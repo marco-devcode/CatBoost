@@ -1,0 +1,65 @@
+name: Pipeline Serie A
+
+# Esegue l'intera pipeline CatBoost per la Serie A:
+#   download -> clean -> ratings (Dixon-Coles) -> features -> model -> evaluate
+# Su runner GitHub (ubuntu) dove le dipendenze pesanti (catboost, penaltyblog) si installano.
+# - Ogni lunedi alle 06:00 UTC (aggiorna dati + modello)
+# - Manuale da tab Actions -> Run workflow
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Download dati (football-data.co.uk)
+        run: python src/download_data.py
+
+      - name: Clean dati
+        run: python src/clean_data.py
+
+      - name: Pi-Rating (Dixon-Coles)
+        run: python src/ratings.py
+
+      - name: Feature engineering
+        run: python src/features.py
+
+      - name: Train CatBoost
+        run: python src/model.py
+
+      - name: Evaluate + report
+        run: python src/evaluate.py
+
+      - name: Commit artefatti generati
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/ models/ results/ 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "Nessun artefatto da committare"
+          else
+            git commit -m "ci: pipeline automatica Serie A ($(date +%Y-%m-%d))"
+            git push
+          fi

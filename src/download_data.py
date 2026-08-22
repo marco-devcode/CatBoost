@@ -1,23 +1,22 @@
 # src/download_data.py
 """
-Scarica TUTTE le stagioni Serie A da api.thestatsapi.com e le salva in
-data/serie_a_raw.csv (formato: Date, HomeTeam, AwayTeam, FTHG, FTAG, FTR, season).
+Scarica le stagioni Serie A da football-data.co.uk e le salva concatenate in
+data/serie_a_raw.csv.
 
-Nessuna dipendenza da football-data.co.uk: tutto via thestatsapi.
-Richiede il Bearer token in env THESTATSAPI_KEY (vedi https://api.thestatsapi.com/llms.txt).
+Formato football-data.co.uk:
+  - Serie A = codice I1
+  - URL: https://www.football-data.co.uk/mmz4281/{season}/I1.csv
+  - Colonne utili: Date, HomeTeam, AwayTeam, FTHG, FTAG, FTR, Season,
+    B365H/B365D/B365A (quote), HST/AST (tiri in porta)
 
-Per recuperare anche lo storico più vecchio (es. 2010/11) basta che le stagioni
-esistano su thestatsapi: il codice itera su TUTTE le stagioni della competition
-(da quella più vecchia a quella corrente), non solo un elenco fisso.
+Le stagioni sono nel formato YY1YY2 (es. 2425 = 2024/25).
 """
 import sys
-import os
 import time
-import json
-import urllib.request
-from pathlib import Path
-
 import pandas as pd
+import urllib.request
+import io
+from pathlib import Path
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -26,161 +25,70 @@ DATA_DIR = ROOT / "data"
 DATA_DIR.mkdir(exist_ok=True)
 OUT_PATH = DATA_DIR / "serie_a_raw.csv"
 
-API_BASE = "https://api.thestatsapi.com/api"
+# Storico + nuove stagioni. Aggiungi qui sotto le stagioni future quando escono
+# (es. 2627 per il 2026/27, se football-data le pubblica).
+SEASONS = [
+    '1011', '1112', '1213', '1314', '1415',
+    '1516', '1617', '1718', '1819', '1920',
+    '2021', '2122', '2223', '2324',
+    '2425', '2526', '2627',
+]
 
-# Stagioni "anno/i" da provare esplicitamente (oltre a quelle enumerate dall'API).
-# Utile se l'API non espone lo storico più vecchio ma i match sono comunque
-# raggiungibili per ID stagione noto. Lasciato vuoto = usa solo quelle dell'API.
-EXTRA_SEASON_YEARS: list[str] = []
+# Serie A = I1 su football-data.co.uk
+BASE_URL = "https://www.football-data.co.uk/mmz4281/{season}/I1.csv"
+
+HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                  'AppleWebKit/537.36 (KHTML, like Gecko) '
+                  'Chrome/124.0 Safari/537.36'
+}
 
 
-def _api_get(path: str, api_key: str, params=None) -> dict:
-    from urllib.parse import urlencode
-    url = f"{API_BASE}{path}"
-    if params:
-        url += ("&" if "?" in url else "?") + urlencode(params)
-    req = urllib.request.Request(url, headers={"Authorization": f"Bearer {api_key}"})
+def fetch_season(season: str, retries: int = 3, delay: float = 3.0) -> pd.DataFrame:
+    """Scarica un CSV con retry e User-Agent per evitare 10054/403."""
+    url = BASE_URL.format(season=season)
     last = Exception("unknown error")
-    for attempt in range(1, 4):
+    for attempt in range(1, retries + 1):
         try:
+            req = urllib.request.Request(url, headers=HEADERS)
             with urllib.request.urlopen(req, timeout=30) as resp:
-                return json.loads(resp.read().decode("utf-8"))
+                raw = resp.read()
+            df = pd.read_csv(io.BytesIO(raw), on_bad_lines='skip', encoding='latin-1')
+            return df
         except Exception as exc:
             last = exc
-            time.sleep(3 * attempt)
+            if attempt < retries:
+                print(f"  [retry {attempt}/{retries}] {season}: {exc}")
+                time.sleep(delay * attempt)
     raise last
 
 
-def _norm_team(name: str) -> str:
-    return (name or "").strip()
-
-
-def _derive_ftr(gh, ga) -> str | None:
-    if gh is None or ga is None:
-        return None
-    try:
-        gh, ga = float(gh), float(ga)
-    except (TypeError, ValueError):
-        return None
-    if gh > ga:
-        return "H"
-    if gh < ga:
-        return "A"
-    return "D"
-
-
-def find_competition(api_key: str) -> str | None:
-    comps = _api_get("/football/competitions", api_key, {"search": "Serie A", "country": "Italy"})
-    for c in comps.get("data", []):
-        if c.get("country") == "Italy" and "serie a" in c.get("name", "").lower():
-            return c["id"]
-    for c in comps.get("data", []):
-        if "serie a" in c.get("name", "").lower():
-            return c["id"]
-    return None
-
-
-def fetch_season_matches(api_key: str, comp_id: str, season_id: str, year: str) -> list[dict]:
-    rows = []
-    page = 1
-    while True:
-        data = _api_get(
-            "/football/matches",
-            api_key,
-            {"competition_id": comp_id, "season_id": season_id,
-             "status": "finished", "per_page": 100, "page": page},
-        )
-        matches = data.get("data", [])
-        if not matches:
-            break
-        for m in matches:
-            h = _norm_team(m.get("home_team", {}).get("name"))
-            a = _norm_team(m.get("away_team", {}).get("name"))
-            sc = m.get("score", {}) or {}
-            gh = sc.get("home")
-            ga = sc.get("away")
-            if gh is None and "final_score" in sc:
-                gh = sc["final_score"].get("home")
-                ga = sc["final_score"].get("away")
-            ftr = _derive_ftr(gh, ga)
-            if not h or not a or ftr is None or gh is None or ga is None:
-                continue
-            try:
-                gh_i, ga_i = int(float(gh)), int(float(ga))
-            except (TypeError, ValueError):
-                continue
-            rows.append({
-                "Date": (m.get("utc_date") or "")[:10],
-                "HomeTeam": h,
-                "AwayTeam": a,
-                "FTHG": gh_i,
-                "FTAG": ga_i,
-                "FTR": ftr,
-                "season": year.replace("/", ""),
-            })
-        meta = data.get("meta", {})
-        if page >= meta.get("total_pages", 1):
-            break
-        page += 1
-        time.sleep(0.4)
-    return rows
-
-
 def main():
-    api_key = os.environ.get("THESTATSAPI_KEY", "")
-    if not api_key:
-        raise RuntimeError(
-            "THESTATSAPI_KEY non impostata. Esporta il Bearer token di "
-            "https://api.thestatsapi.com prima di lanciare download_data.py"
-        )
-
-    print("=== Ricerca competition Serie A ===")
-    comp_id = find_competition(api_key)
-    if not comp_id:
-        raise RuntimeError("Competition 'Serie A' non trovata su thestatsapi.")
-    print(f"  Competition: {comp_id}")
-
-    print("=== Elenco stagioni disponibili ===")
-    seasons = _api_get(f"/football/competitions/{comp_id}/seasons", api_key)
-    season_list = seasons.get("data", [])
-    # Ordine cronologico (più vecchia -> corrente)
-    season_list = sorted(season_list, key=lambda s: (s.get("start_year", 0), s.get("year", "")))
-    print(f"  Stagioni trovate: {len(season_list)}")
-
-    # Aggiungi eventuali stagioni extra (storico non enumerato dall'API)
-    wanted = {s["id"]: s.get("year", "") for s in season_list}
-    for y in EXTRA_SEASON_YEARS:
-        # se non già presente, proviamo a usarla comunque come year (richiede ID)
-        pass  # gli ID vanno scoperti tramite l'API; qui lasciato come estensione
-
-    all_rows = []
-    for s in season_list:
-        sid = s["id"]
-        year = s.get("year", "")
-        print(f"  Recupero {year} ({sid})...")
+    dfs = []
+    for s in SEASONS:
         try:
-            rows = fetch_season_matches(api_key, comp_id, sid, year)
-            print(f"    OK  {year}: {len(rows)} partite")
-            all_rows.extend(rows)
+            df = fetch_season(s)
+            # Normalizza la colonna stagione -> formato YY1YY2
+            if 'Season' in df.columns:
+                df['season'] = df['Season'].astype(str).str.replace('-', '', regex=False)
+            else:
+                df['season'] = s
+            dfs.append(df)
+            print(f"  OK  Stagione {s}: {len(df)} partite")
         except Exception as e:
-            print(f"    ERR {year}: {e}")
-        time.sleep(0.5)
+            print(f"  ERR Stagione {s} fallita (forse non ancora disponibile): {e}")
+        time.sleep(1.0)   # pausa cortesia tra stagioni
 
-    if not all_rows:
-        raise RuntimeError("Nessuna partita recuperata da thestatsapi.")
+    if not dfs:
+        raise RuntimeError("Nessuna stagione scaricata. Controlla la connessione.")
 
-    df = pd.DataFrame(all_rows)
-    # Ordinamento per data (il Pi-Rating richiede ordine cronologico)
-    df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
-    df = df.sort_values("Date", ascending=True, kind="mergesort").reset_index(drop=True)
-    df["Date"] = df["Date"].dt.strftime("%Y-%m-%d")
-
-    df.to_csv(OUT_PATH, index=False)
-    print(f"\nTotale grezzo  : {len(df)} righe")
-    print(f"Stagioni      : {sorted(df['season'].unique())}")
-    print(f"Periodo       : {df['Date'].min()} → {df['Date'].max()}")
+    serie_a = pd.concat(dfs, ignore_index=True)
+    serie_a.to_csv(OUT_PATH, index=False)
+    print(f"\nTotale grezzo  : {len(serie_a)} righe")
+    print(f"Stagioni OK    : {sorted(serie_a['season'].unique())}")
     print(f"Salvato in     : {OUT_PATH}")
 
 
 if __name__ == "__main__":
+    print("=== Download Serie A da football-data.co.uk ===")
     main()

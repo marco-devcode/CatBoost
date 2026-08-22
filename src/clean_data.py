@@ -18,8 +18,8 @@ CLEAN_PATH = ROOT / "data" / "serie_a_clean.csv"
 CRITICAL_COLS = ['Date', 'HomeTeam', 'AwayTeam', 'FTHG', 'FTAG', 'FTR', 'season']
 
 # ── 0. Normalizza colonna stagione ───────────────────────────────────────────
-# football-data.co.uk (storico) usa "Season" (es. "2023-2024")
-# thestatsapi usa "season" (es. "2425"). Unifichiamo in "season" formato YY1YY2.
+# football-data.co.uk scrive "Season" (es. "2023-2024") o "season" (es. "2425").
+# Unifichiamo in "season" formato YY1YY2.
 def _norm_season(v):
     if v is None or (isinstance(v, float) and pd.isna(v)):
         return None

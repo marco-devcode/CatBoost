@@ -73,7 +73,7 @@ try:
         b365_present = True
         print(f"[Data] Test set con quote B365: {len(df_test_b365)} righe")
 except Exception as e:
-    print(f"[INFO] Quote B365 non disponibili (download via thestatsapi non le include): {e}")
+    print(f"[INFO] Quote B365 non disponibili (il raw non le include): {e}")
 
 # ── Definizione modelli ─────────────────────────────────────────────────
 models_info = {

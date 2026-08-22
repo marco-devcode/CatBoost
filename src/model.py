@@ -28,11 +28,11 @@ FEATURE_COLS_BASELINE = ['pi_home_H', 'pi_away_H', 'pi_home_A', 'pi_away_A']
 
 
 def load_data():
-    """Carica i dati splittati dalla Fase 3."""
-    X_train = pd.read_csv(DATA_DIR / 'X_train.csv')
-    X_test  = pd.read_csv(DATA_DIR / 'X_test.csv')
-    y_train = pd.read_csv(DATA_DIR / 'y_train.csv').squeeze()
-    y_test  = pd.read_csv(DATA_DIR / 'y_test.csv').squeeze()
+    """Carica i dati splittati dalla Fase 3 (features.py -> *v2.csv)."""
+    X_train = pd.read_csv(DATA_DIR / 'X_train_v2.csv')
+    X_test  = pd.read_csv(DATA_DIR / 'X_test_v2.csv')
+    y_train = pd.read_csv(DATA_DIR / 'y_train_v2.csv').squeeze()
+    y_test  = pd.read_csv(DATA_DIR / 'y_test_v2.csv').squeeze()
     return X_train, X_test, y_train, y_test
 
 

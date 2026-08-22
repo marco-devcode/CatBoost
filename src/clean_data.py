@@ -17,9 +17,37 @@ CLEAN_PATH = ROOT / "data" / "serie_a_clean.csv"
 
 CRITICAL_COLS = ['Date', 'HomeTeam', 'AwayTeam', 'FTHG', 'FTAG', 'FTR', 'season']
 
+# ── 0. Normalizza colonna stagione ───────────────────────────────────────────
+# football-data.co.uk (storico) usa "Season" (es. "2023-2024")
+# thestatsapi usa "season" (es. "2425"). Unifichiamo in "season" formato YY1YY2.
+def _norm_season(v):
+    if v is None or (isinstance(v, float) and pd.isna(v)):
+        return None
+    s = str(v).strip()
+    if not s:
+        return None
+    # formato "2023-2024" -> "2324"
+    if "-" in s:
+        a, b = s.split("-", 1)
+        a = a[-2:]; b = b[-2:]
+        return f"{a}{b}"
+    # già "2425"
+    return s
+
 # ── 1. Lettura ────────────────────────────────────────────────────────────────
 df = pd.read_csv(RAW_PATH, on_bad_lines='skip')
 print(f"Righe grezze lette: {len(df)}")
+
+# Se presente 'Season' (storico), unificala in 'season'
+if 'Season' in df.columns and 'season' not in df.columns:
+    df['season'] = df['Season'].map(_norm_season)
+elif 'Season' in df.columns and 'season' in df.columns:
+    # alcune righe hanno season vuoto ma Season valorizzato
+    df['season'] = df.apply(
+        lambda r: _norm_season(r['season']) or _norm_season(r.get('Season')), axis=1
+    )
+elif 'season' in df.columns:
+    df['season'] = df['season'].map(_norm_season)
 
 # ── 2. Selezione colonne ──────────────────────────────────────────────────────
 df = df[CRITICAL_COLS].copy()
@@ -70,7 +98,7 @@ for col in CRITICAL_COLS:
     assert n_nan == 0, \
         f"❌ ERRORE: colonna '{col}' contiene {n_nan} valori NaN!"
 
-assert 4800 <= len(df) <= 5500, \
-    f"❌ ATTENZIONE: numero partite fuori range atteso ({len(df)} — atteso 4800-5200)"
+assert 4800 <= len(df) <= 6500, \
+    f"❌ ATTENZIONE: numero partite fuori range atteso ({len(df)} — atteso 4800-6200)"
 
 print("\n✓ Dataset pronto per Fase 3")

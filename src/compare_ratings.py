@@ -34,7 +34,7 @@ def load_features():
     print(f"Dataset: {len(df)} partite")
 
     print("Calcolo Pi-Rating...")
-    df = compute_pi_ratings(df)
+    df, _ = compute_pi_ratings(df)
 
     print("Feature engineering...")
     df = add_rolling_form(df, 5)

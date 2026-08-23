@@ -18,6 +18,10 @@ from sklearn.metrics import accuracy_score, f1_score
 
 sys.stdout.reconfigure(encoding='utf-8')
 
+from ratings import compute_pi_ratings, FEATURE_COLS
+from features import (add_rolling_form, add_rolling_goals, add_rest_days,
+                      add_h2h, add_shots_proxy, OPTIONAL_COLS)
+
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
 RAW_PATH = DATA_DIR / "serie_a_clean.csv"
@@ -26,10 +30,6 @@ CUTOFF = '2022-08-01'
 
 
 def load_features():
-    from ratings import compute_pi_ratings
-    from features import (add_rolling_form, add_rolling_goals, add_rest_days,
-                          add_h2h, add_shots_proxy, FEATURE_COLS, OPTIONAL_COLS)
-
     df = pd.read_csv(RAW_PATH, parse_dates=['Date'])
     print(f"Dataset: {len(df)} partite")
 

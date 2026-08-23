@@ -35,12 +35,21 @@ RAW_PATH = DATA_DIR / "serie_a_clean.csv"
 OUT_PATH = DATA_DIR / "serie_a_ratings.csv"
 RATINGS_SNAPSHOT_PATH = DATA_DIR / "pi_ratings_snapshot.json"
 
+# Decay temporale: mezza vita in anni (una partita di N anni fa pesa 0.5**(N/mezza_vita))
+DECAY_HALF_LIFE_YEARS = 2.0
 
-def fit_dixon_coles(home, away, hg, ag, teams, x0=None):
+
+def fit_dixon_coles(home, away, hg, ag, teams, x0=None, weights=None):
     """Stima attack/defence/home_adv via MLE (Poisson con fattore Dixon-Coles tau).
-    x0: punto iniziale per warm-start (velocizza i fit successivi)."""
+    x0: punto iniziale per warm-start (velocizza i fit successivi).
+    weights: array di peso per partita (decay temporale; None = peso 1)."""
     n_teams = len(teams)
     team_idx = {t: i for i, t in enumerate(teams)}
+
+    if weights is None:
+        weights = np.ones(len(hg))
+    else:
+        weights = np.asarray(weights, dtype=float)
 
     # Parametri: attack[0..n-2], defence[0..n-2], home_adv  (attack ultima squadra = 0 per identificabilita')
     n_params = 2 * (n_teams - 1) + 1
@@ -60,9 +69,9 @@ def fit_dixon_coles(home, away, hg, ag, teams, x0=None):
         hi = np.array([team_idx[h] for h in home])
         ai = np.array([team_idx[a] for a in away])
         lam_h = np.exp(attack[hi] - defence[ai] + home_adv)
-        lam_a = np.exp(attack[ai] - defence[hi])
-        # log-likelihood Poisson
-        ll = -np.sum(lam_h + lam_a) + np.sum(hg * np.log(lam_h + 1e-10) + ag * np.log(lam_a + 1e-10))
+        lam_a = np.exp(attack[ai] - defence[home])
+        # log-likelihood Poisson pesata (decay temporale)
+        ll = -np.sum(weights * (lam_h + lam_a)) + np.sum(weights * (hg * np.log(lam_h + 1e-10) + ag * np.log(lam_a + 1e-10)))
         # vincolo somma attack = 0, somma defence = 0 (per identificabilita')
         ll += -1000 * (np.sum(attack)**2 + np.sum(defence)**2)
         return -ll
@@ -84,25 +93,33 @@ def get_season_endpoints(df):
 
 
 def compute_pi_ratings(df: pd.DataFrame):
-    """Calcola i Pi-Rating con UN solo fit MLE su tutto lo storico.
+    """Calcola i Pi-Rating con UN fit MLE globale + DECAY TEMPORALE.
 
-    NOTA: i rating sono "globali" per squadra (non evolvono nel tempo).
-    Per il confronto con/senza Pi-Rating questo e' sufficiente: il segnale
-    c'e' (forza relativa delle squadre). Un fit per-stagione con decay
-    temporale e' un raffinamento successivo.
+    Ogni partita ha peso w = 0.5 ** (eta / mezza_vita), dove eta e' l'eta'
+    della partita in anni rispetto alla piu' recente del dataset.
+    Con HALF_LIFE_YEARS=2: una partita di 2 anni fa pesa meta', di 4 anni fa 1/4.
+    Le stagioni precedenti CONTANO sulle nuove, ma le recenti contano di piu'.
     """
     df = df.copy().reset_index(drop=True)
     n = len(df)
 
     teams_all = sorted(set(df['HomeTeam'].unique()) | set(df['AwayTeam'].unique()))
 
-    print(f"  Fit Dixon-Coles globale su {n} partite, {len(teams_all)} squadre...")
+    # Pesi di decay temporale
+    dates = pd.to_datetime(df['Date'])
+    age_days = (dates.max() - dates).dt.days.values.astype(float)
+    age_years = np.maximum(age_days / 365.25, 0.0)
+    weights = 0.5 ** (age_years / DECAY_HALF_LIFE_YEARS)
+
+    print(f"  Fit Dixon-Coles globale su {n} partite, {len(teams_all)} squadre "
+          f"(decay mezza vita {DECAY_HALF_LIFE_YEARS} anni)...")
     ratings, home_adv, _ = fit_dixon_coles(
         df['HomeTeam'].values, df['AwayTeam'].values,
         df['FTHG'].values.astype(float), df['FTAG'].values.astype(float),
-        teams_all, None,
+        teams_all, None, weights,
     )
-    print(f"  Fit completato. home_adv={home_adv:.3f}")
+    print(f"  Fit completato. home_adv={home_adv:.3f}, "
+          f"peso partita recente={weights.max():.2f}, piu vecchia={weights.min():.3f}")
 
     attack = {t: ratings[t]['attack'] for t in teams_all}
     defence = {t: ratings[t]['defence'] for t in teams_all}

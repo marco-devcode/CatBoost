@@ -195,14 +195,45 @@ draw_recall = cm[1, 1] / cm[1, :].sum() if cm[1, :].sum() > 0 else 0
 home_recall = cm[0, 0] / cm[0, :].sum() if cm[0, :].sum() > 0 else 0
 away_recall = cm[2, 2] / cm[2, :].sum() if cm[2, :].sum() > 0 else 0
 
+# ── F1-score (macro + per classe) e recall completo ──────────────────────
+from sklearn.metrics import f1_score, recall_score, precision_score
+
+y_true_arr = best['y_test'].values
+y_pred_arr = best['preds']
+
+f1_macro = f1_score(y_true_arr, y_pred_arr, average='macro')
+f1_weighted = f1_score(y_true_arr, y_pred_arr, average='weighted')
+f1_per_class = f1_score(y_true_arr, y_pred_arr, average=None, labels=[0, 1, 2])
+recall_per_class = recall_score(y_true_arr, y_pred_arr, average=None, labels=[0, 1, 2])
+precision_per_class = precision_score(y_true_arr, y_pred_arr, average=None, labels=[0, 1, 2])
+
+print(f"\n{'═'*55}")
+print(f"  F1 / RECALL / PRECISION per classe")
+print(f"{'═'*55}")
+for i, name in enumerate(['H', 'D', 'A']):
+    print(f"  {name}: F1={f1_per_class[i]:.4f}  Recall={recall_per_class[i]:.4f}  Precision={precision_per_class[i]:.4f}")
+print(f"  F1 macro      : {f1_macro:.4f}")
+print(f"  F1 weighted   : {f1_weighted:.4f}")
+
 final_metrics = {
     "best_model": best_key,
     "best_model_desc": best['desc'],
     "accuracy": round(float(best['accuracy']), 4),
     "rps_model": round(float(best['rps']), 4),
+    "f1_macro": round(float(f1_macro), 4),
+    "f1_weighted": round(float(f1_weighted), 4),
+    "f1_per_class": {"H": round(float(f1_per_class[0]), 4),
+                     "D": round(float(f1_per_class[1]), 4),
+                     "A": round(float(f1_per_class[2]), 4)},
+    "precision_per_class": {"H": round(float(precision_per_class[0]), 4),
+                            "D": round(float(precision_per_class[1]), 4),
+                            "A": round(float(precision_per_class[2]), 4)},
     "recall_home": round(float(home_recall), 4),
     "recall_draw": round(float(draw_recall), 4),
     "recall_away": round(float(away_recall), 4),
+    "recall_per_class": {"H": round(float(recall_per_class[0]), 4),
+                         "D": round(float(recall_per_class[1]), 4),
+                         "A": round(float(recall_per_class[2]), 4)},
     "n_test": int(len(best['y_test'])),
     "n_features": int(best['X_test'].shape[1]),
     "features": list(best['X_test'].columns),

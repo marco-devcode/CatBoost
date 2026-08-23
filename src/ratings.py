@@ -1,20 +1,28 @@
 # src/ratings.py
 """
-Calcolo Pi-Rating per ogni squadra della Serie A.
-Basato sul modello Dixon-Coles (penaltyblog).
+Calcolo Pi-Rating (Dixon-Coles) per la Serie A, implementato a mano
+(senza dipendere da penaltyblog, che falliva silenziosamente lasciando
+i rating ai valori di default -> feature costanti).
 
-Feature generate per ogni partita (calcolate PRIMA della partita — no leakage):
-  pi_home_H : attack_home - defence_away + home_adv  (forza casa H vs A)
-  pi_away_H : attack_away - defence_home - home_adv   (forza trasferta A vs H)
-  pi_home_A : defence_home  (componente difensiva di H)
-  pi_away_A : attack_away   (componente offensiva di A)
+Il modello Dixon-Coles stima, per ogni squadra, un parametro di attacco
+(attack) e uno di difesa (defence), piu' un vantaggio casalingo (home_adv).
+Le probabilita' dei gol seguono una Poisson:
+    lambda_home = exp(attack_home - defence_away + home_adv)
+    lambda_away = exp(attack_away - defence_home)
+I parametri sono stimati via Maximum Likelihood (scipy.optimize).
+
+Feature generate per ogni partita (calcolate PRIMA della partita -> no leakage):
+    pi_home_H : attack_home - defence_away + home_adv
+    pi_away_H : attack_away - defence_home - home_adv
+    pi_home_A : defence_home
+    pi_away_A : attack_away
 """
 import sys
 import json
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from penaltyblog.models import DixonColesGoalModel
+from scipy.optimize import minimize
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -27,12 +35,44 @@ RAW_PATH = DATA_DIR / "serie_a_clean.csv"
 OUT_PATH = DATA_DIR / "serie_a_ratings.csv"
 RATINGS_SNAPSHOT_PATH = DATA_DIR / "pi_ratings_snapshot.json"
 
-# Ricalcola il modello alla fine di ogni stagione
-RECOMPUTE_SEASONS = True
+
+def fit_dixon_coles(home, away, hg, ag, teams):
+    """Stima attack/defence/home_adv via MLE (Poisson con fattore Dixon-Coles tau)."""
+    n_teams = len(teams)
+    team_idx = {t: i for i, t in enumerate(teams)}
+
+    # Parametri: attack[0..n-2], defence[0..n-2], home_adv  (attack ultima squadra = 0 per identificabilita')
+    n_params = 2 * (n_teams - 1) + 1
+
+    def unpack(p):
+        attack = np.zeros(n_teams)
+        defence = np.zeros(n_teams)
+        for i in range(n_teams - 1):
+            attack[i] = p[i]
+            defence[i] = p[n_teams - 1 + i]
+        # ultima squadra: attack=0, defence=0 (somma a zero)
+        home_adv = p[-1]
+        return attack, defence, home_adv
+
+    def neg_log_likelihood(p):
+        attack, defence, home_adv = unpack(p)
+        hi = np.array([team_idx[h] for h in home])
+        ai = np.array([team_idx[a] for a in away])
+        lam_h = np.exp(attack[hi] - defence[ai] + home_adv)
+        lam_a = np.exp(attack[ai] - defence[hi])
+        # log-likelihood Poisson
+        ll = -np.sum(lam_h + lam_a) + np.sum(hg * np.log(lam_h + 1e-10) + ag * np.log(lam_a + 1e-10))
+        # vincolo somma attack = 0, somma defence = 0 (per identificabilita')
+        ll += -1000 * (np.sum(attack)**2 + np.sum(defence)**2)
+        return -ll
+
+    x0 = np.zeros(n_params)
+    res = minimize(neg_log_likelihood, x0, method='L-BFGS-B', options={'maxiter': 500})
+    attack, defence, home_adv = unpack(res.x)
+    return {teams[i]: {"attack": float(attack[i]), "defence": float(defence[i])} for i in range(n_teams)}, float(home_adv)
 
 
 def get_season_endpoints(df):
-    """Ritorna gli indici di fine di ogni stagione."""
     seasons = df['season'].unique()
     endpoints = {}
     for s in seasons:
@@ -43,33 +83,21 @@ def get_season_endpoints(df):
 
 
 def compute_pi_ratings(df: pd.DataFrame):
-    """
-    Calcola i Pi-Rating in modo efficiente:
-    - Il modello DixonColes viene fittato una volta per stagione
-    - Ogni partita usa i rating della stagione precedente (no leakage)
-
-    Per la prima stagione usiamo rating neutri.
-    Per le stagioni successive, usiamo i rating stimati da TUTTE le stagioni precedenti.
-    """
     df = df.copy().reset_index(drop=True)
     n = len(df)
 
     teams_all = sorted(set(df['HomeTeam'].unique()) | set(df['AwayTeam'].unique()))
 
-    # Rating di default (neutro)
-    attack = {t: 1.0 for t in teams_all}
-    defence = {t: -1.0 for t in teams_all}
+    attack = {t: 0.0 for t in teams_all}
+    defence = {t: 0.0 for t in teams_all}
     home_adv = 0.3
 
-    # Matrici dei risultati
     pi_cols = ('pi_home_H', 'pi_away_H', 'pi_home_A', 'pi_away_A')
     result = np.zeros((n, 4))
 
     season_ends = get_season_endpoints(df)
-    sorted_seasons = sorted(season_ends.keys())
-
-    # Teniamo traccia di quali stagioni abbiamo già processato
     processed_seasons = set()
+    last_fit_n = 0
 
     for i in range(n):
         row = df.iloc[i]
@@ -77,37 +105,24 @@ def compute_pi_ratings(df: pd.DataFrame):
         away = row['AwayTeam']
         current_season = row['season']
 
-        # Verifica se siamo alla fine di una stagione completata
-        # Ricalcola i rating con tutti i dati fino a ora
-        if current_season not in processed_seasons:
-            if i >= 76:  # almeno 2 giornate
-                past = df.iloc[:i]
-                try:
-                    model = DixonColesGoalModel(
-                        goals_home=past['FTHG'].values,
-                        goals_away=past['FTAG'].values,
-                        teams_home=past['HomeTeam'].values,
-                        teams_away=past['AwayTeam'].values,
-                    )
-                    model.fit(minimizer_options={'maxiter': 1000})
-                    params = model.get_params()
+        # Ricalcola i rating con tutti i dati fino a qui (almeno 76 partite = 2 giornate)
+        if current_season not in processed_seasons and i - last_fit_n >= 76:
+            past = df.iloc[:i]
+            try:
+                ratings, ha = fit_dixon_coles(
+                    past['HomeTeam'].values, past['AwayTeam'].values,
+                    past['FTHG'].values.astype(float), past['FTAG'].values.astype(float),
+                    teams_all,
+                )
+                for t in teams_all:
+                    attack[t] = ratings[t]['attack']
+                    defence[t] = ratings[t]['defence']
+                home_adv = ha
+                processed_seasons.add(current_season)
+                last_fit_n = i
+            except Exception as e:
+                print(f"  [WARN] fit Dixon-Coles @ {i} fallito: {e}")
 
-                    for t in teams_all:
-                        key_a = f"attack_{t}"
-                        key_d = f"defence_{t}"
-                        if key_a in params:
-                            attack[t] = params[key_a]
-                        if key_d in params:
-                            defence[t] = params[key_d]
-
-                    home_adv = params.get("home_advantage", home_adv)
-                    processed_seasons.add(current_season)
-                    if len(processed_seasons) % 3 == 0:
-                        print(f"  Stagione {current_season}: rating aggiornati con {len(past)} partite")
-                except Exception as e:
-                    print(f"  [WARN] Stagione {current_season}: fit fallito: {e}")
-
-        # Calcola Pi-Rating con i parametri correnti
         result[i, 0] = attack[home] - defence[away] + home_adv   # pi_home_H
         result[i, 1] = attack[away] - defence[home] - home_adv   # pi_away_H
         result[i, 2] = defence[home]                               # pi_home_A
@@ -116,7 +131,6 @@ def compute_pi_ratings(df: pd.DataFrame):
     for j, col in enumerate(pi_cols):
         df[col] = result[:, j]
 
-    # Dict dei rating finali
     final_ratings = {
         t: {"attack": round(attack[t], 4), "defence": round(defence[t], 4)}
         for t in teams_all
@@ -127,19 +141,15 @@ def compute_pi_ratings(df: pd.DataFrame):
 
 
 def create_train_test_split(df: pd.DataFrame, cutoff: str = '2022-08-01'):
-    """Split temporale e salvataggio CSV."""
     feature_cols = ['pi_home_H', 'pi_away_H', 'pi_home_A', 'pi_away_A']
 
     df_train = df[df['Date'] < cutoff].copy()
     df_test  = df[df['Date'] >= cutoff].copy()
 
-    X_train = df_train[feature_cols]
+    X_train = df_train[feature_cols].reset_index(drop=True)
     y_train = df_train['FTR'].map({'H': 0, 'D': 1, 'A': 2}).reset_index(drop=True)
-    X_test  = df_test[feature_cols]
+    X_test  = df_test[feature_cols].reset_index(drop=True)
     y_test  = df_test['FTR'].map({'H': 0, 'D': 1, 'A': 2}).reset_index(drop=True)
-
-    X_train = X_train.reset_index(drop=True)
-    X_test = X_test.reset_index(drop=True)
 
     X_train.to_csv(DATA_DIR / 'X_train.csv', index=False)
     X_test.to_csv(DATA_DIR / 'X_test.csv', index=False)
@@ -156,7 +166,7 @@ def create_train_test_split(df: pd.DataFrame, cutoff: str = '2022-08-01'):
 
 if __name__ == "__main__":
     print("=" * 55)
-    print("FASE 3 — Calcolo Pi-Rating Serie A + Split Temporale")
+    print("FASE 3 — Calcolo Pi-Rating Serie A (Dixon-Coles, MLE)")
     print("=" * 55)
 
     df = pd.read_csv(RAW_PATH, parse_dates=['Date'])
@@ -176,8 +186,7 @@ if __name__ == "__main__":
     print(f"\n{'─'*50}")
     print("Statistiche Pi-Rating:")
     for col in ['pi_home_H', 'pi_away_H', 'pi_home_A', 'pi_away_A']:
-        print(f"  {col:<12}: mean={df_rated[col].mean():+.3f}, "
-              f"std={df_rated[col].std():.3f}")
+        print(f"  {col:<12}: mean={df_rated[col].mean():+.3f}, std={df_rated[col].std():.3f}")
 
     print(f"\nTop 5 squadre per Attack Rating:")
     sorted_teams = sorted(

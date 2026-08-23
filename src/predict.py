@@ -1,0 +1,172 @@
+# src/predict.py
+"""
+Predizione di un singolo match Serie A usando il modello CatBoost allenato.
+
+Calcola le feature (forma recente, Pi-Rating correnti, H2H, rest days)
+dallo storico disponibile, poi restituisce le probabilita' H/D/A.
+
+Uso:
+    python src/predict.py "Juventus" "Inter"
+    python src/predict.py "Milan" "Napoli" --date 2026-09-20
+"""
+import sys
+import argparse
+import numpy as np
+import pandas as pd
+from pathlib import Path
+from catboost import CatBoostClassifier
+
+sys.stdout.reconfigure(encoding='utf-8')
+
+ROOT = Path(__file__).resolve().parent.parent
+DATA_DIR = ROOT / "data"
+MODELS_DIR = ROOT / "models"
+
+WINDOW = 5
+
+
+def load_history():
+    """Carica il dataset pulito + Pi-Rating."""
+    ratings = pd.read_csv(DATA_DIR / "serie_a_ratings.csv", parse_dates=['Date'])
+    return ratings
+
+
+def compute_features_for_match(df, home, away, match_date, h2h_cache=None):
+    """Calcola le feature di un match usando SOLO dati precedenti a match_date."""
+    past = df[df['Date'] < match_date].copy() if match_date else df.copy()
+
+    if len(past) == 0:
+        past = df.copy()
+
+    feats = {}
+
+    # Pi-Rating correnti: usa gli ultimi valori noti per le due squadre
+    for team, role in [(home, 'home'), (away, 'away')]:
+        sub = past[past['HomeTeam'] == team]
+        sub2 = past[past['AwayTeam'] == team]
+        last = pd.concat([sub, sub2]).sort_values('Date').tail(1)
+        if len(last) == 0:
+            feats[f'pi_{role}_H'] = 0.0
+            feats[f'pi_{role}_A'] = 0.0
+        else:
+            feats[f'pi_{role}_H'] = last['pi_home_H'].values[0] if role == 'home' else last['pi_away_H'].values[0]
+            feats[f'pi_{role}_A'] = last['pi_home_A'].values[0] if role == 'home' else last['pi_away_A'].values[0]
+
+    # Forma recente (ultimi WINDOW match della squadra, casa o trasferta)
+    def team_form(team, is_home):
+        tcol, scol, acol = ('HomeTeam', 'FTHG', 'FTAG') if is_home else ('AwayTeam', 'FTAG', 'FTHG')
+        sub = past[past[tcol] == team].tail(WINDOW)
+        if len(sub) == 0:
+            return 1.0  # prior neutro
+        pts = np.where(sub[scol].values > sub[acol].values, 3,
+                      np.where(sub[scol].values == sub[acol].values, 1, 0))
+        return float(np.mean(pts))
+
+    feats['home_form_5'] = team_form(home, True)
+    feats['away_form_5'] = team_form(away, False)
+
+    # Goal diff rolling
+    def team_goaldiff(team, is_home):
+        tcol, scol, acol = ('HomeTeam', 'FTHG', 'FTAG') if is_home else ('AwayTeam', 'FTAG', 'FTHG')
+        sub = past[past[tcol] == team].tail(WINDOW)
+        if len(sub) == 0:
+            return 0.0
+        return float(np.mean(sub[scol].values - sub[acol].values))
+
+    feats['home_goal_diff_5'] = team_goaldiff(home, True)
+    feats['away_goal_diff_5'] = team_goaldiff(away, False)
+
+    # Rest days (approssimato: giorni dall'ultima partita di ciascuna squadra)
+    def rest_days(team):
+        sub = past[(past['HomeTeam'] == team) | (past['AwayTeam'] == team)].sort_values('Date')
+        if len(sub) == 0 or match_date is None:
+            return 7.0
+        last = sub['Date'].max()
+        try:
+            return float((match_date - last).days)
+        except Exception:
+            return 7.0
+
+    feats['home_rest_days'] = rest_days(home)
+    feats['away_rest_days'] = rest_days(away)
+    feats['rest_advantage'] = feats['home_rest_days'] - feats['away_rest_days']
+
+    # H2H: win rate casa negli scontri diretti passati
+    key = (min(home, away), max(home, away))
+    if h2h_cache is not None and key in h2h_cache:
+        feats['h2h_home_winrate'] = h2h_cache[key]
+    else:
+        sub = past[((past['HomeTeam'] == home) & (past['AwayTeam'] == away)) |
+                   ((past['HomeTeam'] == away) & (past['AwayTeam'] == home))].tail(WINDOW)
+        if len(sub) == 0:
+            feats['h2h_home_winrate'] = 0.4
+        else:
+            hw = sum(1 for _, r in sub.iterrows()
+                     if (r['HomeTeam'] == home and r['FTR'] == 'H') or
+                        (r['AwayTeam'] == home and r['FTR'] == 'A'))
+            feats['h2h_home_winrate'] = hw / len(sub)
+        if h2h_cache is not None:
+            h2h_cache[key] = feats['h2h_home_winrate']
+
+    return feats
+
+
+def predict_match(home, away, match_date=None, model_path=None):
+    if model_path is None:
+        model_path = MODELS_DIR / "catboost_seriea_v1.cbm"
+    if not model_path.exists():
+        raise FileNotFoundError(
+            f"Modello non trovato in {model_path}. Esegui prima src/model.py "
+            f"(o la GitHub Action) per allenarlo."
+        )
+
+    df = load_history()
+    if match_date:
+        match_date = pd.Timestamp(match_date)
+
+    feats = compute_features_for_match(df, home, away, match_date)
+
+    feature_order = [
+        'pi_home_H', 'pi_away_H', 'pi_home_A', 'pi_away_A',
+        'home_form_5', 'away_form_5',
+        'home_goal_diff_5', 'away_goal_diff_5',
+        'home_rest_days', 'away_rest_days', 'rest_advantage',
+        'h2h_home_winrate',
+    ]
+    X = pd.DataFrame([{c: feats.get(c, 0.0) for c in feature_order}])
+
+    model = CatBoostClassifier()
+    model.load_model(str(model_path))
+    probs = model.predict_proba(X)[0]
+
+    labels = ['H', 'D', 'A']
+    out = {labels[i]: round(float(probs[i]) * 100, 1) for i in range(3)}
+    return out, feats
+
+
+def main():
+    ap = argparse.ArgumentParser(description="Predici un match Serie A")
+    ap.add_argument("home")
+    ap.add_argument("away")
+    ap.add_argument("--date", default=None, help="Data match (YYYY-MM-DD) per il contesto temporale")
+    args = ap.parse_args()
+
+    try:
+        out, feats = predict_match(args.home, args.away, args.date)
+    except FileNotFoundError as e:
+        print(f"ERRORE: {e}")
+        sys.exit(1)
+
+    print(f"\n{'='*50}")
+    print(f"  {args.home}  vs  {args.away}")
+    if args.date:
+        print(f"  (contesto: {args.date})")
+    print(f"{'='*50}")
+    for k in ['H', 'D', 'A']:
+        bar = '█' * int(out[k] / 2.5)
+        print(f"  {k}: {out[k]:5.1f}%  {bar}")
+    print(f"{'='*50}")
+
+
+if __name__ == "__main__":
+    main()

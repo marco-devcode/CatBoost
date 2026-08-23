@@ -54,6 +54,7 @@ jobs:
 
       - name: Commit artefatti generati
         run: |
+          mkdir -p data models results
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/ models/ results/ 2>/dev/null || true

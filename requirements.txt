@@ -1,7 +1,8 @@
 pandas
 numpy
+scipy
 catboost
-penaltyblog
 scikit-learn
 matplotlib
 seaborn
+streamlit

@@ -91,6 +91,27 @@ def compute_features_for_match(df, home, away, match_date, h2h_cache=None):
     feats['away_rest_days'] = rest_days(away)
     feats['rest_advantage'] = feats['home_rest_days'] - feats['away_rest_days']
 
+    # Rolling goals (replica di features.add_rolling_goals): media gol fatti/subiti
+    # negli ultimi 5 match CASA per la di casa, TRASFERta per l'ospite.
+    # Il match futuro non e' nel 'past', quindi tail(5).mean() equivale allo shift(1).
+    def rolling_goals(team, is_home):
+        if is_home:
+            sub = past[past['HomeTeam'] == team].tail(WINDOW)
+            scored_col, conceded_col = 'FTHG', 'FTAG'
+        else:
+            sub = past[past['AwayTeam'] == team].tail(WINDOW)
+            scored_col, conceded_col = 'FTAG', 'FTHG'
+        if len(sub) == 0:
+            return np.nan, np.nan  # come in training (debutti -> NaN, gestito da CatBoost)
+        return float(sub[scored_col].mean()), float(sub[conceded_col].mean())
+
+    hs_, hc_ = rolling_goals(home, True)
+    as_, ac_ = rolling_goals(away, False)
+    feats['home_goals_scored_5'] = hs_
+    feats['home_goals_conceded_5'] = hc_
+    feats['away_goals_scored_5'] = as_
+    feats['away_goals_conceded_5'] = ac_
+
     # H2H: win rate casa negli scontri diretti passati
     key = (min(home, away), max(home, away))
     if h2h_cache is not None and key in h2h_cache:
@@ -117,6 +138,8 @@ FEATURE_ORDER = [
     'home_goal_diff_5', 'away_goal_diff_5',
     'home_rest_days', 'away_rest_days', 'rest_advantage',
     'h2h_home_winrate',
+    'home_goals_scored_5', 'home_goals_conceded_5',
+    'away_goals_scored_5', 'away_goals_conceded_5',
 ]
 
 
@@ -135,13 +158,7 @@ def predict_match(home, away, match_date=None, model_path=None):
 
     feats = compute_features_for_match(df, home, away, match_date)
 
-    feature_order = [
-        'pi_home_H', 'pi_away_H', 'pi_home_A', 'pi_away_A',
-        'home_form_5', 'away_form_5',
-        'home_goal_diff_5', 'away_goal_diff_5',
-        'home_rest_days', 'away_rest_days', 'rest_advantage',
-        'h2h_home_winrate',
-    ]
+    feature_order = FEATURE_ORDER
     X = pd.DataFrame([{c: feats.get(c, 0.0) for c in feature_order}])
 
     model = CatBoostClassifier()

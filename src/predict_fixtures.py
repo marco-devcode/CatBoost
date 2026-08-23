@@ -16,6 +16,7 @@ import json
 import time
 import unicodedata
 import urllib.request
+import urllib.error
 from pathlib import Path
 
 import numpy as np
@@ -92,6 +93,15 @@ def _http_get(url: str, retries: int = 3) -> bytes | None:
             req = urllib.request.Request(url, headers=HEADERS)
             with urllib.request.urlopen(req, timeout=30) as resp:
                 return resp.read()
+        except urllib.error.HTTPError as e:
+            if e.code == 429 and attempt < retries:
+                wait = 10 * attempt  # rate-limit: attesa lunga
+                print(f"  [429 rate-limit] attendo {wait}s...")
+                time.sleep(wait)
+                continue
+            print(f"  [retry {attempt}/{retries}] {e}")
+            if attempt < retries:
+                time.sleep(3 * attempt)
         except Exception as e:
             print(f"  [retry {attempt}/{retries}] {e}")
             if attempt < retries:
@@ -142,23 +152,36 @@ def _parse_events(events: list) -> list:
 def fetch_thesportsdb(season: str):
     """Calendario completo: una chiamata eventsround.php per ogni giornata.
     La chiave di test '123' non espone il bulk stagionale completo."""
-    all_rows = []
-    for rnd in range(1, TSDB_ROUNDS + 1):
+    def fetch_round(rnd: int):
         url = (f"https://www.thesportsdb.com/api/v1/json/{TSDB_KEY}"
                f"/eventsround.php?id={TSDB_LEAGUE_ID}&r={rnd}&s={season}")
         raw = _http_get(url)
         if raw is None:
-            print(f"  [gg {rnd}] fetch fallito, skip")
-            continue
+            return []
         try:
             payload = json.loads(raw.decode('utf-8'))
         except Exception as e:
             print(f"  [gg {rnd}] json error: {e}")
-            continue
-        events = payload.get("events") or []
-        rows = _parse_events(events)
+            return []
+        return _parse_events(payload.get("events") or [])
+
+    all_rows = []
+    missed = []
+    for rnd in range(1, TSDB_ROUNDS + 1):
+        rows = fetch_round(rnd)
+        if not rows:
+            missed.append(rnd)
         all_rows.extend(rows)
-        time.sleep(0.4)  # rate-limit gentile
+        time.sleep(0.6)  # rate-limit gentile
+
+    # Seconda passata per le giornate mancate (di solito 429 transitori)
+    if missed:
+        print(f"  Seconda passata per {len(missed)} giornate: {missed}")
+        time.sleep(15)
+        for rnd in missed:
+            rows = fetch_round(rnd)
+            all_rows.extend(rows)
+            time.sleep(1.5)
 
     df = pd.DataFrame(all_rows)
     if len(df):

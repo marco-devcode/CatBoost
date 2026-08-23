@@ -111,6 +111,15 @@ def compute_features_for_match(df, home, away, match_date, h2h_cache=None):
     return feats
 
 
+FEATURE_ORDER = [
+    'pi_home_H', 'pi_away_H', 'pi_home_A', 'pi_away_A',
+    'home_form_5', 'away_form_5',
+    'home_goal_diff_5', 'away_goal_diff_5',
+    'home_rest_days', 'away_rest_days', 'rest_advantage',
+    'h2h_home_winrate',
+]
+
+
 def predict_match(home, away, match_date=None, model_path=None):
     if model_path is None:
         model_path = MODELS_DIR / "catboost_seriea_v1.cbm"

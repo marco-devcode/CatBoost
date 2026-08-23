@@ -1,0 +1,258 @@
+:root {
+  --bg: #0f1115;
+  --card: #1a1d24;
+  --border: #2a2e38;
+  --text: #f0f2f5;
+  --muted: #9aa3af;
+  --home: #22c55e;
+  --draw: #eab308;
+  --away: #3b82f6;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.header {
+  text-align: center;
+  padding: 20px 0 8px;
+}
+
+.header h1 {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.update-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  margin-top: 12px;
+}
+
+.pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--home);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.stats-bar {
+  display: flex;
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.stat-card {
+  flex: 1;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.round-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.round-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.round-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.round-select {
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 1rem;
+}
+
+.matches {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.match-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.match-teams {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.team-home {
+  font-weight: 700;
+  font-size: 1rem;
+  text-align: right;
+  flex: 1;
+}
+
+.team-away {
+  font-weight: 700;
+  font-size: 1rem;
+  text-align: left;
+  flex: 1;
+}
+
+.vs {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.match-date {
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.result-badge {
+  display: inline-block;
+  background: var(--border);
+  border-radius: 8px;
+  padding: 2px 10px;
+  font-weight: 700;
+}
+
+.ok { color: var(--home); }
+.ko { color: #ef4444; }
+
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 28px 1fr 52px;
+  align-items: center;
+  gap: 8px;
+}
+
+.bar-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.bar-label.H { color: var(--home); }
+.bar-label.D { color: var(--draw); }
+.bar-label.A { color: var(--away); }
+
+.bar-track {
+  height: 10px;
+  background: var(--bg);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.5s ease;
+}
+
+.bar-fill.H { background: var(--home); }
+.bar-fill.D { background: var(--draw); }
+.bar-fill.A { background: var(--away); }
+
+.bar-pct {
+  font-size: 0.8rem;
+  text-align: right;
+  color: var(--text);
+}
+
+.pred-tag {
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-left: 6px;
+}
+
+.footer {
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--muted);
+  padding: 24px 0 40px;
+  line-height: 1.6;
+}
+
+.loading {
+  text-align: center;
+  color: var(--muted);
+  padding: 60px 0;
+}
+
+.error {
+  text-align: center;
+  color: #ef4444;
+  padding: 40px 20px;
+  line-height: 1.6;
+}

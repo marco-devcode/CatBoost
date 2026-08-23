@@ -2,13 +2,17 @@ name: Pipeline Serie A
 
 # Esegue l'intera pipeline CatBoost per la Serie A:
 #   download -> clean -> ratings (Dixon-Coles) -> features -> model -> evaluate
-# Su runner GitHub (ubuntu) dove le dipendenze pesanti (catboost, penaltyblog) si installano.
-# - Ogni lunedi alle 06:00 UTC (aggiorna dati + modello)
+#   -> predizioni fixtures 26/27 -> webapp/public/predictions.json
+# Su runner GitHub (ubuntu) dove le dipendenze pesanti (catboost) si installano.
+# - Ogni lunedi e giovedi alle 06:00 UTC (aggiorna modello + predizioni dashboard)
 # - Manuale da tab Actions -> Run workflow
+# Il push finale degli artefatti (predictions.json incluso) fa scattare il
+# redeploy automatico su Vercel.
 
 on:
   schedule:
     - cron: "0 6 * * 1"
+    - cron: "0 6 * * 4"
   workflow_dispatch:
 
 permissions:
@@ -52,12 +56,15 @@ jobs:
       - name: Evaluate + report
         run: python src/evaluate.py
 
+      - name: Predizioni fixtures (dashboard)
+        run: python src/predict_fixtures.py
+
       - name: Commit artefatti generati
         run: |
-          mkdir -p data models results
+          mkdir -p data models results webapp/public
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/ models/ results/ 2>/dev/null || true
+          git add data/ models/ results/ webapp/public/ 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "Nessun artefatto da committare"
           else

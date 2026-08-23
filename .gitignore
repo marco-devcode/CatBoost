@@ -3,5 +3,7 @@ __pycache__/
 .venv/
 venv/
 env/
-data/__pycache__/
 *.cbm
+webapp/node_modules/
+webapp/.next/
+webapp/tsconfig.tsbuildinfo

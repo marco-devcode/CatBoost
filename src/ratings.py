@@ -69,7 +69,7 @@ def fit_dixon_coles(home, away, hg, ag, teams, x0=None, weights=None):
         hi = np.array([team_idx[h] for h in home])
         ai = np.array([team_idx[a] for a in away])
         lam_h = np.exp(attack[hi] - defence[ai] + home_adv)
-        lam_a = np.exp(attack[ai] - defence[home])
+        lam_a = np.exp(attack[ai] - defence[hi])
         # log-likelihood Poisson pesata (decay temporale)
         ll = -np.sum(weights * (lam_h + lam_a)) + np.sum(weights * (hg * np.log(lam_h + 1e-10) + ag * np.log(lam_a + 1e-10)))
         # vincolo somma attack = 0, somma defence = 0 (per identificabilita')

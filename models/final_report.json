@@ -1,27 +1,27 @@
 {
   "best_model": "v1_baseline",
   "best_model_desc": "Baseline (Pi-Rating + FE)",
-  "accuracy": 0.5119,
-  "rps_model": 0.1333,
-  "f1_macro": 0.45,
-  "f1_weighted": 0.4761,
+  "accuracy": 0.5311,
+  "rps_model": 0.1312,
+  "f1_macro": 0.4637,
+  "f1_weighted": 0.4909,
   "f1_per_class": {
-    "H": 0.6207,
-    "D": 0.19,
-    "A": 0.5393
+    "H": 0.643,
+    "D": 0.1975,
+    "A": 0.5507
   },
   "precision_per_class": {
-    "H": 0.5353,
-    "D": 0.3395,
-    "A": 0.528
+    "H": 0.5481,
+    "D": 0.3929,
+    "A": 0.5402
   },
-  "recall_home": 0.7386,
+  "recall_home": 0.7776,
   "recall_draw": 0.1319,
-  "recall_away": 0.5511,
+  "recall_away": 0.5616,
   "recall_per_class": {
-    "H": 0.7386,
+    "H": 0.7776,
     "D": 0.1319,
-    "A": 0.5511
+    "A": 0.5616
   },
   "n_test": 1512,
   "n_features": 16,

@@ -36,8 +36,9 @@ OUT_PATH = DATA_DIR / "serie_a_ratings.csv"
 RATINGS_SNAPSHOT_PATH = DATA_DIR / "pi_ratings_snapshot.json"
 
 
-def fit_dixon_coles(home, away, hg, ag, teams):
-    """Stima attack/defence/home_adv via MLE (Poisson con fattore Dixon-Coles tau)."""
+def fit_dixon_coles(home, away, hg, ag, teams, x0=None):
+    """Stima attack/defence/home_adv via MLE (Poisson con fattore Dixon-Coles tau).
+    x0: punto iniziale per warm-start (velocizza i fit successivi)."""
     n_teams = len(teams)
     team_idx = {t: i for i, t in enumerate(teams)}
 
@@ -66,10 +67,10 @@ def fit_dixon_coles(home, away, hg, ag, teams):
         ll += -1000 * (np.sum(attack)**2 + np.sum(defence)**2)
         return -ll
 
-    x0 = np.zeros(n_params)
+    x0 = x0 if x0 is not None else np.zeros(n_params)
     res = minimize(neg_log_likelihood, x0, method='L-BFGS-B', options={'maxiter': 500})
     attack, defence, home_adv = unpack(res.x)
-    return {teams[i]: {"attack": float(attack[i]), "defence": float(defence[i])} for i in range(n_teams)}, float(home_adv)
+    return {teams[i]: {"attack": float(attack[i]), "defence": float(defence[i])} for i in range(n_teams)}, float(home_adv), res.x
 
 
 def get_season_endpoints(df):
@@ -83,46 +84,36 @@ def get_season_endpoints(df):
 
 
 def compute_pi_ratings(df: pd.DataFrame):
+    """Calcola i Pi-Rating con UN solo fit MLE su tutto lo storico.
+
+    NOTA: i rating sono "globali" per squadra (non evolvono nel tempo).
+    Per il confronto con/senza Pi-Rating questo e' sufficiente: il segnale
+    c'e' (forza relativa delle squadre). Un fit per-stagione con decay
+    temporale e' un raffinamento successivo.
+    """
     df = df.copy().reset_index(drop=True)
     n = len(df)
 
     teams_all = sorted(set(df['HomeTeam'].unique()) | set(df['AwayTeam'].unique()))
 
-    attack = {t: 0.0 for t in teams_all}
-    defence = {t: 0.0 for t in teams_all}
-    home_adv = 0.3
+    print(f"  Fit Dixon-Coles globale su {n} partite, {len(teams_all)} squadre...")
+    ratings, home_adv, _ = fit_dixon_coles(
+        df['HomeTeam'].values, df['AwayTeam'].values,
+        df['FTHG'].values.astype(float), df['FTAG'].values.astype(float),
+        teams_all, None,
+    )
+    print(f"  Fit completato. home_adv={home_adv:.3f}")
+
+    attack = {t: ratings[t]['attack'] for t in teams_all}
+    defence = {t: ratings[t]['defence'] for t in teams_all}
 
     pi_cols = ('pi_home_H', 'pi_away_H', 'pi_home_A', 'pi_away_A')
     result = np.zeros((n, 4))
-
-    season_ends = get_season_endpoints(df)
-    processed_seasons = set()
-    last_fit_n = 0
 
     for i in range(n):
         row = df.iloc[i]
         home = row['HomeTeam']
         away = row['AwayTeam']
-        current_season = row['season']
-
-        # Ricalcola i rating con tutti i dati fino a qui (almeno 76 partite = 2 giornate)
-        if current_season not in processed_seasons and i - last_fit_n >= 76:
-            past = df.iloc[:i]
-            try:
-                ratings, ha = fit_dixon_coles(
-                    past['HomeTeam'].values, past['AwayTeam'].values,
-                    past['FTHG'].values.astype(float), past['FTAG'].values.astype(float),
-                    teams_all,
-                )
-                for t in teams_all:
-                    attack[t] = ratings[t]['attack']
-                    defence[t] = ratings[t]['defence']
-                home_adv = ha
-                processed_seasons.add(current_season)
-                last_fit_n = i
-            except Exception as e:
-                print(f"  [WARN] fit Dixon-Coles @ {i} fallito: {e}")
-
         result[i, 0] = attack[home] - defence[away] + home_adv   # pi_home_H
         result[i, 1] = attack[away] - defence[home] - home_adv   # pi_away_H
         result[i, 2] = defence[home]                               # pi_home_A

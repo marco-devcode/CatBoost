@@ -1,6 +1,6 @@
 # 🏆 Report Finale — CatBoost Serie A Match Prediction
 
-**Data**: 2026-08-23 14:20
+**Data**: 2026-08-24 06:55
 **Modello migliore**: Baseline (Pi-Rating + FE) (`v1_baseline`)
 
 ---
@@ -9,7 +9,7 @@
 
 | Modello | Feature | RPS ↓ | Accuracy |
 |---------|---------|-------|----------|
-| Baseline (Pi-Rating + FE) | 16 | 0.1312 | 53.11% ◄ **BEST**|
+| Baseline (Pi-Rating + FE) | 16 | 0.1333 | 51.19% ◄ **BEST**|
 
 ---
 
@@ -17,11 +17,11 @@
 
 | Metrica | Valore | Note |
 |---------|--------|------|
-| **Accuracy** | 0.5311 | Target > 0.52 |
-| **RPS** | 0.1312 | Più basso = meglio |
-| **Recall Home Win** | 77.76% | |
+| **Accuracy** | 0.5119 | Target > 0.52 |
+| **RPS** | 0.1333 | Più basso = meglio |
+| **Recall Home Win** | 73.86% | |
 | **Recall Draw** | 13.19% | Classe più difficile |
-| **Recall Away Win** | 56.16% | |
+| **Recall Away Win** | 55.11% | |
 
 ---
 
@@ -29,9 +29,9 @@
 
 | | RPS ↓ | Accuracy |
 |--|-------|----------|
-| **CatBoost (v1_baseline)** | 0.1312 | 53.11% |
+| **CatBoost (v1_baseline)** | 0.1333 | 51.19% |
 | **Bet365** | 0.1721 | 36.64% |
-| **Delta** | +0.0409 ✅ | +0.1647 ✅ |
+| **Delta** | +0.0388 ✅ | +0.1455 ✅ |
 
 ---
 
@@ -40,13 +40,13 @@
 ```
               precision    recall  f1-score   support
 
-           H     0.5481    0.7776    0.6430       616
-           D     0.3929    0.1319    0.1975       417
-           A     0.5402    0.5616    0.5507       479
+           H     0.5353    0.7386    0.6207       616
+           D     0.3395    0.1319    0.1900       417
+           A     0.5280    0.5511    0.5393       479
 
-    accuracy                         0.5311      1512
-   macro avg     0.4937    0.4904    0.4637      1512
-weighted avg     0.5028    0.5311    0.4909      1512
+    accuracy                         0.5119      1512
+   macro avg     0.4676    0.4739    0.4500      1512
+weighted avg     0.4790    0.5119    0.4761      1512
 
 ```
 

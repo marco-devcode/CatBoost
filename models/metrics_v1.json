@@ -1,6 +1,6 @@
 {
-  "accuracy": 0.531085,
-  "rps": 0.131162,
+  "accuracy": 0.511905,
+  "rps": 0.133319,
   "features": [
     "pi_home_H",
     "pi_away_H",

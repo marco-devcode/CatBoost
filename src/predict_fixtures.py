@@ -446,7 +446,7 @@ def main():
 
             # Kelly retrospettivo: tra le 3 giocate, punta su quella con edge
             # positivo (p_model > p_bookmaker) usando la quota reale.
-            if bm_odds is not None:
+            if bm_odds is not None and played:
                 best_k = -1
                 best_info = None
                 for i, lab in enumerate(LABELS):
@@ -466,7 +466,7 @@ def main():
                         "kelly": round(kf, 4), "win": win,
                     })
             # Partita futura: bookmaker + Kelly (prob/features gia' calcolate)
-            if bm_odds is not None:
+            if bm_odds is not None and played:
                 assert bm_prob is not None
                 m["bm"] = {"H": round(bm_odds[0], 2), "D": round(bm_odds[1], 2),
                            "A": round(bm_odds[2], 2)}

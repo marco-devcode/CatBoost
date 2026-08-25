@@ -298,30 +298,45 @@ def main():
     # 1) football-data.co.uk: porta le giornate DISPONIBILI + quote B365.
     #    All'inizio della stagione ha SOLO le prime giornate giocate.
     # 2) TheSportsDB: ha l'INTERO calendario 26/27 (tutte le 38 giornate,
-    #    con date), ma SENZA quote. Lo usiamo per integrare le giornate
-    #    future non ancora presenti su football-data, cosi' la dashboard
-    #    mostra le prediction di CatBoost sulle prossime giornate.
+    #    con date + intRound), ma SENZA quote. Lo usiamo per integrare le
+    #    giornate future non ancora presenti su football-data, cosi' la
+    #    dashboard mostra le prediction di CatBoost sulle prossime giornate.
     fx, source = None, None
     fd = fetch_football_data(SEASON_FD)
     if fd is not None and len(fd):
         fx, source = fd, "football-data.co.uk"
+        # Normalizza Date in datetime64 (FD la legge come stringa DD/MM/YYYY)
+        fx['Date'] = pd.to_datetime(fx['Date'], dayfirst=True, errors='coerce')
+        # Assicura colonna giornata (FD non l'ha: la deriviamo da TSDB dopo)
+        if 'giornata' not in fx.columns:
+            fx['giornata'] = np.nan
         # Integra le giornate future mancanti da TheSportsDB
         print("  Integrazione giornate future da TheSportsDB...")
         tsdb = fetch_thesportsdb(SEASON_TSDB)
         if tsdb is not None:
+            tsdb['Date'] = pd.to_datetime(tsdb['Date'], errors='coerce')
+            # Chiave di dedup su data(giorno)+squadre, formato normalizzato
             def _key(row):
-                return (str(row['Date'])[:10], str(row['HomeTeam']), str(row['AwayTeam']))
-            fd_keys = set(_key(r) for _, r in fd.iterrows())
-            tsdb_keys = [_key(r) for _, r in tsdb.iterrows()]
-            add_mask = [k not in fd_keys for k in tsdb_keys]
+                return (pd.Timestamp(row['Date']).strftime('%Y-%m-%d'),
+                        str(row['HomeTeam']), str(row['AwayTeam']))
+            fd_keys = set(_key(r) for _, r in fx.iterrows())
+            add_mask = [(_key(r) not in fd_keys) for _, r in tsdb.iterrows()]
             add = tsdb[add_mask]
             if len(add):
-                fx = pd.concat([fd, add], ignore_index=True)
+                # Mappa round di TSDB (affidabile per tutte le 38) su TUTTE le
+                # righe (anche FD) cosi' le partite giocate restano nella loro
+                # giornata reale invece di essere rimappate dal clustering.
+                round_map = {_key(r): int(r['giornata']) for _, r in tsdb.iterrows()
+                             if pd.notna(r['giornata'])}
+                fx['giornata'] = fx.apply(
+                    lambda r: round_map.get(_key(r), np.nan), axis=1)
+                fx = pd.concat([fx, add], ignore_index=True)
                 print(f"    +{len(add)} partite future aggiunte (senza quote B365)")
     else:
         print("  football-data non disponibile -> fallback TheSportsDB")
         tsdb = fetch_thesportsdb(SEASON_TSDB)
         if tsdb is not None:
+            tsdb['Date'] = pd.to_datetime(tsdb['Date'], errors='coerce')
             fx, source = tsdb, "thesportsdb.com"
 
     if fx is None or not len(fx):
@@ -340,11 +355,17 @@ def main():
         return
 
     print(f"Fonte calendario: {source}")
-    fx['Date'] = pd.to_datetime(fx['Date'])
     fx = fx.dropna(subset=['Date', 'HomeTeam', 'AwayTeam'])
-    if 'giornata' not in fx.columns or fx['giornata'].isna().any():
-        fx = assign_giornate(fx.drop(columns=['giornata'], errors='ignore'))
+    # Giornata: priorità a chi ce l'ha (TSDB intRound), altrimenti clustering
+    if 'giornata' not in fx.columns:
+        fx['giornata'] = np.nan
+    fx['giornata'] = pd.to_numeric(fx['giornata'], errors='coerce')
+    if fx['giornata'].isna().any():
+        fx = fx.drop(columns=['giornata'])
+        fx = assign_giornate(fx)
     fx['giornata'] = fx['giornata'].astype(int)
+    # Deduplicazione finale per (data, squadre) a prova di bug nel merge
+    fx = fx.drop_duplicates(subset=['Date', 'HomeTeam', 'AwayTeam'], keep='first').reset_index(drop=True)
     print(f"Fixture: {len(fx)} partite, {fx['giornata'].max()} giornate")
 
     # Squadre della Serie A corrente: derivate dal calendario stesso (fonte

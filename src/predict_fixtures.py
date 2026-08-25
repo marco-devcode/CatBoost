@@ -309,8 +309,12 @@ def main():
         print("  Integrazione giornate future da TheSportsDB...")
         tsdb = fetch_thesportsdb(SEASON_TSDB)
         if tsdb is not None:
-            fd_keys = set(zip(fd['Date'].astype(str), fd['HomeTeam'], fd['AwayTeam']))
-            add = tsdb[~tsdb.apply(lambda r: (r['Date'].astype(str), r['HomeTeam'], r['AwayTeam']) in fd_keys, axis=1)]
+            def _key(row):
+                return (str(row['Date'])[:10], str(row['HomeTeam']), str(row['AwayTeam']))
+            fd_keys = set(_key(r) for _, r in fd.iterrows())
+            tsdb_keys = [_key(r) for _, r in tsdb.iterrows()]
+            add_mask = [k not in fd_keys for k in tsdb_keys]
+            add = tsdb[add_mask]
             if len(add):
                 fx = pd.concat([fd, add], ignore_index=True)
                 print(f"    +{len(add)} partite future aggiunte (senza quote B365)")

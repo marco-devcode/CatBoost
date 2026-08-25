@@ -432,7 +432,7 @@ def main():
                 m["ok"] = bool(m["pred"] == ftr)
 
             # Confronto bookmaker / Kelly solo sulle giocate (serve risultato)
-            if bm_odds is not None:
+            if bm_odds is not None and played:
                 assert bm_prob is not None
                 m["bm"] = {"H": round(bm_odds[0], 2), "D": round(bm_odds[1], 2),
                            "A": round(bm_odds[2], 2)}

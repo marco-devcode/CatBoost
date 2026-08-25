@@ -282,6 +282,10 @@ def main():
         raise FileNotFoundError(f"{MODEL_PATH} non trovato: esegui prima src/model.py")
     model = CatBoostClassifier()
     model.load_model(str(MODEL_PATH))
+    # Timestamp del modello allenato: se cambia rispetto al run precedente,
+    # il freeze delle stime passate viene ignorato (una correzione di bug nel
+    # modello deve propagarsi). Altrimenti le stime giocate restano stabili.
+    model_trained_at = pd.Timestamp(MODEL_PATH.stat().st_mtime).isoformat(timespec="seconds")
 
     sys.path.insert(0, str(ROOT / 'src'))
     from predict import (load_history, compute_features_for_match, FEATURE_ORDER,
@@ -332,20 +336,30 @@ def main():
           f"{sorted(current_season_teams)}")
 
     # ── Freeze stime passate ──────────────────────────────────────────
-    # Carica le stime gia' pubblicate: le partite GIA' GIOCATE mantengono
-    # le loro prob/pred originali e NON vengono ricalcolate.
+    # Carica le stime gia' pubblicate. Se il modello NON e' cambiato rispetto
+    # al run precedente, le partite GIA' GIOCATE mantengono le loro prob/pred
+    # (non driftano quando escono i nuovi risultati). Se il modello e' stato
+    # riallenato (correzione di bug), il freeze viene ignorato e tutto si
+    # ricalcola col modello nuovo.
     prev_estimates = {}
+    prev_model_trained_at = None
+    freeze_active = False
     if OUT_JSON.exists():
         try:
             with open(OUT_JSON) as f:
                 old = json.load(f)
+            prev_model_trained_at = old.get("meta", {}).get("model_trained_at")
             for g, ms in old.get("giornate", {}).items():
                 for m in ms:
                     if m.get("ok") is not None:  # gia' giocata nella vecchia run
                         prev_estimates[_match_key(m["home"], m["away"], m["date"])] = m
-            print(f"  Freeze: {len(prev_estimates)} stime di partite gia' giocate riutilizzate")
+            freeze_active = (prev_model_trained_at == model_trained_at)
+            n = len(prev_estimates)
+            print(f"  Freeze {'ATTIVO' if freeze_active else 'DISATTIVO (modello cambiato)'}:"
+                  f" {n} stime di partite gia' giocate")
         except Exception as e:
             print(f"  [warn] predictions.json precedente illeggibile: {e}")
+            freeze_active = False
 
     # ── Predizioni + bookmaker + kelly ────────────────────────────────
     LABELS = ['H', 'D', 'A']
@@ -371,21 +385,26 @@ def main():
             except (TypeError, ValueError):
                 bm_odds = None
 
+        k = _match_key(m["home"], m["away"], m["date"])
         # Partita gia' giocata (con risultato reale): riusa le stime passate
-        if played:
-            k = _match_key(m["home"], m["away"], m["date"])
-            if k in prev_estimates:
-                old = prev_estimates[k]
-                m["prob"] = old.get("prob")
-                m["pred"] = old.get("pred")
-            else:
-                # Prima volta che vediamo il risultato: calcola comunque (raro)
-                feats = compute_features_for_match(history, m["home"], m["away"], row['Date'], h2h_cache, current_season_teams)
-                X = pd.DataFrame([{c: feats.get(c, 0.0) for c in FEATURE_ORDER}])
-                probs = model.predict_proba(X)[0]
-                m["prob"] = {LABELS[i]: round(float(probs[i]) * 100, 1) for i in range(3)}
-                m["pred"] = LABELS[int(np.argmax(probs))]
-                m["features"] = {c: round(float(feats.get(c, 0.0)), 3) for c in FEATURE_ORDER}
+        # SOLO se il freeze e' attivo (modello invariato). Altrimenti ricalcola.
+        if played and freeze_active and k in prev_estimates:
+            old = prev_estimates[k]
+            m["prob"] = old.get("prob")
+            m["pred"] = old.get("pred")
+            # Ricalcola le feature col modello ATTUALE (trasparenza), anche
+            # se le stime 1X2 restano quelle congelate del run precedente.
+            feats = compute_features_for_match(history, m["home"], m["away"], row['Date'], h2h_cache, current_season_teams)
+            m["features"] = {c: round(float(feats.get(c, 0.0)), 3) for c in FEATURE_ORDER}
+        else:
+            # Ricalcola tutto (freeze disattivo per modello cambiato, oppure
+            # prima volta che vediamo il risultato).
+            feats = compute_features_for_match(history, m["home"], m["away"], row['Date'], h2h_cache, current_season_teams)
+            X = pd.DataFrame([{c: feats.get(c, 0.0) for c in FEATURE_ORDER}])
+            probs = model.predict_proba(X)[0]
+            m["prob"] = {LABELS[i]: round(float(probs[i]) * 100, 1) for i in range(3)}
+            m["pred"] = LABELS[int(np.argmax(probs))]
+            m["features"] = {c: round(float(feats.get(c, 0.0)), 3) for c in FEATURE_ORDER}
 
             ftr = ftr.strip().upper()
             m["risultato"] = f"{int(row['FTHG'])}-{int(row['FTAG'])}"
@@ -426,15 +445,7 @@ def main():
                         "pick": lab, "model_p": round(pk, 3), "odd": round(odd, 2),
                         "kelly": round(kf, 4), "win": win,
                     })
-        else:
-            # Partita futura: sempre ricalcolata con le feature aggiornate
-            feats = compute_features_for_match(history, m["home"], m["away"], row['Date'], h2h_cache, current_season_teams)
-            X = pd.DataFrame([{c: feats.get(c, 0.0) for c in FEATURE_ORDER}])
-            probs = model.predict_proba(X)[0]
-            m["prob"] = {LABELS[i]: round(float(probs[i]) * 100, 1) for i in range(3)}
-            m["pred"] = LABELS[int(np.argmax(probs))]
-            m["features"] = {c: round(float(feats.get(c, 0.0)), 3) for c in FEATURE_ORDER}
-
+            # Partita futura: bookmaker + Kelly (prob/features gia' calcolate)
             if bm_odds is not None:
                 assert bm_prob is not None
                 m["bm"] = {"H": round(bm_odds[0], 2), "D": round(bm_odds[1], 2),
@@ -515,6 +526,7 @@ def main():
             "fonte": source,
             "ultima_giornata_giocata": ultima_gg,
             "prossima_giornata": prossima_gg,
+            "model_trained_at": model_trained_at,
             **meta_extra,
         },
         "stats": {"corrette": corrette, "total": len(giocate)},

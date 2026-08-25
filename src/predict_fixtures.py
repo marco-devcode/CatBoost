@@ -385,6 +385,7 @@ def main():
                 probs = model.predict_proba(X)[0]
                 m["prob"] = {LABELS[i]: round(float(probs[i]) * 100, 1) for i in range(3)}
                 m["pred"] = LABELS[int(np.argmax(probs))]
+                m["features"] = {c: round(float(feats.get(c, 0.0)), 3) for c in FEATURE_ORDER}
 
             ftr = ftr.strip().upper()
             m["risultato"] = f"{int(row['FTHG'])}-{int(row['FTAG'])}"
@@ -432,6 +433,7 @@ def main():
             probs = model.predict_proba(X)[0]
             m["prob"] = {LABELS[i]: round(float(probs[i]) * 100, 1) for i in range(3)}
             m["pred"] = LABELS[int(np.argmax(probs))]
+            m["features"] = {c: round(float(feats.get(c, 0.0)), 3) for c in FEATURE_ORDER}
 
             if bm_odds is not None:
                 assert bm_prob is not None

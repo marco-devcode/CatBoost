@@ -393,3 +393,104 @@ body {
   line-height: 1.4;
 }
 
+/* ── Variabili di prediction ───────────────────────────────────────── */
+.vars-toggle {
+  width: 100%;
+  text-align: left;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: 14px 0;
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.vars-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  margin: -6px 0 14px;
+}
+
+.vars-intro {
+  font-size: 0.74rem;
+  color: var(--text);
+  line-height: 1.5;
+  margin: 0 0 10px;
+}
+
+.vars-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 14px;
+}
+
+.vars-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 0.72rem;
+}
+
+.vars-key {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: #38bdf8;
+  font-size: 0.68rem;
+  min-width: 92px;
+}
+
+.vars-desc {
+  color: var(--muted);
+}
+
+.vars-note {
+  font-size: 0.68rem;
+  color: var(--muted);
+  margin: 12px 0 0;
+  line-height: 1.4;
+}
+
+/* ── Feature per match (toggle) ────────────────────────────────────── */
+.feat-wrap {
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+
+.feat-toggle {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 0.7rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.feat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 12px;
+  margin-top: 8px;
+}
+
+.feat-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  padding: 2px 0;
+}
+
+.feat-name {
+  color: var(--muted);
+}
+
+.feat-val {
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+

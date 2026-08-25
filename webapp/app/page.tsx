@@ -8,6 +8,55 @@ function formatDate(iso: string): string {
   return d.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short" });
 }
 
+// Etichette leggibili delle 18 feature (ordine FEATURE_ORDER)
+const FEATURE_LABELS: Record<string, string> = {
+  pi_home_H: "Pi-Rating casa (home)",
+  pi_away_H: "Pi-Rating casa (away)",
+  pi_home_A: "Pi-Rating trasf. (home)",
+  pi_away_A: "Pi-Rating trasf. (away)",
+  home_form_5: "Forma casa (ult. 5)",
+  away_form_5: "Forma trasf. (ult. 5)",
+  home_pts5: "Punti casa (ult. 5)",
+  away_pts5: "Punti trasf. (ult. 5)",
+  home_goal_diff5: "Diff. reti casa (ult. 5)",
+  away_goal_diff5: "Diff. reti trasf. (ult. 5)",
+  h2h_home: "H2H casa (storico scontri)",
+  h2h_away: "H2H trasf. (storico scontri)",
+  home_rest: "Giorni di riposo casa",
+  away_rest: "Giorni di riposo trasf.",
+  home_promoted: "Neopromossa casa",
+  away_promoted: "Neopromossa trasf.",
+  home_goals5: "Gol casa (ult. 5)",
+  away_goals5: "Gol trasf. (ult. 5)",
+};
+
+function fmtVal(v: number): string {
+  if (Number.isInteger(v)) return v.toString();
+  return v.toFixed(3);
+}
+
+function MatchFeatures({ m }: { m: MatchPrediction }) {
+  const [open, setOpen] = useState(false);
+  if (!m.features) return null;
+  return (
+    <div className="feat-wrap">
+      <button className="feat-toggle" onClick={() => setOpen((o) => !o)}>
+        {open ? "▾" : "▸"} Variabili usate ({Object.keys(m.features).length})
+      </button>
+      {open && (
+        <div className="feat-grid">
+          {Object.entries(m.features).map(([k, v]) => (
+            <div key={k} className="feat-item">
+              <span className="feat-name">{FEATURE_LABELS[k] ?? k}</span>
+              <span className="feat-val">{fmtVal(v)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function MatchCard({ m }: { m: MatchPrediction }) {
   const played = m.ok !== undefined;
   const maxKey = (["H", "D", "A"] as const).reduce((a, b) => (m.prob[a] >= m.prob[b] ? a : b));
@@ -65,6 +114,8 @@ function MatchCard({ m }: { m: MatchPrediction }) {
           @ {m.kelly.odd.toFixed(2)} (modello {(m.kelly.model_p * 100).toFixed(0)}% vs quota)
         </div>
       )}
+
+      <MatchFeatures m={m} />
     </div>
   );
 }
@@ -73,6 +124,7 @@ export default function Home() {
   const [data, setData] = useState<PredictionsData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [roundOverride, setRoundOverride] = useState<number | null>(null);
+  const [showVars, setShowVars] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -194,6 +246,33 @@ export default function Home() {
             Simulazione retrospettiva su partite giocate con edge (pₘ &gt; p_bookmaker).
             Non è un consiglio di scommessa.
           </div>
+        </div>
+      )}
+
+      <button className="vars-toggle" onClick={() => setShowVars((s) => !s)}>
+        {showVars ? "▾" : "▸"} Variabili di prediction (come nasce la stima)
+      </button>
+      {showVars && (
+        <div className="vars-panel">
+          <p className="vars-intro">
+            Il modello (CatBoost + Pi-Rating Dixon-Coles, decay 2 anni) riceve <b>18 variabili</b> per
+            ogni match. Ecco cosa usiamo e cosa rappresentano. Clicca "Variabili usate" su una
+            partita per vedere i valori reali di quella sfida.
+          </p>
+          <div className="vars-grid">
+            {Object.entries(FEATURE_LABELS).map(([k, label]) => (
+              <div key={k} className="vars-item">
+                <code className="vars-key">{k}</code>
+                <span className="vars-desc">{label}</span>
+              </div>
+            ))}
+          </div>
+          <p className="vars-note">
+            Nota di trasparenza: all&apos;inizio della stagione forma/H2H/riposo sono neutri, quindi
+            la stima dipende quasi interamente dai <b>Pi-Rating</b> (forza stimata sui risultati, non
+            sulla posizione in classifica). Se un Pi-Rating è anomalo, la quota ne risente — ed è
+            visibile qui.
+          </p>
         </div>
       )}
 

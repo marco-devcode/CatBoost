@@ -18,6 +18,8 @@ export interface MatchPrediction {
     odd: number;
     stake_pct: number;
   } | null;
+  // Feature usate dal modello (per trasparenza), in ordine FEATURE_ORDER
+  features?: Record<string, number>;
 }
 
 export interface KellySummary {

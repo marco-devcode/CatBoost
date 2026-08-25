@@ -84,7 +84,13 @@ def compute_features_for_match(df, home, away, match_date, h2h_cache=None,
 
     feats = {}
 
-    # Pi-Rating correnti: usa gli ultimi valori noti per le due squadre
+    # Pi-Rating correnti: usa gli ultimi valori noti per le due squadre.
+    # ATTENZIONE: l'ultima partita di una squadra puo' essere in casa O in
+    # trasferta. I campi pi_*_H / pi_*_A nel CSV sono sempre riferiti alla
+    # squadra DI CASA / squadra IN TRASFERTA di QUELLA riga. Quindi prendiamo
+    # il rating della squadra stessa in base a dove ha giocato l'ultima volta,
+    # altrimenti si leggerebbe il rating dell'avversaria (bug: Roma 1a giornata
+    # 26/27 leggeva pi_home_H spurio da una trasferta -> quotata sotto).
     for team, role in [(home, 'home'), (away, 'away')]:
         sub = past[past['HomeTeam'] == team]
         sub2 = past[past['AwayTeam'] == team]
@@ -93,8 +99,14 @@ def compute_features_for_match(df, home, away, match_date, h2h_cache=None,
             feats[f'pi_{role}_H'] = 0.0
             feats[f'pi_{role}_A'] = 0.0
         else:
-            feats[f'pi_{role}_H'] = last['pi_home_H'].values[0] if role == 'home' else last['pi_away_H'].values[0]
-            feats[f'pi_{role}_A'] = last['pi_home_A'].values[0] if role == 'home' else last['pi_away_A'].values[0]
+            lr = last.iloc[0]
+            was_home = (lr['HomeTeam'] == team)
+            if role == 'home':
+                feats['pi_home_H'] = lr['pi_home_H'] if was_home else lr['pi_away_H']
+                feats['pi_home_A'] = lr['pi_home_A'] if was_home else lr['pi_away_A']
+            else:
+                feats['pi_away_H'] = lr['pi_home_H'] if was_home else lr['pi_away_H']
+                feats['pi_away_A'] = lr['pi_home_A'] if was_home else lr['pi_away_A']
 
     # Forma recente (ultimi WINDOW match della squadra, casa o trasferta)
     def team_form(team, is_home):

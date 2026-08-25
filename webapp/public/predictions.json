@@ -1,25 +1,26 @@
 {
   "meta": {
-    "last_update": "2026-08-25T17:36:25",
+    "last_update": "2026-08-25T19:11:22",
     "stagione": "2627",
     "fonte": "football-data.co.uk",
     "ultima_giornata_giocata": 1,
     "prossima_giornata": 2,
+    "model_trained_at": "1970-01-01T00:00:01",
     "bookmaker_rps": 0.1151,
-    "model_rps": 0.1636,
+    "model_rps": 0.1244,
     "beats_bookmaker_rps": false,
     "kelly": {
       "bankroll_iniziale": 1000.0,
-      "bankroll_finale": 682.37,
-      "profitto": -317.63,
-      "roi_pct": -31.76,
+      "bankroll_finale": 904.65,
+      "profitto": -95.35,
+      "roi_pct": -9.54,
       "scommesse": 10,
-      "stake_totale_pct": 51.7,
+      "stake_totale_pct": 54.8,
       "fraction": 0.25
     }
   },
   "stats": {
-    "corrette": 5,
+    "corrette": 7,
     "total": 10
   },
   "giornate": {
@@ -29,11 +30,31 @@
         "away": "Monza",
         "date": "2026-08-22",
         "prob": {
-          "H": 50.9,
-          "D": 16.3,
-          "A": 32.8
+          "H": 81.0,
+          "D": 7.2,
+          "A": 11.8
         },
         "pred": "H",
+        "features": {
+          "pi_home_H": 0.494,
+          "pi_away_H": -0.45,
+          "pi_home_A": 0.781,
+          "pi_away_A": -0.022,
+          "home_form_5": 2.2,
+          "away_form_5": 0.6,
+          "home_goal_diff_5": 1.6,
+          "away_goal_diff_5": -1.4,
+          "home_rest_days": 91.0,
+          "away_rest_days": 455.0,
+          "rest_advantage": -364.0,
+          "h2h_home_winrate": 0.6,
+          "home_goals_scored_5": 2.4,
+          "home_goals_conceded_5": 0.8,
+          "away_goals_scored_5": 0.4,
+          "away_goals_conceded_5": 1.8,
+          "home_promoted": 0.0,
+          "away_promoted": 0.0
+        },
         "risultato": "4-1",
         "esito": "H",
         "ok": true,
@@ -46,6 +67,12 @@
           "H": 79.1,
           "D": 13.6,
           "A": 7.3
+        },
+        "kelly": {
+          "pick": "A",
+          "model_p": 0.118,
+          "odd": 13.0,
+          "stake_pct": 1.11
         }
       },
       {
@@ -53,11 +80,31 @@
         "away": "Como",
         "date": "2026-08-22",
         "prob": {
-          "H": 25.9,
-          "D": 19.4,
-          "A": 54.7
+          "H": 10.4,
+          "D": 11.9,
+          "A": 77.7
         },
         "pred": "A",
+        "features": {
+          "pi_home_H": -0.398,
+          "pi_away_H": 0.4,
+          "pi_home_A": 0.167,
+          "pi_away_A": 0.464,
+          "home_form_5": 0.8,
+          "away_form_5": 2.0,
+          "home_goal_diff_5": -0.2,
+          "away_goal_diff_5": 1.0,
+          "home_rest_days": 90.0,
+          "away_rest_days": 90.0,
+          "rest_advantage": 0.0,
+          "h2h_home_winrate": 0.25,
+          "home_goals_scored_5": 0.4,
+          "home_goals_conceded_5": 0.6,
+          "away_goals_scored_5": 1.6,
+          "away_goals_conceded_5": 0.6,
+          "home_promoted": 0.0,
+          "away_promoted": 0.0
+        },
         "risultato": "1-1",
         "esito": "D",
         "ok": false,
@@ -70,6 +117,12 @@
           "H": 21.2,
           "D": 26.5,
           "A": 52.2
+        },
+        "kelly": {
+          "pick": "A",
+          "model_p": 0.777,
+          "odd": 1.83,
+          "stake_pct": 12.71
         }
       },
       {
@@ -77,14 +130,34 @@
         "away": "Napoli",
         "date": "2026-08-22",
         "prob": {
-          "H": 30.5,
-          "D": 39.8,
-          "A": 29.7
+          "H": 8.1,
+          "D": 14.8,
+          "A": 77.1
         },
-        "pred": "D",
+        "pred": "A",
+        "features": {
+          "pi_home_H": -0.106,
+          "pi_away_H": 0.628,
+          "pi_home_A": 0.081,
+          "pi_away_A": 0.418,
+          "home_form_5": 1.2,
+          "away_form_5": 2.2,
+          "home_goal_diff_5": -0.6,
+          "away_goal_diff_5": 1.0,
+          "home_rest_days": 90.0,
+          "away_rest_days": 90.0,
+          "rest_advantage": 0.0,
+          "h2h_home_winrate": 0.0,
+          "home_goals_scored_5": 1.0,
+          "home_goals_conceded_5": 1.6,
+          "away_goals_scored_5": 1.4,
+          "away_goals_conceded_5": 0.4,
+          "home_promoted": 0.0,
+          "away_promoted": 0.0
+        },
         "risultato": "0-2",
         "esito": "A",
-        "ok": false,
+        "ok": true,
         "bm": {
           "H": 4.5,
           "D": 3.4,
@@ -94,6 +167,12 @@
           "H": 21.3,
           "D": 28.2,
           "A": 50.5
+        },
+        "kelly": {
+          "pick": "A",
+          "model_p": 0.771,
+          "odd": 1.9,
+          "stake_pct": 12.91
         }
       },
       {
@@ -101,11 +180,31 @@
         "away": "Cagliari",
         "date": "2026-08-22",
         "prob": {
-          "H": 27.3,
-          "D": 20.8,
-          "A": 51.9
+          "H": 35.2,
+          "D": 23.9,
+          "A": 40.8
         },
         "pred": "A",
+        "features": {
+          "pi_home_H": 0.239,
+          "pi_away_H": -0.325,
+          "pi_home_A": 0.019,
+          "pi_away_A": 0.103,
+          "home_form_5": 1.4,
+          "away_form_5": 0.8,
+          "home_goal_diff_5": -0.2,
+          "away_goal_diff_5": -1.0,
+          "home_rest_days": 90.0,
+          "away_rest_days": 90.0,
+          "rest_advantage": 0.0,
+          "h2h_home_winrate": 0.0,
+          "home_goals_scored_5": 1.0,
+          "home_goals_conceded_5": 1.2,
+          "away_goals_scored_5": 0.8,
+          "away_goals_conceded_5": 1.8,
+          "home_promoted": 0.0,
+          "away_promoted": 0.0
+        },
         "risultato": "0-1",
         "esito": "A",
         "ok": true,
@@ -118,6 +217,12 @@
           "H": 37.9,
           "D": 31.6,
           "A": 30.5
+        },
+        "kelly": {
+          "pick": "A",
+          "model_p": 0.408,
+          "odd": 3.1,
+          "stake_pct": 3.15
         }
       },
       {
@@ -125,11 +230,31 @@
         "away": "Juventus",
         "date": "2026-08-23",
         "prob": {
-          "H": 21.5,
-          "D": 28.4,
-          "A": 50.1
+          "H": 23.4,
+          "D": 28.1,
+          "A": 48.5
         },
         "pred": "A",
+        "features": {
+          "pi_home_H": 0.132,
+          "pi_away_H": 0.249,
+          "pi_home_A": -0.182,
+          "pi_away_A": 0.475,
+          "home_form_5": 0.8,
+          "away_form_5": 2.2,
+          "home_goal_diff_5": -0.8,
+          "away_goal_diff_5": 0.6,
+          "home_rest_days": 819.0,
+          "away_rest_days": 91.0,
+          "rest_advantage": 728.0,
+          "h2h_home_winrate": 0.0,
+          "home_goals_scored_5": 1.0,
+          "home_goals_conceded_5": 1.8,
+          "away_goals_scored_5": 1.0,
+          "away_goals_conceded_5": 0.4,
+          "home_promoted": 0.0,
+          "away_promoted": 0.0
+        },
         "risultato": "0-1",
         "esito": "A",
         "ok": true,
@@ -142,6 +267,12 @@
           "H": 11.9,
           "D": 22.6,
           "A": 65.5
+        },
+        "kelly": {
+          "pick": "H",
+          "model_p": 0.234,
+          "odd": 8.0,
+          "stake_pct": 3.11
         }
       },
       {
@@ -149,11 +280,31 @@
         "away": "Lecce",
         "date": "2026-08-23",
         "prob": {
-          "H": 32.1,
-          "D": 43.1,
-          "A": 24.9
+          "H": 28.8,
+          "D": 50.4,
+          "A": 20.8
         },
         "pred": "D",
+        "features": {
+          "pi_home_H": -0.468,
+          "pi_away_H": -0.083,
+          "pi_home_A": -0.094,
+          "pi_away_A": 0.04,
+          "home_form_5": 1.2,
+          "away_form_5": 1.4,
+          "home_goal_diff_5": -0.4,
+          "away_goal_diff_5": -0.2,
+          "home_rest_days": 455.0,
+          "away_rest_days": 91.0,
+          "rest_advantage": 364.0,
+          "h2h_home_winrate": 0.0,
+          "home_goals_scored_5": 1.0,
+          "home_goals_conceded_5": 1.4,
+          "away_goals_scored_5": 1.0,
+          "away_goals_conceded_5": 1.2,
+          "home_promoted": 0.0,
+          "away_promoted": 0.0
+        },
         "risultato": "0-2",
         "esito": "A",
         "ok": false,
@@ -166,6 +317,12 @@
           "H": 42.5,
           "D": 30.9,
           "A": 26.6
+        },
+        "kelly": {
+          "pick": "D",
+          "model_p": 0.504,
+          "odd": 3.1,
+          "stake_pct": 6.7
         }
       },
       {
@@ -173,11 +330,31 @@
         "away": "Sassuolo",
         "date": "2026-08-23",
         "prob": {
-          "H": 48.4,
-          "D": 39.1,
-          "A": 12.5
+          "H": 51.5,
+          "D": 34.3,
+          "A": 14.2
         },
         "pred": "H",
+        "features": {
+          "pi_home_H": 0.302,
+          "pi_away_H": 0.124,
+          "pi_home_A": 0.58,
+          "pi_away_A": 0.289,
+          "home_form_5": 1.0,
+          "away_form_5": 0.4,
+          "home_goal_diff_5": -0.2,
+          "away_goal_diff_5": -0.6,
+          "home_rest_days": 93.0,
+          "away_rest_days": 91.0,
+          "rest_advantage": 2.0,
+          "h2h_home_winrate": 0.4,
+          "home_goals_scored_5": 0.6,
+          "home_goals_conceded_5": 0.8,
+          "away_goals_scored_5": 0.6,
+          "away_goals_conceded_5": 1.2,
+          "home_promoted": 0.0,
+          "away_promoted": 0.0
+        },
         "risultato": "2-1",
         "esito": "H",
         "ok": true,
@@ -190,6 +367,12 @@
           "H": 62.2,
           "D": 23.2,
           "A": 14.6
+        },
+        "kelly": {
+          "pick": "D",
+          "model_p": 0.343,
+          "odd": 4.1,
+          "stake_pct": 3.28
         }
       },
       {
@@ -197,14 +380,34 @@
         "away": "Milan",
         "date": "2026-08-23",
         "prob": {
-          "H": 38.6,
-          "D": 18.0,
-          "A": 43.5
+          "H": 49.3,
+          "D": 13.9,
+          "A": 36.8
         },
-        "pred": "A",
+        "pred": "H",
+        "features": {
+          "pi_home_H": -0.173,
+          "pi_away_H": 0.705,
+          "pi_home_A": 0.079,
+          "pi_away_A": 0.281,
+          "home_form_5": 2.2,
+          "away_form_5": 1.2,
+          "home_goal_diff_5": 1.0,
+          "away_goal_diff_5": -0.4,
+          "home_rest_days": 91.0,
+          "away_rest_days": 91.0,
+          "rest_advantage": 0.0,
+          "h2h_home_winrate": 0.4,
+          "home_goals_scored_5": 2.4,
+          "home_goals_conceded_5": 1.4,
+          "away_goals_scored_5": 0.6,
+          "away_goals_conceded_5": 1.0,
+          "home_promoted": 0.0,
+          "away_promoted": 0.0
+        },
         "risultato": "1-2",
         "esito": "A",
-        "ok": true,
+        "ok": false,
         "bm": {
           "H": 4.75,
           "D": 3.6,
@@ -214,6 +417,12 @@
           "H": 19.9,
           "D": 26.2,
           "A": 53.9
+        },
+        "kelly": {
+          "pick": "H",
+          "model_p": 0.493,
+          "odd": 4.75,
+          "stake_pct": 8.94
         }
       },
       {
@@ -221,14 +430,34 @@
         "away": "Lazio",
         "date": "2026-08-24",
         "prob": {
-          "H": 24.5,
-          "D": 57.8,
-          "A": 17.7
+          "H": 27.7,
+          "D": 29.1,
+          "A": 43.2
         },
-        "pred": "D",
+        "pred": "A",
+        "features": {
+          "pi_home_H": 0.024,
+          "pi_away_H": 0.789,
+          "pi_home_A": 0.141,
+          "pi_away_A": 0.227,
+          "home_form_5": 1.0,
+          "away_form_5": 1.8,
+          "home_goal_diff_5": -0.4,
+          "away_goal_diff_5": 0.4,
+          "home_rest_days": 93.0,
+          "away_rest_days": 93.0,
+          "rest_advantage": 0.0,
+          "h2h_home_winrate": 0.4,
+          "home_goals_scored_5": 1.0,
+          "home_goals_conceded_5": 1.4,
+          "away_goals_scored_5": 1.2,
+          "away_goals_conceded_5": 0.8,
+          "home_promoted": 0.0,
+          "away_promoted": 0.0
+        },
         "risultato": "0-1",
         "esito": "A",
-        "ok": false,
+        "ok": true,
         "bm": {
           "H": 2.2,
           "D": 3.2,
@@ -238,6 +467,12 @@
           "H": 43.2,
           "D": 29.7,
           "A": 27.1
+        },
+        "kelly": {
+          "pick": "A",
+          "model_p": 0.432,
+          "odd": 3.5,
+          "stake_pct": 5.12
         }
       },
       {
@@ -245,14 +480,34 @@
         "away": "Fiorentina",
         "date": "2026-08-24",
         "prob": {
-          "H": 27.9,
-          "D": 14.9,
-          "A": 57.3
+          "H": 61.1,
+          "D": 15.2,
+          "A": 23.8
         },
-        "pred": "A",
+        "pred": "H",
+        "features": {
+          "pi_home_H": 0.351,
+          "pi_away_H": 0.219,
+          "pi_home_A": 0.497,
+          "pi_away_A": 0.132,
+          "home_form_5": 2.6,
+          "away_form_5": 2.0,
+          "home_goal_diff_5": 2.0,
+          "away_goal_diff_5": 0.4,
+          "home_rest_days": 92.0,
+          "away_rest_days": 94.0,
+          "rest_advantage": -2.0,
+          "h2h_home_winrate": 0.6,
+          "home_goals_scored_5": 2.2,
+          "home_goals_conceded_5": 0.2,
+          "away_goals_scored_5": 1.6,
+          "away_goals_conceded_5": 1.2,
+          "home_promoted": 0.0,
+          "away_promoted": 0.0
+        },
         "risultato": "4-0",
         "esito": "H",
-        "ok": false,
+        "ok": true,
         "bm": {
           "H": 1.57,
           "D": 4.1,
@@ -262,6 +517,12 @@
           "H": 60.4,
           "D": 23.1,
           "A": 16.5
+        },
+        "kelly": {
+          "pick": "A",
+          "model_p": 0.238,
+          "odd": 5.75,
+          "stake_pct": 1.94
         }
       }
     ]

@@ -256,3 +256,140 @@ body {
   padding: 40px 20px;
   line-height: 1.6;
 }
+
+/* ── Bookmaker odds per match ─────────────────────────────────────── */
+.bm-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.bm-title {
+  font-size: 0.7rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.bm-odds {
+  display: flex;
+  gap: 12px;
+}
+
+.bm-cell {
+  font-size: 0.78rem;
+  color: var(--text);
+}
+
+.bm-cell i.bm-p {
+  color: var(--muted);
+  font-style: normal;
+  margin-left: 3px;
+  font-size: 0.68rem;
+}
+
+.kelly-hint {
+  margin-top: 8px;
+  font-size: 0.72rem;
+  color: #eab308;
+  background: rgba(234, 179, 8, 0.08);
+  border: 1px solid rgba(234, 179, 8, 0.25);
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+
+/* ── Confronto Bookmaker (RPS) ────────────────────────────────────── */
+.compare-bar {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  margin: 14px 0;
+}
+
+.compare-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.compare-grid {
+  display: flex;
+  gap: 10px;
+}
+
+.compare-cell {
+  flex: 1;
+  text-align: center;
+}
+
+.compare-name {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+.compare-val {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.compare-val.good { color: var(--home); }
+.compare-val.bad { color: #ef4444; }
+
+/* ── Kelly Simulation ─────────────────────────────────────────────── */
+.kelly-bar {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  margin: 14px 0;
+}
+
+.kelly-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.kelly-grid {
+  display: flex;
+  gap: 10px;
+}
+
+.kelly-cell {
+  flex: 1;
+  text-align: center;
+}
+
+.kelly-num {
+  display: block;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.kelly-num.good { color: var(--home); }
+.kelly-num.bad { color: #ef4444; }
+
+.kelly-lab {
+  display: block;
+  font-size: 0.68rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.kelly-note {
+  font-size: 0.66rem;
+  color: var(--muted);
+  margin-top: 8px;
+  line-height: 1.4;
+}
+

@@ -11,6 +11,10 @@ Aggiunge feature contestuali al di sopra dei 4 Pi-Rating baseline:
   6. Shots on Target proxy per xG
 
 Tutte le feature usano shift(1) per evitare data leakage.
+
+Feature canoniche (FEATURE_COLS) allineate 1:1 con predict.FEATURE_ORDER
+perche' CatBoost fa match per NOME colonna: training e inferenza devono
+ricevere ESATTAMENTE le stesse feature, nello stesso ordine.
 """
 import sys
 import numpy as np
@@ -210,6 +214,9 @@ def add_shots_proxy(df, window=5):
 # ═══════════════════════════════════════════════════════════════════════════════
 # Assemblaggio Feature Matrix
 # ═══════════════════════════════════════════════════════════════════════════════
+# Feature canoniche (ordinate come in predict.FEATURE_ORDER per allineare
+# training <-> inferenza). Tutte obbligatorie; i debutti (rolling goals NaN)
+# sono gestiti nativamente da CatBoost (valore mancante permesso).
 FEATURE_COLS = [
     # Pi-rating (baseline)
     'pi_home_H', 'pi_away_H', 'pi_home_A', 'pi_away_A',
@@ -220,24 +227,53 @@ FEATURE_COLS = [
     'home_rest_days', 'away_rest_days', 'rest_advantage',
     # Head to head
     'h2h_home_winrate',
-]
-
-# Feature opzionali (se disponibili)
-OPTIONAL_COLS = [
-    'home_shots_target_5', 'away_shots_target_5', 'shots_diff',
+    # Rolling goals (ultimi 5, casa/trasferta)
     'home_goals_scored_5', 'home_goals_conceded_5',
     'away_goals_scored_5', 'away_goals_conceded_5',
+    # Flag neopromossa (il modello impara lo sconto da solo dai dati)
+    'home_promoted', 'away_promoted',
 ]
+
+
+def add_promotion_flags(df, current_season_teams=None):
+    """Flag neopromozione.
+
+    Logica storica: una squadra presente in una stagione ma ASSENTE da quella
+    precedente -> neopromossa per TUTTA quella stagione. Il modello impara da
+    solo lo sconto di rating da applicare (pattern sistematico, non hardcoded).
+
+    Se si passa `current_season_teams` (insieme delle squadre della stagione
+    CORRENTE di inferenza, es. 26/27), qualsiasi squadra NON presente in quell'
+    insieme viene forzata a neopromossa=1. Questo copre il caso in cui la
+    stagione corrente non e' ancora nel dataset storico (inizio campionato): il
+    Venezia appena promosso non ha Pi-Rating freschi e, senza il flag, verrebbe
+    trattato da squadra Serie A "normale", generando stime sballate.
+    """
+    df = df.copy()
+    seasons = sorted(df['season'].unique())
+    season_teams = {
+        s: set(df.loc[df['season'] == s, 'HomeTeam'])
+        | set(df.loc[df['season'] == s, 'AwayTeam'])
+        for s in seasons
+    }
+    promoted = {}
+    for i, s in enumerate(seasons):
+        prev = season_teams[seasons[i - 1]] if i > 0 else None
+        for t in season_teams[s]:
+            if current_season_teams is not None and (t not in current_season_teams):
+                promoted[(s, t)] = 1  # stagione corrente ma assente dallo storico
+            else:
+                promoted[(s, t)] = 0 if (prev is None or t in prev) else 1
+    df['home_promoted'] = [promoted[(r.season, r.HomeTeam)] for r in df.itertuples()]
+    df['away_promoted'] = [promoted[(r.season, r.AwayTeam)] for r in df.itertuples()]
+    n = int((df['home_promoted'] == 1).sum() + (df['away_promoted'] == 1).sum())
+    print(f"  Flag neopromozione: {n} presenze neopromosse su {len(df)} partite")
+    return df
 
 
 def build_feature_matrix(df, cutoff='2022-08-01'):
     """Costruisce la matrice feature completa e fa il split temporale."""
     df_clean = df[FEATURE_COLS + ['Date', 'FTR']].copy()
-
-    for col in OPTIONAL_COLS:
-        if col in df.columns:
-            df_clean[col] = df[col]
-
     df_clean = df_clean.dropna(subset=FEATURE_COLS + ['FTR'])
 
     df_train = df_clean[df_clean['Date'] < cutoff].copy()
@@ -275,6 +311,12 @@ if __name__ == "__main__":
 
     print("5.4 — Head-to-Head (può richiedere 1-2 min)...")
     df = add_h2h(df, window=5)
+
+    print("5.4b — Flag neopromozione (stagione corrente)...")
+    cur_season = sorted(df['season'].unique())[-1]
+    cur_teams = (set(df.loc[df['season'] == cur_season, 'HomeTeam'])
+                 | set(df.loc[df['season'] == cur_season, 'AwayTeam']))
+    df = add_promotion_flags(df, current_season_teams=cur_teams)
 
     print("5.5 — Shots on Target proxy...")
     df_raw = pd.read_csv(RAW_PATH)

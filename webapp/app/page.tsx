@@ -11,6 +11,7 @@ function formatDate(iso: string): string {
 function MatchCard({ m }: { m: MatchPrediction }) {
   const played = m.ok !== undefined;
   const maxKey = (["H", "D", "A"] as const).reduce((a, b) => (m.prob[a] >= m.prob[b] ? a : b));
+  const hasBm = m.bm && m.bm_prob;
   return (
     <div className="match-card">
       <div className="match-teams">
@@ -42,6 +43,28 @@ function MatchCard({ m }: { m: MatchPrediction }) {
           </div>
         ))}
       </div>
+
+      {hasBm && (
+        <div className="bm-row">
+          <span className="bm-title">Bookmaker</span>
+          <span className="bm-odds">
+            {(["H", "D", "A"] as const).map((k) => (
+              <span key={k} className="bm-cell">
+                <b>{k === "H" ? "1" : k === "D" ? "X" : "2"}</b> {m.bm![k].toFixed(2)}
+                <i className="bm-p">({m.bm_prob![k].toFixed(0)}%)</i>
+              </span>
+            ))}
+          </span>
+        </div>
+      )}
+
+      {!played && m.kelly && (
+        <div className="kelly-hint">
+          💡 Kelly {m.kelly.stake_pct.toFixed(1)}% su{" "}
+          <b>{m.kelly.pick === "H" ? "1" : m.kelly.pick === "D" ? "X" : "2"}</b>{" "}
+          @ {m.kelly.odd.toFixed(2)} (modello {(m.kelly.model_p * 100).toFixed(0)}% vs quota)
+        </div>
+      )}
     </div>
   );
 }
@@ -74,6 +97,10 @@ export default function Home() {
       : roundKeys[0];
   const current = roundOverride ?? defaultRound;
   const matches = current && data?.giornate[String(current)] ? data.giornate[String(current)] : [];
+
+  const meta = data?.meta;
+  const hasBmData = meta?.bookmaker_rps !== undefined && meta?.model_rps !== undefined;
+  const kelly = meta?.kelly;
 
   if (error)
     return (
@@ -115,6 +142,57 @@ export default function Home() {
             <div className="stat-label">
               Predizioni corrette ({((data.stats.corrette / data.stats.total) * 100).toFixed(0)}%)
             </div>
+          </div>
+        </div>
+      )}
+
+      {hasBmData && (
+        <div className="compare-bar">
+          <div className="compare-title">Confronto Bookmaker (RPS ↓)</div>
+          <div className="compare-grid">
+            <div className="compare-cell">
+              <span className="compare-name">CatBoost</span>
+              <span className="compare-val">{meta!.model_rps!.toFixed(4)}</span>
+            </div>
+            <div className="compare-cell">
+              <span className="compare-name">Bet365</span>
+              <span className="compare-val">{meta!.bookmaker_rps!.toFixed(4)}</span>
+            </div>
+            <div className="compare-cell">
+              <span className="compare-name">Esito</span>
+              <span className={`compare-val ${meta!.beats_bookmaker_rps ? "good" : "bad"}`}>
+                {meta!.beats_bookmaker_rps ? "✅ battiamo" : "⚠️ sotto"}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {kelly && (
+        <div className="kelly-bar">
+          <div className="kelly-title">
+            💰 Kelly Simulation {kelly.fraction * 100}% · bankroll €1000 (test set)
+          </div>
+          <div className="kelly-grid">
+            <div className="kelly-cell">
+              <span className="kelly-num">€{kelly.bankroll_finale.toFixed(0)}</span>
+              <span className="kelly-lab">Bankroll finale</span>
+            </div>
+            <div className="kelly-cell">
+              <span className={`kelly-num ${kelly.roi_pct >= 0 ? "good" : "bad"}`}>
+                {kelly.roi_pct >= 0 ? "+" : ""}
+                {kelly.roi_pct.toFixed(1)}%
+              </span>
+              <span className="kelly-lab">ROI</span>
+            </div>
+            <div className="kelly-cell">
+              <span className="kelly-num">{kelly.scommesse}</span>
+              <span className="kelly-lab">Scommesse</span>
+            </div>
+          </div>
+          <div className="kelly-note">
+            Simulazione retrospettiva su partite giocate con edge (pₘ &gt; p_bookmaker).
+            Non è un consiglio di scommessa.
           </div>
         </div>
       )}

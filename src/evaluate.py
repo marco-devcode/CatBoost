@@ -2,6 +2,7 @@
 """
 Final Evaluation — CatBoost Serie A
 Confronta i modelli, seleziona il migliore e genera il report.
+Inclusa: Kelly betting simulation (FASE6 §6) su test set.
 """
 import sys
 import json
@@ -45,6 +46,8 @@ def odds_to_prob(bh, bd, ba):
         return [p/total for p in raw]
     except Exception:
         return [0.45, 0.25, 0.30]
+
+KELLY_FRACTION = 0.25  # Kelly ridotto al 25% per gestione del rischio
 
 print("╔" + "═"*58 + "╗")
 print("║  VALUTAZIONE FINALE — CatBoost Serie A                     ║")
@@ -142,6 +145,10 @@ for key, r in results.items():
 
 # ── Metriche bookmaker (opzionale) ──────────────────────────────────────
 rps_bm, acc_bm = None, None
+bm_probs_list = []
+valid_idx = []
+y_best = best['y_test']
+probs_best = best['probs']
 if b365_present and df_test_b365 is not None:
     y_best = best['y_test']
     probs_best = best['probs']
@@ -170,6 +177,82 @@ if b365_present and df_test_b365 is not None:
         print(f"  {best['desc']:<30} {best['rps']:>8.4f}  {best['accuracy']:>9.2%}")
         print(f"  {'Bookmaker Bet365':<30} {rps_bm:>8.4f}  {acc_bm:>9.2%}")
         print(f"\n  Delta RPS  : {rps_bm - best['rps']:+.4f}  ({'✅ modello vince' if best['rps'] < rps_bm else '⚠️ BM vince'})")
+
+# ── Kelly betting simulation (FASE6 §6) ────────────────────────────────
+# Per ogni partita del test set in cui il modello stima p_model > p_bookmaker
+# (edge positivo), punta con Kelly ridotto al 25% sulla giocata con edge migliore.
+# Simulazione retrospettiva su test set (didattica, ottimistica per il futuro).
+kelly_metrics = None
+if b365_present and df_test_b365 is not None and len(bm_probs_list) > 0:
+    probs_best = best['probs']
+    bankroll = 1000.0
+    history_bank = [1000.0]
+    n_bets = 0
+    stakes_total = 0.0
+    bm_probs_valid = np.array(bm_probs_list)
+    y_valid = y_best.values[valid_idx]
+    for i, vi in enumerate(valid_idx):
+        row = df_test_b365.iloc[vi]
+        try:
+            odds = np.array([float(row['B365H']), float(row['B365D']), float(row['B365A'])])
+        except (TypeError, ValueError):
+            continue
+        if np.any(odds <= 1.0):
+            continue
+        pm = probs_best[vi]
+        pb = bm_probs_valid[i]
+        best_k = -1.0
+        best_pick = None
+        for c in range(3):
+            if pm[c] > pb[c]:
+                b = odds[c] - 1.0
+                q = 1.0 - pm[c]
+                k = (b * pm[c] - q) / b
+                k = max(0.0, k * KELLY_FRACTION)
+                if k > best_k:
+                    best_k = k
+                    best_pick = c
+        if best_pick is not None:
+            stake = bankroll * best_k
+            stakes_total += stake
+            outcome = y_valid[vi]
+            win = (outcome == best_pick)
+            bankroll += stake * (odds[best_pick] - 1.0) if win else -stake
+            n_bets += 1
+            history_bank.append(bankroll)
+
+    profit = bankroll - 1000.0
+    roi = (profit / 1000.0) * 100.0
+    kelly_metrics = {
+        "bankroll_iniziale": 1000.0,
+        "bankroll_finale": round(float(bankroll), 2),
+        "profitto": round(float(profit), 2),
+        "roi_pct": round(float(roi), 2),
+        "scommesse": n_bets,
+        "stake_totale_pct": round(float(stakes_total / 1000.0) * 100, 1),
+        "fraction": KELLY_FRACTION,
+    }
+    print(f"\n{'═'*55}")
+    print(f"  KELLY SIMULATION (fraction={KELLY_FRACTION}, bankroll €1000)")
+    print(f"{'═'*55}")
+    print(f"  Scommesse          : {n_bets}")
+    print(f"  Bankroll finale    : €{bankroll:.2f}")
+    print(f"  Profitto / ROI     : €{profit:.2f} ({roi:+.1f}%)")
+    try:
+        fig, ax = plt.subplots(figsize=(8, 4))
+        ax.plot(range(len(history_bank)), history_bank, color='#22c55e', lw=2)
+        ax.axhline(1000.0, color='#9aa3af', ls='--', lw=1, label='Bankroll iniziale')
+        ax.set_title(f'Kelly Simulation (25%) — Bankroll €1000 → €{bankroll:.0f}')
+        ax.set_xlabel('Scommesse piazzate')
+        ax.set_ylabel('Bankroll (€)')
+        ax.legend()
+        ax.grid(alpha=0.2)
+        plt.tight_layout()
+        plt.savefig(RESULTS_DIR / 'kelly_simulation.png', dpi=150, bbox_inches='tight')
+        plt.close()
+        print("  Salvato: models/kelly_simulation.png")
+    except Exception as e:
+        print(f"  [warn] grafico Kelly non salvato: {e}")
 
 # ── Classification Report ───────────────────────────────────────────────
 print(f"\n{'═'*55}")
@@ -242,6 +325,8 @@ if rps_bm is not None:
     final_metrics["rps_bookmaker"] = round(float(rps_bm), 4)
     final_metrics["accuracy_bookmaker"] = round(float(acc_bm), 4)
     final_metrics["beats_bookmaker_rps"] = bool(best['rps'] < rps_bm)
+if kelly_metrics is not None:
+    final_metrics["kelly"] = kelly_metrics
 
 with open(RESULTS_DIR / 'final_report.json', 'w') as f:
     json.dump(final_metrics, f, indent=2, ensure_ascii=False)
@@ -279,6 +364,7 @@ report_md += f"""
 | **Recall Away Win** | {away_recall:.2%} | |
 
 """
+
 if rps_bm is not None:
     report_md += f"""---
 
@@ -292,9 +378,30 @@ if rps_bm is not None:
 
 """
 
+if kelly_metrics is not None:
+    report_md += f"""---
+
+## 4. Kelly Betting Simulation (didattica, test set)
+
+> ⚠️ Simulazione retrospettiva su dati storici: i risultati reali futuri saranno
+> quasi sempre più conservativi. Kelly ridotto al {int(KELLY_FRACTION*100)}%.
+
+| Metrica | Valore |
+|---------|--------|
+| Scommesse piazzate | {kelly_metrics['scommesse']} |
+| Bankroll iniziale | €{kelly_metrics['bankroll_iniziale']:.0f} |
+| Bankroll finale | €{kelly_metrics['bankroll_finale']:.2f} |
+| Profitto | €{kelly_metrics['profitto']:+.2f} |
+| ROI | {kelly_metrics['roi_pct']:+.1f}% |
+| Stake totale | {kelly_metrics['stake_totale_pct']}% del bankroll |
+
+![Kelly Simulation](kelly_simulation.png)
+
+"""
+
 report_md += f"""---
 
-## 4. Classification Report
+## 5. Classification Report
 
 ```
 {cr}
@@ -302,7 +409,7 @@ report_md += f"""---
 
 ---
 
-## 5. Confusion Matrix
+## 6. Confusion Matrix
 
 ![Confusion Matrix](confusion_matrix_final.png)
 

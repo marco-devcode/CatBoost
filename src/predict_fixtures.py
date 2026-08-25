@@ -3,12 +3,24 @@
 Genera webapp/public/predictions.json per la dashboard Serie A 26/27.
 
 Fonti calendario (in ordine di preferenza):
-  1. football-data.co.uk  (CSV stagione I1)
+  1. football-data.co.uk  (CSV stagione I1, include quote B365)
   2. TheSportsDB          (API gratuita, eventi stagione 2026-2027)
 
 Per ogni partita del calendario:
-  - GIA GIOCATA  -> salva risultato reale + se la predizione era corretta (✅/❌)
-  - FUTURA       -> calcola le feature (forma, Pi-Rating, H2H, riposo) e le % H/D/A
+  - GIA GIOCATA  -> mantiene le stime H/D/A ORIGINALI (freeze): non vengono
+                    ricalcolate quando escono i nuovi risultati. Si aggiornano
+                    solo risultato reale + esito (ok/❌).
+  - FUTURA       -> calcola le feature (forma, Pi-Rating, H2H, riposo,
+                    flag neopromossa) e le % H/D/A.
+
+In piu' (per la dashboard):
+  - Confronto BOOKMAKER: quote B365 normalizzate in probabilita', e RPS del
+    modello vs RPS del bookmaker sulle partite gia' giocate.
+  - Kelly simulation: frazione di Kelly (25%) sulle giocate in cui il modello
+    batte il bookmaker, con bankroll simulato e ROI.
+
+Le stime delle partite passate restano STABILI nel tempo: lo storico cresce ma
+non "sgonfia" le probabilita' gia' pubblicate.
 """
 import sys
 import io
@@ -42,6 +54,7 @@ SEASON_FD = "2627"        # formato football-data
 SEASON_TSDB = "2026-2027" # formato TheSportsDB
 
 MODEL_PATH = MODELS_DIR / "catboost_seriea_v1.cbm"
+KELLY_FRACTION = 0.25      # Kelly ridotto al 25% per gestione del rischio
 
 # Nomi squadre TheSportsDB -> nomi storico football-data
 ALIASES = {
@@ -110,20 +123,32 @@ def _http_get(url: str, retries: int = 3) -> bytes | None:
 
 
 def fetch_football_data(season: str):
-    """CSV football-data. None se non ancora disponibile."""
+    """CSV football-data. None se non ancora disponibile.
+
+    Estrae anche le quote B365 (H/D/A) se presenti nel CSV.
+    """
     raw = _http_get(FIXTURES_URL.format(season=season))
     if raw is None:
         return None
     try:
         df = pd.read_csv(io.BytesIO(raw), on_bad_lines='skip', encoding='latin-1')
-        return df if 'HomeTeam' in df.columns else None
+        if 'HomeTeam' not in df.columns:
+            return None
+        # Normalizza i nomi squadra (football-data usa gia' i nomi canonici,
+        # ma per sicurezza applichiamo norm_team)
+        df['HomeTeam'] = df['HomeTeam'].map(norm_team)
+        df['AwayTeam'] = df['AwayTeam'].map(norm_team)
+        return df
     except Exception as e:
         print(f"  football-data parse error: {e}")
         return None
 
 
 def _parse_events(events: list) -> list:
-    """Converte eventi TheSportsDB in righe football-data-like."""
+    """Converte eventi TheSportsDB in righe football-data-like.
+
+    TheSportsDB NON espone le quote B365, quindi bm resta None.
+    """
     rows = []
     for ev in events:
         home = norm_team(ev.get("strHomeTeam", ""))
@@ -144,6 +169,7 @@ def _parse_events(events: list) -> list:
             "Date": pd.to_datetime(date),
             "HomeTeam": home, "AwayTeam": away,
             "FTHG": fthg, "FTAG": ftag, "FTR": ftr,
+            "B365H": np.nan, "B365D": np.nan, "B365A": np.nan,
             "giornata": int(rnd) if rnd else np.nan,
         })
     return rows
@@ -207,6 +233,46 @@ def assign_giornate(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def _match_key(home: str, away: str, date: str) -> str:
+    return f"{date}|{home}|{away}"
+
+
+def bookmaker_prob(home_odd, draw_odd, away_odd):
+    """Normalizza le quote B365 rimuovendo l'overround -> probabilita' 1X2."""
+    try:
+        h, d, a = float(home_odd), float(draw_odd), float(away_odd)
+        if h <= 1.0 or d <= 1.0 or a <= 1.0:
+            return None
+        raw = [1.0 / h, 1.0 / d, 1.0 / a]
+        tot = sum(raw)
+        if tot <= 0:
+            return None
+        return [x / tot for x in raw]  # [pH, pD, pA]
+    except (TypeError, ValueError):
+        return None
+
+
+def kelly_fraction(p_model, odds, fraction=KELLY_FRACTION):
+    """Kelly ridotto: frazione di bankroll da puntare. <=0 se non conviene."""
+    b = odds - 1.0
+    q = 1.0 - p_model
+    if b <= 0:
+        return 0.0
+    k = (b * p_model - q) / b
+    return max(0.0, k * fraction)
+
+
+def ranked_probability_score(y_true, y_proba):
+    """RPS: piu' basso e' meglio. y_true: 0/1/2, y_proba: lista [pH,pD,pA]."""
+    n = len(y_proba[0]) if hasattr(y_proba, '__len__') else 3
+    rps = 0.0
+    for true, prob in zip(y_true, y_proba):
+        cum_true = np.cumsum(np.eye(n)[true])
+        cum_pred = np.cumsum(prob)
+        rps += np.mean((cum_pred - cum_true) ** 2)
+    return rps / max(len(y_true), 1)
+
+
 def main():
     print("=" * 55)
     print(f"PREDIZIONI FIXTURE Serie A {SEASON_FD[:2]}/{SEASON_FD[2:]}")
@@ -218,7 +284,8 @@ def main():
     model.load_model(str(MODEL_PATH))
 
     sys.path.insert(0, str(ROOT / 'src'))
-    from predict import load_history, compute_features_for_match, FEATURE_ORDER
+    from predict import (load_history, compute_features_for_match, FEATURE_ORDER,
+                         is_promoted)
 
     history = load_history()
     print(f"Storico: {len(history)} partite")
@@ -257,25 +324,142 @@ def main():
     fx['giornata'] = fx['giornata'].astype(int)
     print(f"Fixture: {len(fx)} partite, {fx['giornata'].max()} giornate")
 
-    # ── Predizioni ─────────────────────────────────────────────────────
+    # Squadre della Serie A corrente: derivate dal calendario stesso (fonte
+    # autorevole), NON hardcodate. Serve per il flag neopromossa: chi e' in
+    # questa lista ma ASSENTE dall'ultima stagione storica completa -> promosso.
+    current_season_teams = set(fx['HomeTeam']) | set(fx['AwayTeam'])
+    print(f"Squadre stagione corrente ({len(current_season_teams)}): "
+          f"{sorted(current_season_teams)}")
+
+    # ── Freeze stime passate ──────────────────────────────────────────
+    # Carica le stime gia' pubblicate: le partite GIA' GIOCATE mantengono
+    # le loro prob/pred originali e NON vengono ricalcolate.
+    prev_estimates = {}
+    if OUT_JSON.exists():
+        try:
+            with open(OUT_JSON) as f:
+                old = json.load(f)
+            for g, ms in old.get("giornate", {}).items():
+                for m in ms:
+                    if m.get("ok") is not None:  # gia' giocata nella vecchia run
+                        prev_estimates[_match_key(m["home"], m["away"], m["date"])] = m
+            print(f"  Freeze: {len(prev_estimates)} stime di partite gia' giocate riutilizzate")
+        except Exception as e:
+            print(f"  [warn] predictions.json precedente illeggibile: {e}")
+
+    # ── Predizioni + bookmaker + kelly ────────────────────────────────
     LABELS = ['H', 'D', 'A']
+    h2h_cache = {}
     giornate: dict[str, list] = {}
+    bm_rows = []   # (y_true, bm_prob) per RPS bookmaker sulle giocate
+    model_rows = []  # (y_true, model_prob) per RPS modello sulle giocate
+    kelly_log = []  # simulate scommesse sulle giocate con value
+
     for _, row in fx.iterrows():
         g = str(row['giornata'])
         m = {"home": row['HomeTeam'], "away": row['AwayTeam'],
              "date": row['Date'].strftime("%Y-%m-%d")}
-        feats = compute_features_for_match(history, m["home"], m["away"], row['Date'])
-        X = pd.DataFrame([{c: feats.get(c, 0.0) for c in FEATURE_ORDER}])
-        probs = model.predict_proba(X)[0]
-        m["prob"] = {LABELS[i]: round(float(probs[i]) * 100, 1) for i in range(3)}
-        m["pred"] = LABELS[int(np.argmax(probs))]
-
         ftr = row.get('FTR')
-        if isinstance(ftr, str) and ftr.strip().upper() in ('H', 'D', 'A'):
+        played = isinstance(ftr, str) and ftr.strip().upper() in ('H', 'D', 'A')
+
+        # Quote bookmaker (solo football-data le porta)
+        bm_prob = bookmaker_prob(row.get('B365H'), row.get('B365D'), row.get('B365A'))
+        bm_odds = None
+        if bm_prob is not None:
+            try:
+                bm_odds = [float(row['B365H']), float(row['B365D']), float(row['B365A'])]
+            except (TypeError, ValueError):
+                bm_odds = None
+
+        # Partita gia' giocata (con risultato reale): riusa le stime passate
+        if played:
+            k = _match_key(m["home"], m["away"], m["date"])
+            if k in prev_estimates:
+                old = prev_estimates[k]
+                m["prob"] = old.get("prob")
+                m["pred"] = old.get("pred")
+            else:
+                # Prima volta che vediamo il risultato: calcola comunque (raro)
+                feats = compute_features_for_match(history, m["home"], m["away"], row['Date'], h2h_cache, current_season_teams)
+                X = pd.DataFrame([{c: feats.get(c, 0.0) for c in FEATURE_ORDER}])
+                probs = model.predict_proba(X)[0]
+                m["prob"] = {LABELS[i]: round(float(probs[i]) * 100, 1) for i in range(3)}
+                m["pred"] = LABELS[int(np.argmax(probs))]
+
             ftr = ftr.strip().upper()
             m["risultato"] = f"{int(row['FTHG'])}-{int(row['FTAG'])}"
             m["esito"] = ftr
             m["ok"] = bool(m["pred"] == ftr)
+
+            # Confronto bookmaker / Kelly solo sulle giocate (serve risultato)
+            if bm_odds is not None:
+                assert bm_prob is not None
+                m["bm"] = {"H": round(bm_odds[0], 2), "D": round(bm_odds[1], 2),
+                           "A": round(bm_odds[2], 2)}
+                m["bm_prob"] = {LABELS[i]: round(bm_prob[i] * 100, 1) for i in range(3)}
+                y_idx = {'H': 0, 'D': 1, 'A': 2}[ftr]
+                bm_rows.append((y_idx, bm_prob))
+                model_rows.append((y_idx, [m["prob"][l] / 100 for l in LABELS]))
+            else:
+                m["bm"] = None
+                m["bm_prob"] = None
+
+            # Kelly retrospettivo: tra le 3 giocate, punta su quella con edge
+            # positivo (p_model > p_bookmaker) usando la quota reale.
+            if bm_odds is not None:
+                best_k = -1
+                best_info = None
+                for i, lab in enumerate(LABELS):
+                    pk = m["prob"][lab] / 100.0
+                    pb = bm_prob[i]
+                    if pk > pb:  # il modello stima piu' probabile del bookmaker
+                        kf = kelly_fraction(pk, bm_odds[i])
+                        if kf > 0 and kf > best_k:
+                            best_k = kf
+                            best_info = (lab, pk, bm_odds[i], kf)
+                if best_info is not None:
+                    lab, pk, odd, kf = best_info
+                    win = (ftr == lab)
+                    kelly_log.append({
+                        "home": m["home"], "away": m["away"], "date": m["date"],
+                        "pick": lab, "model_p": round(pk, 3), "odd": round(odd, 2),
+                        "kelly": round(kf, 4), "win": win,
+                    })
+        else:
+            # Partita futura: sempre ricalcolata con le feature aggiornate
+            feats = compute_features_for_match(history, m["home"], m["away"], row['Date'], h2h_cache, current_season_teams)
+            X = pd.DataFrame([{c: feats.get(c, 0.0) for c in FEATURE_ORDER}])
+            probs = model.predict_proba(X)[0]
+            m["prob"] = {LABELS[i]: round(float(probs[i]) * 100, 1) for i in range(3)}
+            m["pred"] = LABELS[int(np.argmax(probs))]
+
+            if bm_odds is not None:
+                assert bm_prob is not None
+                m["bm"] = {"H": round(bm_odds[0], 2), "D": round(bm_odds[1], 2),
+                           "A": round(bm_odds[2], 2)}
+                m["bm_prob"] = {LABELS[i]: round(bm_prob[i] * 100, 1) for i in range(3)}
+                # Suggerimento Kelly sulle future: giocata con edge migliore
+                best_k = -1
+                best_info = None
+                for i, lab in enumerate(LABELS):
+                    pk = m["prob"][lab] / 100.0
+                    pb = bm_prob[i]
+                    if pk > pb:
+                        kf = kelly_fraction(pk, bm_odds[i])
+                        if kf > 0 and kf > best_k:
+                            best_k = kf
+                            best_info = (lab, pk, bm_odds[i], kf)
+                if best_info is not None:
+                    lab, pk, odd, kf = best_info
+                    m["kelly"] = {"pick": lab, "model_p": round(pk, 3),
+                                  "odd": round(odd, 2), "stake_pct": round(kf * 100, 2)}
+                else:
+                    m["kelly"] = None
+            else:
+                m["bm"] = None
+                m["bm_prob"] = None
+                m["kelly"] = None
+
         giornate.setdefault(g, []).append(m)
 
     tutte = [m for ms in giornate.values() for m in ms]
@@ -286,6 +470,42 @@ def main():
     prossima_gg = min((int(g) for g, ms in giornate.items()
                        if any(m.get("ok") is None for m in ms)), default=ultima_gg + 1)
 
+    # ── Confronto bookmaker (RPS) + Kelly simulation ─────────────────
+    meta_extra = {}
+    if bm_rows:
+        y_bm = [r[0] for r in bm_rows]
+        p_bm = [r[1] for r in bm_rows]
+        y_md = [r[0] for r in model_rows]
+        p_md = [r[1] for r in model_rows]
+        rps_bm = ranked_probability_score(y_bm, p_bm)
+        rps_md = ranked_probability_score(y_md, p_md)
+        meta_extra["bookmaker_rps"] = round(float(rps_bm), 4)
+        meta_extra["model_rps"] = round(float(rps_md), 4)
+        meta_extra["beats_bookmaker_rps"] = bool(rps_md < rps_bm)
+        print(f"  RPS modello={rps_md:.4f} | RPS bookmaker={rps_bm:.4f} "
+              f"| modello batte bookmaker: {rps_md < rps_bm}")
+
+    if kelly_log:
+        bankroll = 1000.0
+        stakes_total = 0.0
+        for bet in kelly_log:
+            stake = bankroll * bet["kelly"]
+            stakes_total += stake
+            bankroll += stake * (bet["odd"] - 1) if bet["win"] else -stake
+        profit = bankroll - 1000.0
+        roi = (profit / 1000.0) * 100.0
+        meta_extra["kelly"] = {
+            "bankroll_iniziale": 1000.0,
+            "bankroll_finale": round(float(bankroll), 2),
+            "profitto": round(float(profit), 2),
+            "roi_pct": round(float(roi), 2),
+            "scommesse": len(kelly_log),
+            "stake_totale_pct": round(float(stakes_total / 1000.0) * 100, 1),
+            "fraction": KELLY_FRACTION,
+        }
+        print(f"  Kelly (fraction={KELLY_FRACTION}): {len(kelly_log)} scommesse, "
+              f"bankroll finale €{bankroll:.2f} (ROI {roi:.1f}%)")
+
     out = {
         "meta": {
             "last_update": pd.Timestamp.now().isoformat(timespec="seconds"),
@@ -293,6 +513,7 @@ def main():
             "fonte": source,
             "ultima_giornata_giocata": ultima_gg,
             "prossima_giornata": prossima_gg,
+            **meta_extra,
         },
         "stats": {"corrette": corrette, "total": len(giocate)},
         "giornate": dict(sorted(giornate.items(), key=lambda kv: int(kv[0]))),

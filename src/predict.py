@@ -2,12 +2,18 @@
 """
 Predizione di un singolo match Serie A usando il modello CatBoost allenato.
 
-Calcola le feature (forma recente, Pi-Rating correnti, H2H, rest days)
-dallo storico disponibile, poi restituisce le probabilita' H/D/A.
+Calcola le feature (forma recente, Pi-Rating correnti, H2H, rest days,
+flag neopromossa) dallo storico disponibile, poi restituisce le probabilita'
+H/D/A.
 
 Uso:
     python src/predict.py "Juventus" "Inter"
     python src/predict.py "Milan" "Napoli" --date 2026-09-20
+
+Il flag neopromossa e' calcolato cosi': una squadra e' "neopromossa" nella
+stagione corrente se e' presente nelle squadre della stagione corrente ma
+ASSENTE dall'ULTIMA stagione COMPLETA nello storico. Il modello impara da solo
+lo sconto di rating da applicare (pattern sistematico, non hardcoded).
 """
 import sys
 import argparse
@@ -31,7 +37,45 @@ def load_history():
     return ratings
 
 
-def compute_features_for_match(df, home, away, match_date, h2h_cache=None):
+def _last_complete_season_teams(history):
+    """Insieme delle squadre nell'ULTIMA stagione presente nello storico."""
+    if len(history) == 0:
+        return set()
+    last_season = sorted(history['season'].unique())[-1]
+    sub = history[history['season'] == last_season]
+    return (set(sub['HomeTeam']) | set(sub['AwayTeam']))
+
+
+def is_promoted(history, team, match_date, current_season_teams=None):
+    """True se `team` e' neopromossa rispetto alla stagione di match_date.
+
+    Senza `current_season_teams`: logica storica pura (assente nella stagione
+    immediatamente precedente a match_date).
+    Con `current_season_teams` (insieme delle squadre della Serie A corrente,
+    es. derivato dal calendario): neopromossa = presente in current ma ASSENTE
+    dall'ultima stagione COMPLETA nello storico. Questo gestisce correttamente
+    il caso inizio 26/27, dove lo storico si ferma al 25/26 e il Venezia appena
+    promosso non ha Pi-Rating freschi.
+    """
+    last_teams = _last_complete_season_teams(history)
+    if current_season_teams is not None:
+        if team not in current_season_teams:
+            return 0  # non e' in Serie A quest'anno -> non marcare
+        return 0 if team in last_teams else 1
+    # fallback: logica stagione-precedente
+    if match_date is None:
+        return 0
+    prev_year = match_date.year - 1
+    prev_season = int(f"{prev_year % 100:02d}{(prev_year + 1) % 100:02d}") \
+        if match_date.month < 7 else \
+        int(f"{(match_date.year - 1) % 100:02d}{match_date.year % 100:02d}")
+    past = history[history['season'] == prev_season]
+    seen = len(past[(past['HomeTeam'] == team) | (past['AwayTeam'] == team)]) > 0
+    return 0 if seen else 1
+
+
+def compute_features_for_match(df, home, away, match_date, h2h_cache=None,
+                               current_season_teams=None):
     """Calcola le feature di un match usando SOLO dati precedenti a match_date."""
     past = df[df['Date'] < match_date].copy() if match_date else df.copy()
 
@@ -92,7 +136,7 @@ def compute_features_for_match(df, home, away, match_date, h2h_cache=None):
     feats['rest_advantage'] = feats['home_rest_days'] - feats['away_rest_days']
 
     # Rolling goals (replica di features.add_rolling_goals): media gol fatti/subiti
-    # negli ultimi 5 match CASA per la di casa, TRASFERta per l'ospite.
+    # negli ultimi 5 match CASA per la di casa, TRASFERTA per l'ospite.
     # Il match futuro non e' nel 'past', quindi tail(5).mean() equivale allo shift(1).
     def rolling_goals(team, is_home):
         if is_home:
@@ -129,6 +173,12 @@ def compute_features_for_match(df, home, away, match_date, h2h_cache=None):
         if h2h_cache is not None:
             h2h_cache[key] = feats['h2h_home_winrate']
 
+    # Flag neopromossa: il modello impara lo sconto da solo. Squadre appena
+    # promosse (presenti nella stagione corrente ma assenti dall'ultima stagione
+    # storica completa, es. Venezia 26/27) -> 1.
+    feats['home_promoted'] = is_promoted(df, home, match_date, current_season_teams)
+    feats['away_promoted'] = is_promoted(df, away, match_date, current_season_teams)
+
     return feats
 
 
@@ -140,10 +190,12 @@ FEATURE_ORDER = [
     'h2h_home_winrate',
     'home_goals_scored_5', 'home_goals_conceded_5',
     'away_goals_scored_5', 'away_goals_conceded_5',
+    'home_promoted', 'away_promoted',
 ]
 
 
-def predict_match(home, away, match_date=None, model_path=None):
+def predict_match(home, away, match_date=None, model_path=None,
+                  current_season_teams=None):
     if model_path is None:
         model_path = MODELS_DIR / "catboost_seriea_v1.cbm"
     if not model_path.exists():
@@ -156,7 +208,8 @@ def predict_match(home, away, match_date=None, model_path=None):
     if match_date:
         match_date = pd.Timestamp(match_date)
 
-    feats = compute_features_for_match(df, home, away, match_date)
+    feats = compute_features_for_match(df, home, away, match_date,
+                                        current_season_teams=current_season_teams)
 
     feature_order = FEATURE_ORDER
     X = pd.DataFrame([{c: feats.get(c, 0.0) for c in feature_order}])

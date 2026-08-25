@@ -106,6 +106,12 @@ function MatchCard({ m }: { m: MatchPrediction }) {
           </span>
         </div>
       )}
+      {!hasBm && (
+        <div className="bm-row bm-none">
+          <span className="bm-title">Bookmaker</span>
+          <span className="bm-na">Non disponibile (calendario futuro)</span>
+        </div>
+      )}
 
       {!played && m.kelly && (
         <div className="kelly-hint">

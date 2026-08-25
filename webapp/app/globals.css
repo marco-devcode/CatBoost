@@ -292,6 +292,12 @@ body {
   font-size: 0.68rem;
 }
 
+.bm-none .bm-na {
+  font-size: 0.7rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
 .kelly-hint {
   margin-top: 8px;
   font-size: 0.72rem;

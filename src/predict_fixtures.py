@@ -294,11 +294,26 @@ def main():
     history = load_history()
     print(f"Storico: {len(history)} partite")
 
-    # ── Calendario: football-data prima, TheSportsDB fallback ─────────
+    # ── Calendario ────────────────────────────────────────────────────
+    # 1) football-data.co.uk: porta le giornate DISPONIBILI + quote B365.
+    #    All'inizio della stagione ha SOLO le prime giornate giocate.
+    # 2) TheSportsDB: ha l'INTERO calendario 26/27 (tutte le 38 giornate,
+    #    con date), ma SENZA quote. Lo usiamo per integrare le giornate
+    #    future non ancora presenti su football-data, cosi' la dashboard
+    #    mostra le prediction di CatBoost sulle prossime giornate.
     fx, source = None, None
     fd = fetch_football_data(SEASON_FD)
     if fd is not None and len(fd):
         fx, source = fd, "football-data.co.uk"
+        # Integra le giornate future mancanti da TheSportsDB
+        print("  Integrazione giornate future da TheSportsDB...")
+        tsdb = fetch_thesportsdb(SEASON_TSDB)
+        if tsdb is not None:
+            fd_keys = set(zip(fd['Date'].astype(str), fd['HomeTeam'], fd['AwayTeam']))
+            add = tsdb[~tsdb.apply(lambda r: (r['Date'].astype(str), r['HomeTeam'], r['AwayTeam']) in fd_keys, axis=1)]
+            if len(add):
+                fx = pd.concat([fd, add], ignore_index=True)
+                print(f"    +{len(add)} partite future aggiunte (senza quote B365)")
     else:
         print("  football-data non disponibile -> fallback TheSportsDB")
         tsdb = fetch_thesportsdb(SEASON_TSDB)

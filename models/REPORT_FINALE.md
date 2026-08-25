@@ -1,6 +1,6 @@
 # 🏆 Report Finale — CatBoost Serie A Match Prediction
 
-**Data**: 2026-08-25 19:11
+**Data**: 2026-08-25 21:01
 **Modello migliore**: Baseline (Pi-Rating + FE) (`v1_baseline`)
 
 ---

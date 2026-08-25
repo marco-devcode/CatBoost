@@ -1,30 +1,30 @@
 {
   "best_model": "v1_baseline",
   "best_model_desc": "Baseline (Pi-Rating + FE)",
-  "accuracy": 0.5119,
-  "rps_model": 0.1333,
-  "f1_macro": 0.45,
-  "f1_weighted": 0.4761,
+  "accuracy": 0.525,
+  "rps_model": 0.1324,
+  "f1_macro": 0.4623,
+  "f1_weighted": 0.4883,
   "f1_per_class": {
-    "H": 0.6207,
-    "D": 0.19,
-    "A": 0.5393
+    "H": 0.6302,
+    "D": 0.2085,
+    "A": 0.5482
   },
   "precision_per_class": {
-    "H": 0.5353,
-    "D": 0.3395,
-    "A": 0.528
+    "H": 0.5411,
+    "D": 0.3986,
+    "A": 0.5342
   },
-  "recall_home": 0.7386,
-  "recall_draw": 0.1319,
-  "recall_away": 0.5511,
+  "recall_home": 0.7544,
+  "recall_draw": 0.1411,
+  "recall_away": 0.5629,
   "recall_per_class": {
-    "H": 0.7386,
-    "D": 0.1319,
-    "A": 0.5511
+    "H": 0.7544,
+    "D": 0.1411,
+    "A": 0.5629
   },
-  "n_test": 1512,
-  "n_features": 16,
+  "n_test": 1522,
+  "n_features": 18,
   "features": [
     "pi_home_H",
     "pi_away_H",
@@ -41,9 +41,20 @@
     "home_goals_scored_5",
     "home_goals_conceded_5",
     "away_goals_scored_5",
-    "away_goals_conceded_5"
+    "away_goals_conceded_5",
+    "home_promoted",
+    "away_promoted"
   ],
-  "rps_bookmaker": 0.1721,
-  "accuracy_bookmaker": 0.3664,
-  "beats_bookmaker_rps": true
+  "rps_bookmaker": 0.1722,
+  "accuracy_bookmaker": 0.3673,
+  "beats_bookmaker_rps": true,
+  "kelly": {
+    "bankroll_iniziale": 1000.0,
+    "bankroll_finale": 2.8714624699356773e+52,
+    "profitto": 2.8714624699356773e+52,
+    "roi_pct": 2.8714624699356772e+51,
+    "scommesse": 1522,
+    "stake_totale_pct": 2.321039593878632e+51,
+    "fraction": 0.25
+  }
 }

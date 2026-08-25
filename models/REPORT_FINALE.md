@@ -1,6 +1,6 @@
 # 🏆 Report Finale — CatBoost Serie A Match Prediction
 
-**Data**: 2026-08-24 06:55
+**Data**: 2026-08-25 16:24
 **Modello migliore**: Baseline (Pi-Rating + FE) (`v1_baseline`)
 
 ---
@@ -9,7 +9,7 @@
 
 | Modello | Feature | RPS ↓ | Accuracy |
 |---------|---------|-------|----------|
-| Baseline (Pi-Rating + FE) | 16 | 0.1333 | 51.19% ◄ **BEST**|
+| Baseline (Pi-Rating + FE) | 18 | 0.1324 | 52.50% ◄ **BEST**|
 
 ---
 
@@ -17,11 +17,11 @@
 
 | Metrica | Valore | Note |
 |---------|--------|------|
-| **Accuracy** | 0.5119 | Target > 0.52 |
-| **RPS** | 0.1333 | Più basso = meglio |
-| **Recall Home Win** | 73.86% | |
-| **Recall Draw** | 13.19% | Classe più difficile |
-| **Recall Away Win** | 55.11% | |
+| **Accuracy** | 0.5250 | Target > 0.52 |
+| **RPS** | 0.1324 | Più basso = meglio |
+| **Recall Home Win** | 75.44% | |
+| **Recall Draw** | 14.11% | Classe più difficile |
+| **Recall Away Win** | 56.29% | |
 
 ---
 
@@ -29,30 +29,48 @@
 
 | | RPS ↓ | Accuracy |
 |--|-------|----------|
-| **CatBoost (v1_baseline)** | 0.1333 | 51.19% |
-| **Bet365** | 0.1721 | 36.64% |
-| **Delta** | +0.0388 ✅ | +0.1455 ✅ |
+| **CatBoost (v1_baseline)** | 0.1324 | 52.50% |
+| **Bet365** | 0.1722 | 36.73% |
+| **Delta** | +0.0397 ✅ | +0.1577 ✅ |
 
 ---
 
-## 4. Classification Report
+## 4. Kelly Betting Simulation (didattica, test set)
+
+> ⚠️ Simulazione retrospettiva su dati storici: i risultati reali futuri saranno
+> quasi sempre più conservativi. Kelly ridotto al 25%.
+
+| Metrica | Valore |
+|---------|--------|
+| Scommesse piazzate | 1522 |
+| Bankroll iniziale | €1000 |
+| Bankroll finale | €28714624699356773015292152203708419049229576199733248.00 |
+| Profitto | €+28714624699356773015292152203708419049229576199733248.00 |
+| ROI | +2871462469935677235067815431125048259732604605956096.0% |
+| Stake totale | 2.321039593878632e+51% del bankroll |
+
+![Kelly Simulation](kelly_simulation.png)
+
+---
+
+## 5. Classification Report
 
 ```
               precision    recall  f1-score   support
 
-           H     0.5353    0.7386    0.6207       616
-           D     0.3395    0.1319    0.1900       417
-           A     0.5280    0.5511    0.5393       479
+           H     0.5411    0.7544    0.6302       619
+           D     0.3986    0.1411    0.2085       418
+           A     0.5342    0.5629    0.5482       485
 
-    accuracy                         0.5119      1512
-   macro avg     0.4676    0.4739    0.4500      1512
-weighted avg     0.4790    0.5119    0.4761      1512
+    accuracy                         0.5250      1522
+   macro avg     0.4913    0.4862    0.4623      1522
+weighted avg     0.4998    0.5250    0.4883      1522
 
 ```
 
 ---
 
-## 5. Confusion Matrix
+## 6. Confusion Matrix
 
 ![Confusion Matrix](confusion_matrix_final.png)
 

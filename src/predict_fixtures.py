@@ -417,7 +417,7 @@ def main():
             m["features"] = {c: round(float(feats.get(c, 0.0)), 3) for c in FEATURE_ORDER}
         else:
             # Ricalcola tutto (freeze disattivo per modello cambiato, oppure
-            # prima volta che vediamo il risultato).
+            # prima volta che vediamo il risultato, oppure partita futura).
             feats = compute_features_for_match(history, m["home"], m["away"], row['Date'], h2h_cache, current_season_teams)
             X = pd.DataFrame([{c: feats.get(c, 0.0) for c in FEATURE_ORDER}])
             probs = model.predict_proba(X)[0]
@@ -425,10 +425,11 @@ def main():
             m["pred"] = LABELS[int(np.argmax(probs))]
             m["features"] = {c: round(float(feats.get(c, 0.0)), 3) for c in FEATURE_ORDER}
 
-            ftr = ftr.strip().upper()
-            m["risultato"] = f"{int(row['FTHG'])}-{int(row['FTAG'])}"
-            m["esito"] = ftr
-            m["ok"] = bool(m["pred"] == ftr)
+            if played:
+                ftr = ftr.strip().upper()
+                m["risultato"] = f"{int(row['FTHG'])}-{int(row['FTAG'])}"
+                m["esito"] = ftr
+                m["ok"] = bool(m["pred"] == ftr)
 
             # Confronto bookmaker / Kelly solo sulle giocate (serve risultato)
             if bm_odds is not None:

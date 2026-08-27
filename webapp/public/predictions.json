@@ -1,15 +1,27 @@
 {
   "meta": {
-    "last_update": "2026-08-27T17:24:55",
+    "last_update": "2026-08-27T20:06:40",
     "stagione": "2627",
     "fonte": "football-data.co.uk",
-    "ultima_giornata_giocata": 0,
-    "prossima_giornata": 1,
-    "model_trained_at": "1970-01-01T00:00:01"
+    "ultima_giornata_giocata": 1,
+    "prossima_giornata": 2,
+    "model_trained_at": "1970-01-01T00:00:01",
+    "bookmaker_rps": 0.1151,
+    "model_rps": 0.1244,
+    "beats_bookmaker_rps": false,
+    "kelly": {
+      "bankroll_iniziale": 1000.0,
+      "bankroll_finale": 904.65,
+      "profitto": -95.35,
+      "roi_pct": -9.54,
+      "scommesse": 10,
+      "stake_totale_pct": 54.8,
+      "fraction": 0.25
+    }
   },
   "stats": {
-    "corrette": 0,
-    "total": 0
+    "corrette": 7,
+    "total": 10
   },
   "giornate": {
     "1": [
@@ -42,6 +54,25 @@
           "away_goals_conceded_5": 1.8,
           "home_promoted": 0.0,
           "away_promoted": 0.0
+        },
+        "risultato": "4-1",
+        "esito": "H",
+        "ok": true,
+        "bm": {
+          "H": 1.2,
+          "D": 7.0,
+          "A": 13.0
+        },
+        "bm_prob": {
+          "H": 79.1,
+          "D": 13.6,
+          "A": 7.3
+        },
+        "kelly": {
+          "pick": "A",
+          "model_p": 0.118,
+          "odd": 13.0,
+          "stake_pct": 1.11
         }
       },
       {
@@ -73,6 +104,25 @@
           "away_goals_conceded_5": 0.6,
           "home_promoted": 0.0,
           "away_promoted": 0.0
+        },
+        "risultato": "1-1",
+        "esito": "D",
+        "ok": false,
+        "bm": {
+          "H": 4.5,
+          "D": 3.6,
+          "A": 1.83
+        },
+        "bm_prob": {
+          "H": 21.2,
+          "D": 26.5,
+          "A": 52.2
+        },
+        "kelly": {
+          "pick": "A",
+          "model_p": 0.777,
+          "odd": 1.83,
+          "stake_pct": 12.71
         }
       },
       {
@@ -104,6 +154,25 @@
           "away_goals_conceded_5": 0.4,
           "home_promoted": 0.0,
           "away_promoted": 0.0
+        },
+        "risultato": "0-2",
+        "esito": "A",
+        "ok": true,
+        "bm": {
+          "H": 4.5,
+          "D": 3.4,
+          "A": 1.9
+        },
+        "bm_prob": {
+          "H": 21.3,
+          "D": 28.2,
+          "A": 50.5
+        },
+        "kelly": {
+          "pick": "A",
+          "model_p": 0.771,
+          "odd": 1.9,
+          "stake_pct": 12.91
         }
       },
       {
@@ -135,6 +204,25 @@
           "away_goals_conceded_5": 1.8,
           "home_promoted": 0.0,
           "away_promoted": 0.0
+        },
+        "risultato": "0-1",
+        "esito": "A",
+        "ok": true,
+        "bm": {
+          "H": 2.5,
+          "D": 3.0,
+          "A": 3.1
+        },
+        "bm_prob": {
+          "H": 37.9,
+          "D": 31.6,
+          "A": 30.5
+        },
+        "kelly": {
+          "pick": "A",
+          "model_p": 0.408,
+          "odd": 3.1,
+          "stake_pct": 3.15
         }
       },
       {
@@ -166,6 +254,25 @@
           "away_goals_conceded_5": 0.4,
           "home_promoted": 0.0,
           "away_promoted": 0.0
+        },
+        "risultato": "0-1",
+        "esito": "A",
+        "ok": true,
+        "bm": {
+          "H": 8.0,
+          "D": 4.2,
+          "A": 1.45
+        },
+        "bm_prob": {
+          "H": 11.9,
+          "D": 22.6,
+          "A": 65.5
+        },
+        "kelly": {
+          "pick": "H",
+          "model_p": 0.234,
+          "odd": 8.0,
+          "stake_pct": 3.11
         }
       },
       {
@@ -197,6 +304,25 @@
           "away_goals_conceded_5": 1.2,
           "home_promoted": 0.0,
           "away_promoted": 0.0
+        },
+        "risultato": "0-2",
+        "esito": "A",
+        "ok": false,
+        "bm": {
+          "H": 2.25,
+          "D": 3.1,
+          "A": 3.6
+        },
+        "bm_prob": {
+          "H": 42.5,
+          "D": 30.9,
+          "A": 26.6
+        },
+        "kelly": {
+          "pick": "D",
+          "model_p": 0.504,
+          "odd": 3.1,
+          "stake_pct": 6.7
         }
       },
       {
@@ -228,6 +354,25 @@
           "away_goals_conceded_5": 1.2,
           "home_promoted": 0.0,
           "away_promoted": 0.0
+        },
+        "risultato": "2-1",
+        "esito": "H",
+        "ok": true,
+        "bm": {
+          "H": 1.53,
+          "D": 4.1,
+          "A": 6.5
+        },
+        "bm_prob": {
+          "H": 62.2,
+          "D": 23.2,
+          "A": 14.6
+        },
+        "kelly": {
+          "pick": "D",
+          "model_p": 0.343,
+          "odd": 4.1,
+          "stake_pct": 3.28
         }
       },
       {
@@ -259,6 +404,25 @@
           "away_goals_conceded_5": 1.0,
           "home_promoted": 0.0,
           "away_promoted": 0.0
+        },
+        "risultato": "1-2",
+        "esito": "A",
+        "ok": false,
+        "bm": {
+          "H": 4.75,
+          "D": 3.6,
+          "A": 1.75
+        },
+        "bm_prob": {
+          "H": 19.9,
+          "D": 26.2,
+          "A": 53.9
+        },
+        "kelly": {
+          "pick": "H",
+          "model_p": 0.493,
+          "odd": 4.75,
+          "stake_pct": 8.94
         }
       },
       {
@@ -290,6 +454,25 @@
           "away_goals_conceded_5": 0.8,
           "home_promoted": 0.0,
           "away_promoted": 0.0
+        },
+        "risultato": "0-1",
+        "esito": "A",
+        "ok": true,
+        "bm": {
+          "H": 2.2,
+          "D": 3.2,
+          "A": 3.5
+        },
+        "bm_prob": {
+          "H": 43.2,
+          "D": 29.7,
+          "A": 27.1
+        },
+        "kelly": {
+          "pick": "A",
+          "model_p": 0.432,
+          "odd": 3.5,
+          "stake_pct": 5.12
         }
       },
       {
@@ -321,6 +504,25 @@
           "away_goals_conceded_5": 1.2,
           "home_promoted": 0.0,
           "away_promoted": 0.0
+        },
+        "risultato": "4-0",
+        "esito": "H",
+        "ok": true,
+        "bm": {
+          "H": 1.57,
+          "D": 4.1,
+          "A": 5.75
+        },
+        "bm_prob": {
+          "H": 60.4,
+          "D": 23.1,
+          "A": 16.5
+        },
+        "kelly": {
+          "pick": "A",
+          "model_p": 0.238,
+          "odd": 5.75,
+          "stake_pct": 1.94
         }
       }
     ],
@@ -11680,40 +11882,6 @@
         "kelly": null
       },
       {
-        "home": "Frosinone",
-        "away": "Atalanta",
-        "date": "2027-05-09",
-        "prob": {
-          "H": 17.6,
-          "D": 23.3,
-          "A": 59.1
-        },
-        "pred": "A",
-        "features": {
-          "pi_home_H": -0.281,
-          "pi_away_H": 0.817,
-          "pi_home_A": -0.182,
-          "pi_away_A": 0.269,
-          "home_form_5": 0.8,
-          "away_form_5": 1.6,
-          "home_goal_diff_5": -0.8,
-          "away_goal_diff_5": 0.6,
-          "home_rest_days": 259.0,
-          "away_rest_days": 259.0,
-          "rest_advantage": 0.0,
-          "h2h_home_winrate": 0.6,
-          "home_goals_scored_5": 0.6,
-          "home_goals_conceded_5": 1.4,
-          "away_goals_scored_5": 2.0,
-          "away_goals_conceded_5": 1.4,
-          "home_promoted": 0.0,
-          "away_promoted": 0.0
-        },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
-      },
-      {
         "home": "Inter",
         "away": "Lecce",
         "date": "2027-05-09",
@@ -11950,34 +12118,32 @@
         "bm": null,
         "bm_prob": null,
         "kelly": null
-      }
-    ],
-    "36": [
+      },
       {
-        "home": "Como",
+        "home": "Frosinone",
         "away": "Atalanta",
-        "date": "2027-05-16",
+        "date": "2027-05-09",
         "prob": {
-          "H": 60.8,
-          "D": 20.8,
-          "A": 18.4
+          "H": 17.6,
+          "D": 23.3,
+          "A": 59.1
         },
-        "pred": "H",
+        "pred": "A",
         "features": {
-          "pi_home_H": 0.263,
+          "pi_home_H": -0.281,
           "pi_away_H": 0.817,
-          "pi_home_A": 0.464,
+          "pi_home_A": -0.182,
           "pi_away_A": 0.269,
-          "home_form_5": 2.0,
+          "home_form_5": 0.8,
           "away_form_5": 1.6,
-          "home_goal_diff_5": 1.2,
+          "home_goal_diff_5": -0.8,
           "away_goal_diff_5": 0.6,
-          "home_rest_days": 267.0,
-          "away_rest_days": 266.0,
-          "rest_advantage": 1.0,
-          "h2h_home_winrate": 0.25,
-          "home_goals_scored_5": 2.2,
-          "home_goals_conceded_5": 1.0,
+          "home_rest_days": 259.0,
+          "away_rest_days": 259.0,
+          "rest_advantage": 0.0,
+          "h2h_home_winrate": 0.6,
+          "home_goals_scored_5": 0.6,
+          "home_goals_conceded_5": 1.4,
           "away_goals_scored_5": 2.0,
           "away_goals_conceded_5": 1.4,
           "home_promoted": 0.0,
@@ -11986,68 +12152,36 @@
         "bm": null,
         "bm_prob": null,
         "kelly": null
-      },
+      }
+    ],
+    "36": [
       {
-        "home": "Monza",
-        "away": "Parma",
+        "home": "Napoli",
+        "away": "Genoa",
         "date": "2027-05-16",
         "prob": {
-          "H": 30.0,
-          "D": 30.3,
-          "A": 39.7
+          "H": 73.2,
+          "D": 13.5,
+          "A": 13.3
         },
-        "pred": "A",
+        "pred": "H",
         "features": {
-          "pi_home_H": -0.605,
-          "pi_away_H": 0.199,
-          "pi_home_A": -0.022,
-          "pi_away_A": 0.019,
-          "home_form_5": 0.2,
-          "away_form_5": 0.8,
-          "home_goal_diff_5": -1.8,
-          "away_goal_diff_5": -1.0,
+          "pi_home_H": 0.324,
+          "pi_away_H": -0.191,
+          "pi_home_A": 0.535,
+          "pi_away_A": 0.065,
+          "home_form_5": 1.8,
+          "away_form_5": 1.0,
+          "home_goal_diff_5": 0.6,
+          "away_goal_diff_5": -0.4,
           "home_rest_days": 267.0,
           "away_rest_days": 267.0,
           "rest_advantage": 0.0,
-          "h2h_home_winrate": 0.5,
-          "home_goals_scored_5": 0.6,
-          "home_goals_conceded_5": 2.4,
-          "away_goals_scored_5": 0.6,
-          "away_goals_conceded_5": 1.6,
-          "home_promoted": 0.0,
-          "away_promoted": 0.0
-        },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
-      },
-      {
-        "home": "Bologna",
-        "away": "Frosinone",
-        "date": "2027-05-16",
-        "prob": {
-          "H": 35.8,
-          "D": 46.3,
-          "A": 17.9
-        },
-        "pred": "D",
-        "features": {
-          "pi_home_H": 0.234,
-          "pi_away_H": -0.281,
-          "pi_home_A": 0.141,
-          "pi_away_A": -0.182,
-          "home_form_5": 1.0,
-          "away_form_5": 1.4,
-          "home_goal_diff_5": -0.2,
-          "away_goal_diff_5": 0.2,
-          "home_rest_days": 265.0,
-          "away_rest_days": 266.0,
-          "rest_advantage": -1.0,
-          "h2h_home_winrate": 0.4,
-          "home_goals_scored_5": 1.0,
-          "home_goals_conceded_5": 1.2,
-          "away_goals_scored_5": 0.8,
-          "away_goals_conceded_5": 0.6,
+          "h2h_home_winrate": 0.0,
+          "home_goals_scored_5": 1.6,
+          "home_goals_conceded_5": 1.0,
+          "away_goals_scored_5": 0.4,
+          "away_goals_conceded_5": 0.8,
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
@@ -12090,32 +12224,32 @@
         "kelly": null
       },
       {
-        "home": "Lecce",
-        "away": "Fiorentina",
+        "home": "Como",
+        "away": "Atalanta",
         "date": "2027-05-16",
         "prob": {
-          "H": 29.7,
-          "D": 35.6,
-          "A": 34.7
+          "H": 60.8,
+          "D": 20.8,
+          "A": 18.4
         },
-        "pred": "D",
+        "pred": "H",
         "features": {
-          "pi_home_H": -0.216,
-          "pi_away_H": -0.154,
-          "pi_home_A": -0.164,
-          "pi_away_A": 0.341,
-          "home_form_5": 1.4,
-          "away_form_5": 1.4,
-          "home_goal_diff_5": -0.4,
-          "away_goal_diff_5": -1.0,
-          "home_rest_days": 266.0,
-          "away_rest_days": 265.0,
+          "pi_home_H": 0.263,
+          "pi_away_H": 0.817,
+          "pi_home_A": 0.464,
+          "pi_away_A": 0.269,
+          "home_form_5": 2.0,
+          "away_form_5": 1.6,
+          "home_goal_diff_5": 1.2,
+          "away_goal_diff_5": 0.6,
+          "home_rest_days": 267.0,
+          "away_rest_days": 266.0,
           "rest_advantage": 1.0,
-          "h2h_home_winrate": 0.4,
-          "home_goals_scored_5": 0.8,
-          "home_goals_conceded_5": 1.2,
-          "away_goals_scored_5": 0.8,
-          "away_goals_conceded_5": 1.8,
+          "h2h_home_winrate": 0.25,
+          "home_goals_scored_5": 2.2,
+          "home_goals_conceded_5": 1.0,
+          "away_goals_scored_5": 2.0,
+          "away_goals_conceded_5": 1.4,
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
@@ -12260,32 +12394,100 @@
         "kelly": null
       },
       {
-        "home": "Napoli",
-        "away": "Genoa",
+        "home": "Monza",
+        "away": "Parma",
         "date": "2027-05-16",
         "prob": {
-          "H": 73.2,
-          "D": 13.5,
-          "A": 13.3
+          "H": 30.0,
+          "D": 30.3,
+          "A": 39.7
         },
-        "pred": "H",
+        "pred": "A",
         "features": {
-          "pi_home_H": 0.324,
-          "pi_away_H": -0.191,
-          "pi_home_A": 0.535,
-          "pi_away_A": 0.065,
-          "home_form_5": 1.8,
-          "away_form_5": 1.0,
-          "home_goal_diff_5": 0.6,
-          "away_goal_diff_5": -0.4,
+          "pi_home_H": -0.605,
+          "pi_away_H": 0.199,
+          "pi_home_A": -0.022,
+          "pi_away_A": 0.019,
+          "home_form_5": 0.2,
+          "away_form_5": 0.8,
+          "home_goal_diff_5": -1.8,
+          "away_goal_diff_5": -1.0,
           "home_rest_days": 267.0,
           "away_rest_days": 267.0,
           "rest_advantage": 0.0,
-          "h2h_home_winrate": 0.0,
-          "home_goals_scored_5": 1.6,
-          "home_goals_conceded_5": 1.0,
-          "away_goals_scored_5": 0.4,
-          "away_goals_conceded_5": 0.8,
+          "h2h_home_winrate": 0.5,
+          "home_goals_scored_5": 0.6,
+          "home_goals_conceded_5": 2.4,
+          "away_goals_scored_5": 0.6,
+          "away_goals_conceded_5": 1.6,
+          "home_promoted": 0.0,
+          "away_promoted": 0.0
+        },
+        "bm": null,
+        "bm_prob": null,
+        "kelly": null
+      },
+      {
+        "home": "Lecce",
+        "away": "Fiorentina",
+        "date": "2027-05-16",
+        "prob": {
+          "H": 29.7,
+          "D": 35.6,
+          "A": 34.7
+        },
+        "pred": "D",
+        "features": {
+          "pi_home_H": -0.216,
+          "pi_away_H": -0.154,
+          "pi_home_A": -0.164,
+          "pi_away_A": 0.341,
+          "home_form_5": 1.4,
+          "away_form_5": 1.4,
+          "home_goal_diff_5": -0.4,
+          "away_goal_diff_5": -1.0,
+          "home_rest_days": 266.0,
+          "away_rest_days": 265.0,
+          "rest_advantage": 1.0,
+          "h2h_home_winrate": 0.4,
+          "home_goals_scored_5": 0.8,
+          "home_goals_conceded_5": 1.2,
+          "away_goals_scored_5": 0.8,
+          "away_goals_conceded_5": 1.8,
+          "home_promoted": 0.0,
+          "away_promoted": 0.0
+        },
+        "bm": null,
+        "bm_prob": null,
+        "kelly": null
+      },
+      {
+        "home": "Bologna",
+        "away": "Frosinone",
+        "date": "2027-05-16",
+        "prob": {
+          "H": 35.8,
+          "D": 46.3,
+          "A": 17.9
+        },
+        "pred": "D",
+        "features": {
+          "pi_home_H": 0.234,
+          "pi_away_H": -0.281,
+          "pi_home_A": 0.141,
+          "pi_away_A": -0.182,
+          "home_form_5": 1.0,
+          "away_form_5": 1.4,
+          "home_goal_diff_5": -0.2,
+          "away_goal_diff_5": 0.2,
+          "home_rest_days": 265.0,
+          "away_rest_days": 266.0,
+          "rest_advantage": -1.0,
+          "h2h_home_winrate": 0.4,
+          "home_goals_scored_5": 1.0,
+          "home_goals_conceded_5": 1.2,
+          "away_goals_scored_5": 0.8,
+          "away_goals_conceded_5": 0.6,
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
@@ -12295,6 +12497,278 @@
       }
     ],
     "37": [
+      {
+        "home": "Genoa",
+        "away": "Bologna",
+        "date": "2027-05-23",
+        "prob": {
+          "H": 35.9,
+          "D": 23.5,
+          "A": 40.6
+        },
+        "pred": "A",
+        "features": {
+          "pi_home_H": -0.191,
+          "pi_away_H": 0.234,
+          "pi_home_A": 0.065,
+          "pi_away_A": 0.141,
+          "home_form_5": 0.6,
+          "away_form_5": 2.4,
+          "home_goal_diff_5": -1.2,
+          "away_goal_diff_5": 0.4,
+          "home_rest_days": 274.0,
+          "away_rest_days": 272.0,
+          "rest_advantage": 2.0,
+          "h2h_home_winrate": 0.2,
+          "home_goals_scored_5": 0.6,
+          "home_goals_conceded_5": 1.8,
+          "away_goals_scored_5": 1.4,
+          "away_goals_conceded_5": 1.0,
+          "home_promoted": 0.0,
+          "away_promoted": 0.0
+        },
+        "bm": null,
+        "bm_prob": null,
+        "kelly": null
+      },
+      {
+        "home": "Roma",
+        "away": "Como",
+        "date": "2027-05-23",
+        "prob": {
+          "H": 47.0,
+          "D": 13.0,
+          "A": 40.0
+        },
+        "pred": "H",
+        "features": {
+          "pi_home_H": 0.512,
+          "pi_away_H": 0.263,
+          "pi_home_A": 0.349,
+          "pi_away_A": 0.464,
+          "home_form_5": 2.6,
+          "away_form_5": 2.0,
+          "home_goal_diff_5": 2.6,
+          "away_goal_diff_5": 1.0,
+          "home_rest_days": 272.0,
+          "away_rest_days": 274.0,
+          "rest_advantage": -2.0,
+          "h2h_home_winrate": 0.5,
+          "home_goals_scored_5": 2.8,
+          "home_goals_conceded_5": 0.2,
+          "away_goals_scored_5": 1.8,
+          "away_goals_conceded_5": 0.8,
+          "home_promoted": 0.0,
+          "away_promoted": 0.0
+        },
+        "bm": null,
+        "bm_prob": null,
+        "kelly": null
+      },
+      {
+        "home": "Atalanta",
+        "away": "Lecce",
+        "date": "2027-05-23",
+        "prob": {
+          "H": 57.6,
+          "D": 34.1,
+          "A": 8.4
+        },
+        "pred": "H",
+        "features": {
+          "pi_home_H": 0.817,
+          "pi_away_H": -0.216,
+          "pi_home_A": 0.269,
+          "pi_away_A": -0.164,
+          "home_form_5": 1.4,
+          "away_form_5": 2.0,
+          "home_goal_diff_5": 0.0,
+          "away_goal_diff_5": 0.4,
+          "home_rest_days": 273.0,
+          "away_rest_days": 273.0,
+          "rest_advantage": 0.0,
+          "h2h_home_winrate": 0.0,
+          "home_goals_scored_5": 0.6,
+          "home_goals_conceded_5": 0.6,
+          "away_goals_scored_5": 1.4,
+          "away_goals_conceded_5": 1.0,
+          "home_promoted": 0.0,
+          "away_promoted": 0.0
+        },
+        "bm": null,
+        "bm_prob": null,
+        "kelly": null
+      },
+      {
+        "home": "Fiorentina",
+        "away": "Monza",
+        "date": "2027-05-23",
+        "prob": {
+          "H": 39.4,
+          "D": 31.6,
+          "A": 29.0
+        },
+        "pred": "H",
+        "features": {
+          "pi_home_H": -0.154,
+          "pi_away_H": -0.605,
+          "pi_home_A": 0.341,
+          "pi_away_A": -0.022,
+          "home_form_5": 1.4,
+          "away_form_5": 0.6,
+          "home_goal_diff_5": 0.2,
+          "away_goal_diff_5": -1.4,
+          "home_rest_days": 272.0,
+          "away_rest_days": 274.0,
+          "rest_advantage": -2.0,
+          "h2h_home_winrate": 0.4,
+          "home_goals_scored_5": 0.6,
+          "home_goals_conceded_5": 0.4,
+          "away_goals_scored_5": 0.6,
+          "away_goals_conceded_5": 2.0,
+          "home_promoted": 0.0,
+          "away_promoted": 0.0
+        },
+        "bm": null,
+        "bm_prob": null,
+        "kelly": null
+      },
+      {
+        "home": "Torino",
+        "away": "Napoli",
+        "date": "2027-05-23",
+        "prob": {
+          "H": 8.5,
+          "D": 15.6,
+          "A": 75.8
+        },
+        "pred": "A",
+        "features": {
+          "pi_home_H": 0.012,
+          "pi_away_H": 0.324,
+          "pi_home_A": 0.079,
+          "pi_away_A": 0.535,
+          "home_form_5": 1.6,
+          "away_form_5": 2.2,
+          "home_goal_diff_5": 0.2,
+          "away_goal_diff_5": 1.2,
+          "home_rest_days": 273.0,
+          "away_rest_days": 274.0,
+          "rest_advantage": -1.0,
+          "h2h_home_winrate": 0.6,
+          "home_goals_scored_5": 1.8,
+          "home_goals_conceded_5": 1.6,
+          "away_goals_scored_5": 1.4,
+          "away_goals_conceded_5": 0.2,
+          "home_promoted": 0.0,
+          "away_promoted": 0.0
+        },
+        "bm": null,
+        "bm_prob": null,
+        "kelly": null
+      },
+      {
+        "home": "Inter",
+        "away": "Lazio",
+        "date": "2027-05-23",
+        "prob": {
+          "H": 42.1,
+          "D": 22.1,
+          "A": 35.7
+        },
+        "pred": "H",
+        "features": {
+          "pi_home_H": 1.028,
+          "pi_away_H": 0.105,
+          "pi_home_A": 0.437,
+          "pi_away_A": 0.393,
+          "home_form_5": 2.6,
+          "away_form_5": 1.8,
+          "home_goal_diff_5": 2.2,
+          "away_goal_diff_5": 0.2,
+          "home_rest_days": 274.0,
+          "away_rest_days": 272.0,
+          "rest_advantage": 2.0,
+          "h2h_home_winrate": 0.0,
+          "home_goals_scored_5": 3.0,
+          "home_goals_conceded_5": 0.8,
+          "away_goals_scored_5": 1.0,
+          "away_goals_conceded_5": 0.8,
+          "home_promoted": 0.0,
+          "away_promoted": 0.0
+        },
+        "bm": null,
+        "bm_prob": null,
+        "kelly": null
+      },
+      {
+        "home": "Frosinone",
+        "away": "Cagliari",
+        "date": "2027-05-23",
+        "prob": {
+          "H": 25.9,
+          "D": 30.2,
+          "A": 43.9
+        },
+        "pred": "A",
+        "features": {
+          "pi_home_H": -0.281,
+          "pi_away_H": -0.063,
+          "pi_home_A": -0.182,
+          "pi_away_A": 0.103,
+          "home_form_5": 0.8,
+          "away_form_5": 1.4,
+          "home_goal_diff_5": -0.8,
+          "away_goal_diff_5": -0.4,
+          "home_rest_days": 273.0,
+          "away_rest_days": 274.0,
+          "rest_advantage": -1.0,
+          "h2h_home_winrate": 0.5,
+          "home_goals_scored_5": 0.6,
+          "home_goals_conceded_5": 1.4,
+          "away_goals_scored_5": 0.8,
+          "away_goals_conceded_5": 1.2,
+          "home_promoted": 0.0,
+          "away_promoted": 0.0
+        },
+        "bm": null,
+        "bm_prob": null,
+        "kelly": null
+      },
+      {
+        "home": "Udinese",
+        "away": "Sassuolo",
+        "date": "2027-05-23",
+        "prob": {
+          "H": 26.4,
+          "D": 40.8,
+          "A": 32.7
+        },
+        "pred": "D",
+        "features": {
+          "pi_home_H": -0.045,
+          "pi_away_H": -0.126,
+          "pi_home_A": 0.054,
+          "pi_away_A": 0.289,
+          "home_form_5": 1.0,
+          "away_form_5": 0.2,
+          "home_goal_diff_5": 0.0,
+          "away_goal_diff_5": -0.8,
+          "home_rest_days": 274.0,
+          "away_rest_days": 273.0,
+          "rest_advantage": 1.0,
+          "h2h_home_winrate": 0.4,
+          "home_goals_scored_5": 0.6,
+          "home_goals_conceded_5": 0.6,
+          "away_goals_scored_5": 0.6,
+          "away_goals_conceded_5": 1.4,
+          "home_promoted": 0.0,
+          "away_promoted": 0.0
+        },
+        "bm": null,
+        "bm_prob": null,
+        "kelly": null
+      },
       {
         "home": "Parma",
         "away": "Juventus",
@@ -12362,315 +12836,9 @@
         "bm": null,
         "bm_prob": null,
         "kelly": null
-      },
-      {
-        "home": "Inter",
-        "away": "Lazio",
-        "date": "2027-05-23",
-        "prob": {
-          "H": 42.1,
-          "D": 22.1,
-          "A": 35.7
-        },
-        "pred": "H",
-        "features": {
-          "pi_home_H": 1.028,
-          "pi_away_H": 0.105,
-          "pi_home_A": 0.437,
-          "pi_away_A": 0.393,
-          "home_form_5": 2.6,
-          "away_form_5": 1.8,
-          "home_goal_diff_5": 2.2,
-          "away_goal_diff_5": 0.2,
-          "home_rest_days": 274.0,
-          "away_rest_days": 272.0,
-          "rest_advantage": 2.0,
-          "h2h_home_winrate": 0.0,
-          "home_goals_scored_5": 3.0,
-          "home_goals_conceded_5": 0.8,
-          "away_goals_scored_5": 1.0,
-          "away_goals_conceded_5": 0.8,
-          "home_promoted": 0.0,
-          "away_promoted": 0.0
-        },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
-      },
-      {
-        "home": "Torino",
-        "away": "Napoli",
-        "date": "2027-05-23",
-        "prob": {
-          "H": 8.5,
-          "D": 15.6,
-          "A": 75.8
-        },
-        "pred": "A",
-        "features": {
-          "pi_home_H": 0.012,
-          "pi_away_H": 0.324,
-          "pi_home_A": 0.079,
-          "pi_away_A": 0.535,
-          "home_form_5": 1.6,
-          "away_form_5": 2.2,
-          "home_goal_diff_5": 0.2,
-          "away_goal_diff_5": 1.2,
-          "home_rest_days": 273.0,
-          "away_rest_days": 274.0,
-          "rest_advantage": -1.0,
-          "h2h_home_winrate": 0.6,
-          "home_goals_scored_5": 1.8,
-          "home_goals_conceded_5": 1.6,
-          "away_goals_scored_5": 1.4,
-          "away_goals_conceded_5": 0.2,
-          "home_promoted": 0.0,
-          "away_promoted": 0.0
-        },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
-      },
-      {
-        "home": "Frosinone",
-        "away": "Cagliari",
-        "date": "2027-05-23",
-        "prob": {
-          "H": 25.9,
-          "D": 30.2,
-          "A": 43.9
-        },
-        "pred": "A",
-        "features": {
-          "pi_home_H": -0.281,
-          "pi_away_H": -0.063,
-          "pi_home_A": -0.182,
-          "pi_away_A": 0.103,
-          "home_form_5": 0.8,
-          "away_form_5": 1.4,
-          "home_goal_diff_5": -0.8,
-          "away_goal_diff_5": -0.4,
-          "home_rest_days": 273.0,
-          "away_rest_days": 274.0,
-          "rest_advantage": -1.0,
-          "h2h_home_winrate": 0.5,
-          "home_goals_scored_5": 0.6,
-          "home_goals_conceded_5": 1.4,
-          "away_goals_scored_5": 0.8,
-          "away_goals_conceded_5": 1.2,
-          "home_promoted": 0.0,
-          "away_promoted": 0.0
-        },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
-      },
-      {
-        "home": "Atalanta",
-        "away": "Lecce",
-        "date": "2027-05-23",
-        "prob": {
-          "H": 57.6,
-          "D": 34.1,
-          "A": 8.4
-        },
-        "pred": "H",
-        "features": {
-          "pi_home_H": 0.817,
-          "pi_away_H": -0.216,
-          "pi_home_A": 0.269,
-          "pi_away_A": -0.164,
-          "home_form_5": 1.4,
-          "away_form_5": 2.0,
-          "home_goal_diff_5": 0.0,
-          "away_goal_diff_5": 0.4,
-          "home_rest_days": 273.0,
-          "away_rest_days": 273.0,
-          "rest_advantage": 0.0,
-          "h2h_home_winrate": 0.0,
-          "home_goals_scored_5": 0.6,
-          "home_goals_conceded_5": 0.6,
-          "away_goals_scored_5": 1.4,
-          "away_goals_conceded_5": 1.0,
-          "home_promoted": 0.0,
-          "away_promoted": 0.0
-        },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
-      },
-      {
-        "home": "Roma",
-        "away": "Como",
-        "date": "2027-05-23",
-        "prob": {
-          "H": 47.0,
-          "D": 13.0,
-          "A": 40.0
-        },
-        "pred": "H",
-        "features": {
-          "pi_home_H": 0.512,
-          "pi_away_H": 0.263,
-          "pi_home_A": 0.349,
-          "pi_away_A": 0.464,
-          "home_form_5": 2.6,
-          "away_form_5": 2.0,
-          "home_goal_diff_5": 2.6,
-          "away_goal_diff_5": 1.0,
-          "home_rest_days": 272.0,
-          "away_rest_days": 274.0,
-          "rest_advantage": -2.0,
-          "h2h_home_winrate": 0.5,
-          "home_goals_scored_5": 2.8,
-          "home_goals_conceded_5": 0.2,
-          "away_goals_scored_5": 1.8,
-          "away_goals_conceded_5": 0.8,
-          "home_promoted": 0.0,
-          "away_promoted": 0.0
-        },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
-      },
-      {
-        "home": "Genoa",
-        "away": "Bologna",
-        "date": "2027-05-23",
-        "prob": {
-          "H": 35.9,
-          "D": 23.5,
-          "A": 40.6
-        },
-        "pred": "A",
-        "features": {
-          "pi_home_H": -0.191,
-          "pi_away_H": 0.234,
-          "pi_home_A": 0.065,
-          "pi_away_A": 0.141,
-          "home_form_5": 0.6,
-          "away_form_5": 2.4,
-          "home_goal_diff_5": -1.2,
-          "away_goal_diff_5": 0.4,
-          "home_rest_days": 274.0,
-          "away_rest_days": 272.0,
-          "rest_advantage": 2.0,
-          "h2h_home_winrate": 0.2,
-          "home_goals_scored_5": 0.6,
-          "home_goals_conceded_5": 1.8,
-          "away_goals_scored_5": 1.4,
-          "away_goals_conceded_5": 1.0,
-          "home_promoted": 0.0,
-          "away_promoted": 0.0
-        },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
-      },
-      {
-        "home": "Udinese",
-        "away": "Sassuolo",
-        "date": "2027-05-23",
-        "prob": {
-          "H": 26.4,
-          "D": 40.8,
-          "A": 32.7
-        },
-        "pred": "D",
-        "features": {
-          "pi_home_H": -0.045,
-          "pi_away_H": -0.126,
-          "pi_home_A": 0.054,
-          "pi_away_A": 0.289,
-          "home_form_5": 1.0,
-          "away_form_5": 0.2,
-          "home_goal_diff_5": 0.0,
-          "away_goal_diff_5": -0.8,
-          "home_rest_days": 274.0,
-          "away_rest_days": 273.0,
-          "rest_advantage": 1.0,
-          "h2h_home_winrate": 0.4,
-          "home_goals_scored_5": 0.6,
-          "home_goals_conceded_5": 0.6,
-          "away_goals_scored_5": 0.6,
-          "away_goals_conceded_5": 1.4,
-          "home_promoted": 0.0,
-          "away_promoted": 0.0
-        },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
-      },
-      {
-        "home": "Fiorentina",
-        "away": "Monza",
-        "date": "2027-05-23",
-        "prob": {
-          "H": 39.4,
-          "D": 31.6,
-          "A": 29.0
-        },
-        "pred": "H",
-        "features": {
-          "pi_home_H": -0.154,
-          "pi_away_H": -0.605,
-          "pi_home_A": 0.341,
-          "pi_away_A": -0.022,
-          "home_form_5": 1.4,
-          "away_form_5": 0.6,
-          "home_goal_diff_5": 0.2,
-          "away_goal_diff_5": -1.4,
-          "home_rest_days": 272.0,
-          "away_rest_days": 274.0,
-          "rest_advantage": -2.0,
-          "h2h_home_winrate": 0.4,
-          "home_goals_scored_5": 0.6,
-          "home_goals_conceded_5": 0.4,
-          "away_goals_scored_5": 0.6,
-          "away_goals_conceded_5": 2.0,
-          "home_promoted": 0.0,
-          "away_promoted": 0.0
-        },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
       }
     ],
     "38": [
-      {
-        "home": "Como",
-        "away": "Genoa",
-        "date": "2027-05-30",
-        "prob": {
-          "H": 74.4,
-          "D": 11.9,
-          "A": 13.7
-        },
-        "pred": "H",
-        "features": {
-          "pi_home_H": 0.263,
-          "pi_away_H": -0.191,
-          "pi_home_A": 0.464,
-          "pi_away_A": 0.065,
-          "home_form_5": 2.0,
-          "away_form_5": 1.0,
-          "home_goal_diff_5": 1.2,
-          "away_goal_diff_5": -0.4,
-          "home_rest_days": 281.0,
-          "away_rest_days": 281.0,
-          "rest_advantage": 0.0,
-          "h2h_home_winrate": 0.0,
-          "home_goals_scored_5": 2.2,
-          "home_goals_conceded_5": 1.0,
-          "away_goals_scored_5": 0.4,
-          "away_goals_conceded_5": 0.8,
-          "home_promoted": 0.0,
-          "away_promoted": 0.0
-        },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
-      },
       {
         "home": "Lazio",
         "away": "Fiorentina",
@@ -12970,6 +13138,40 @@
           "home_goals_conceded_5": 2.4,
           "away_goals_scored_5": 0.8,
           "away_goals_conceded_5": 1.4,
+          "home_promoted": 0.0,
+          "away_promoted": 0.0
+        },
+        "bm": null,
+        "bm_prob": null,
+        "kelly": null
+      },
+      {
+        "home": "Como",
+        "away": "Genoa",
+        "date": "2027-05-30",
+        "prob": {
+          "H": 74.4,
+          "D": 11.9,
+          "A": 13.7
+        },
+        "pred": "H",
+        "features": {
+          "pi_home_H": 0.263,
+          "pi_away_H": -0.191,
+          "pi_home_A": 0.464,
+          "pi_away_A": 0.065,
+          "home_form_5": 2.0,
+          "away_form_5": 1.0,
+          "home_goal_diff_5": 1.2,
+          "away_goal_diff_5": -0.4,
+          "home_rest_days": 281.0,
+          "away_rest_days": 281.0,
+          "rest_advantage": 0.0,
+          "h2h_home_winrate": 0.0,
+          "home_goals_scored_5": 2.2,
+          "home_goals_conceded_5": 1.0,
+          "away_goals_scored_5": 0.4,
+          "away_goals_conceded_5": 0.8,
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },

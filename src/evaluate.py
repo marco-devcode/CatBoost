@@ -275,78 +275,69 @@ plt.close()
 print("  Salvato: models/confusion_matrix_final.png")
 
 # ── SHAP Analysis per flag neopromossa ──────────────────────────────────
-# Calcola SHAP values sul test set per vedere l'impatto di home_promoted/away_promoted
+# Usa gli SHAP values NATIVI di CatBoost (get_feature_importance(type='ShapValues'))
+# -> niente dipendenze esterne (shap/numba) e niente segfault su CI.
 shap_metrics = None
 try:
-    import shap
     print(f"\n{'═'*55}")
-    print(f"  SHAP ANALYSIS — Feature Importance (test set)")
+    print(f"  SHAP ANALYSIS — Feature Importance (test set, CatBoost nativo)")
     print(f"{'═'*55}")
-    
-    # SHAP Explainer per CatBoost
-    explainer = shap.TreeExplainer(best['model'])
-    shap_values = explainer.shap_values(best['X_test'])
-    
-    # Per classificazione multiclasse, shap_values è lista di 3 array (H, D, A)
-    # Calcola mean |SHAP| per feature su tutte le classi
-    if isinstance(shap_values, list):
-        mean_abs_shap = np.mean([np.mean(np.abs(sv), axis=0) for sv in shap_values], axis=0)
-    else:
-        mean_abs_shap = np.mean(np.abs(shap_values), axis=0)
-    
+
+    # CatBoost restituisce (n_samples, n_features+1, n_classes); l'ultima
+    # colonna per classe e' il base value. Togliamola.
+    sv_all = best['model'].get_feature_importance(
+        data=best['X_test'], type='ShapValues')
+    # sv_all: (n_samples, n_features+1, n_classes)
+    shap_vals = sv_all[:, :-1, :]          # (n_samples, n_features, n_classes)
     feature_names = list(best['X_test'].columns)
+
+    # mean |SHAP| per feature, mediato sulle 3 classi
+    mean_abs_shap = np.mean(np.mean(np.abs(shap_vals), axis=0), axis=1)
+
     shap_df = pd.DataFrame({
         'feature': feature_names,
-        'mean_abs_shap': mean_abs_shap
+        'mean_abs_shap': mean_abs_shap,
     }).sort_values('mean_abs_shap', ascending=False)
-    
+
     print(f"\n  Top 10 feature per mean |SHAP|:")
     for _, row in shap_df.head(10).iterrows():
         print(f"    {row['feature']:20s}  {row['mean_abs_shap']:.6f}")
-    
-    # Report specifico per i flag neopromossa
+
     for flag in ['home_promoted', 'away_promoted']:
         if flag in feature_names:
             idx = feature_names.index(flag)
             val = mean_abs_shap[idx]
+            rank = int(shap_df[shap_df['feature'] == flag].index[0]) + 1
+            # SHAP per classe H (indice 0) quando feature=1 vs feature=0
+            sv_h = shap_vals[:, idx, 0]
+            feat_vals = best['X_test'][flag].values
+            shap_1 = sv_h[feat_vals == 1].mean() if (feat_vals == 1).any() else 0.0
+            shap_0 = sv_h[feat_vals == 0].mean() if (feat_vals == 0).any() else 0.0
             print(f"\n  {flag}:")
-            print(f"    mean |SHAP| = {val:.6f}")
-            print(f"    rank = {shap_df[shap_df['feature']==flag].index[0]+1}/{len(feature_names)}")
-            # SHAP dependence (valore feature vs SHAP value per classe H)
-            try:
-                if isinstance(shap_values, list):
-                    sv_class = shap_values[0][:, idx]  # classe H (indice 0)
-                else:
-                    sv_class = shap_values[:, idx]
-                feat_vals = best['X_test'][flag].values
-                # Per feature binaria: media SHAP quando feature=1 vs feature=0
-                shap_1 = sv_class[feat_vals == 1].mean() if (feat_vals == 1).any() else 0
-                shap_0 = sv_class[feat_vals == 0].mean() if (feat_vals == 0).any() else 0
-                print(f"    mean SHAP (feature=1, classe H) = {shap_1:.6f}")
-                print(f"    mean SHAP (feature=0, classe H) = {shap_0:.6f}")
-                print(f"    delta = {shap_1 - shap_0:+.6f}")
-            except Exception as e:
-                print(f"    [warn] dependence plot non calcolato: {e}")
-            
+            print(f"    mean |SHAP| = {val:.6f}  (rank {rank}/{len(feature_names)})")
+            print(f"    mean SHAP feature=1 (classe H) = {shap_1:+.6f}")
+            print(f"    mean SHAP feature=0 (classe H) = {shap_0:+.6f}")
+            print(f"    delta = {shap_1 - shap_0:+.6f}")
             shap_metrics = shap_metrics or {}
             shap_metrics[flag] = {
                 "mean_abs_shap": float(val),
-                "rank": int(shap_df[shap_df['feature']==flag].index[0]+1),
-                "n_features_total": len(feature_names)
+                "rank": rank,
+                "n_features_total": len(feature_names),
+                "shap_feature1_classH": float(shap_1),
+                "shap_feature0_classH": float(shap_0),
+                "delta_classH": float(shap_1 - shap_0),
             }
         else:
             print(f"\n  {flag}: NON PRESENTE nel test set")
-    
-    # Grafico summary SHAP (top 15)
+
+    # Grafico bar summary (top 15) con matplotlib nativo
     try:
+        top = shap_df.head(15).iloc[::-1]
         fig, ax = plt.subplots(figsize=(10, 6))
-        if isinstance(shap_values, list):
-            shap.summary_plot(shap_values[0], best['X_test'], feature_names=feature_names, 
-                             max_display=15, show=False, plot_type="bar")
-        else:
-            shap.summary_plot(shap_values, best['X_test'], feature_names=feature_names,
-                             max_display=15, show=False, plot_type="bar")
-        plt.title('SHAP Feature Importance (classe H) — Top 15')
+        ax.barh(top['feature'], top['mean_abs_shap'], color='#22c55e')
+        ax.set_xlabel('mean |SHAP|')
+        ax.set_title('SHAP Feature Importance (CatBoost nativo) — Top 15')
+        ax.grid(alpha=0.2)
         plt.tight_layout()
         plt.savefig(RESULTS_DIR / 'shap_summary.png', dpi=150, bbox_inches='tight')
         plt.close()
@@ -354,8 +345,6 @@ try:
     except Exception as e:
         print(f"  [warn] grafico SHAP summary non salvato: {e}")
 
-except ImportError:
-    print(f"\n  [info] SHAP non installato (pip install shap) — salto analisi SHAP")
 except Exception as e:
     print(f"  [warn] SHAP analysis fallita: {e}")
 

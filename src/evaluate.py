@@ -288,9 +288,12 @@ try:
     from catboost import Pool
     sv_all = best['model'].get_feature_importance(
         data=Pool(best['X_test']), type='ShapValues')
-    # sv_all: (n_samples, n_features+1, n_classes)
-    shap_vals = sv_all[:, :-1, :]          # (n_samples, n_features, n_classes)
     feature_names = list(best['X_test'].columns)
+    # CatBoost per multiclasse restituisce (n_samples, n_features[+1], n_classes).
+    # La colonna extra (se presente) e' il base value per classe: la scartiamo
+    # prendendo le prime n_features colonne, robusto a entrambe le forme.
+    n_feat = len(feature_names)
+    shap_vals = sv_all[:, :n_feat, :]          # (n_samples, n_features, n_classes)
 
     # mean |SHAP| per feature, mediato sulle 3 classi
     mean_abs_shap = np.mean(np.mean(np.abs(shap_vals), axis=0), axis=1)

@@ -285,8 +285,9 @@ try:
 
     # CatBoost restituisce (n_samples, n_features+1, n_classes); l'ultima
     # colonna per classe e' il base value. Togliamola.
+    from catboost import Pool
     sv_all = best['model'].get_feature_importance(
-        data=best['X_test'], type='ShapValues')
+        data=Pool(best['X_test']), type='ShapValues')
     # sv_all: (n_samples, n_features+1, n_classes)
     shap_vals = sv_all[:, :-1, :]          # (n_samples, n_features, n_classes)
     feature_names = list(best['X_test'].columns)

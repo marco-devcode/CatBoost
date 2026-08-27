@@ -1,6 +1,6 @@
 # 🏆 Report Finale — CatBoost Serie A Match Prediction
 
-**Data**: 2026-08-27 20:23
+**Data**: 2026-08-27 20:33
 **Modello migliore**: Baseline (Pi-Rating + FE) (`v1_baseline`)
 
 ---
@@ -9,7 +9,7 @@
 
 | Modello | Feature | RPS ↓ | Accuracy |
 |---------|---------|-------|----------|
-| Baseline (Pi-Rating + FE) | 18 | 0.1331 | 51.64% ◄ **BEST**|
+| Baseline (Pi-Rating + FE) | 18 | 0.1324 | 52.50% ◄ **BEST**|
 
 ---
 
@@ -17,11 +17,11 @@
 
 | Metrica | Valore | Note |
 |---------|--------|------|
-| **Accuracy** | 0.5164 | Target > 0.52 |
-| **RPS** | 0.1331 | Più basso = meglio |
-| **Recall Home Win** | 73.18% | |
+| **Accuracy** | 0.5250 | Target > 0.52 |
+| **RPS** | 0.1324 | Più basso = meglio |
+| **Recall Home Win** | 75.44% | |
 | **Recall Draw** | 14.11% | Classe più difficile |
-| **Recall Away Win** | 56.49% | |
+| **Recall Away Win** | 56.29% | |
 
 ---
 
@@ -29,9 +29,9 @@
 
 | | RPS ↓ | Accuracy |
 |--|-------|----------|
-| **CatBoost (v1_baseline)** | 0.1331 | 51.64% |
+| **CatBoost (v1_baseline)** | 0.1324 | 52.50% |
 | **Bet365** | 0.1722 | 36.73% |
-| **Delta** | +0.0390 ✅ | +0.1491 ✅ |
+| **Delta** | +0.0397 ✅ | +0.1577 ✅ |
 
 ---
 
@@ -44,12 +44,27 @@
 |---------|--------|
 | Scommesse piazzate | 1522 |
 | Bankroll iniziale | €1000 |
-| Bankroll finale | €154797939204623887378943030377213739296727498752000.00 |
-| Profitto | €+154797939204623887378943030377213739296727498752000.00 |
-| ROI | +15479793920462388737894303037721373929672749875200.0% |
-| Stake totale | 1.2311177593279722e+49% del bankroll |
+| Bankroll finale | €28714624699356773015292152203708419049229576199733248.00 |
+| Profitto | €+28714624699356773015292152203708419049229576199733248.00 |
+| ROI | +2871462469935677235067815431125048259732604605956096.0% |
+| Stake totale | 2.321039593878632e+51% del bankroll |
 
 ![Kelly Simulation](kelly_simulation.png)
+
+---
+
+## 4b. SHAP Analysis — Flag Neopromossa
+
+> Mean |SHAP| misura quanto ogni feature sposta la predizione in media sul test set.
+> Se ≈ 0 → il flag non porta segnale e può essere rimosso. Se `home_promoted`
+> e `away_promoted` hanno valori simili → erano ridondanti, conviene unificarli.
+
+| Flag | mean |SHAP| | Rank su 18 feature |
+|------|-------------|------|
+| home_promoted | 0.026174 | 17/18 |
+| away_promoted | 0.028835 | 18/18 |
+
+![SHAP Summary](shap_summary.png)
 
 ---
 
@@ -58,13 +73,13 @@
 ```
               precision    recall  f1-score   support
 
-           H     0.5438    0.7318    0.6240       619
-           D     0.3471    0.1411    0.2007       418
-           A     0.5279    0.5649    0.5458       485
+           H     0.5411    0.7544    0.6302       619
+           D     0.3986    0.1411    0.2085       418
+           A     0.5342    0.5629    0.5482       485
 
-    accuracy                         0.5164      1522
-   macro avg     0.4729    0.4793    0.4568      1522
-weighted avg     0.4847    0.5164    0.4828      1522
+    accuracy                         0.5250      1522
+   macro avg     0.4913    0.4862    0.4623      1522
+weighted avg     0.4998    0.5250    0.4883      1522
 
 ```
 

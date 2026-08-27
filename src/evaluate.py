@@ -289,11 +289,20 @@ try:
     sv_all = best['model'].get_feature_importance(
         data=Pool(best['X_test']), type='ShapValues')
     feature_names = list(best['X_test'].columns)
-    # CatBoost per multiclasse restituisce (n_samples, n_features[+1], n_classes).
-    # La colonna extra (se presente) e' il base value per classe: la scartiamo
-    # prendendo le prime n_features colonne, robusto a entrambe le forme.
     n_feat = len(feature_names)
-    shap_vals = sv_all[:, :n_feat, :]          # (n_samples, n_features, n_classes)
+    # CatBoost per multiclasse restituisce (n_samples, A, B) dove {A,B} =
+    # {n_classes, n_feat (+1 base value)}. L'ordine degli assi non e' garantito,
+    # quindi lo rendiamo robusto: identifichiamo l'asse delle feature, scartiamo
+    # il base value (ultima colonna) se presente, e lo portiamo in posizione 1.
+    if sv_all.shape[1] in (n_feat, n_feat + 1):
+        feat_axis = 1
+    elif sv_all.shape[2] in (n_feat, n_feat + 1):
+        feat_axis = 2
+    else:
+        feat_axis = 1  # fallback
+    if sv_all.shape[feat_axis] == n_feat + 1:
+        sv_all = np.take(sv_all, range(n_feat), axis=feat_axis)
+    shap_vals = np.moveaxis(sv_all, feat_axis, 1)   # (n_samples, n_feat, n_classes)
 
     # mean |SHAP| per feature, mediato sulle 3 classi
     mean_abs_shap = np.mean(np.mean(np.abs(shap_vals), axis=0), axis=1)

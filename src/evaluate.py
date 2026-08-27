@@ -274,6 +274,91 @@ plt.savefig(RESULTS_DIR / 'confusion_matrix_final.png', dpi=150, bbox_inches='ti
 plt.close()
 print("  Salvato: models/confusion_matrix_final.png")
 
+# ── SHAP Analysis per flag neopromossa ──────────────────────────────────
+# Calcola SHAP values sul test set per vedere l'impatto di home_promoted/away_promoted
+shap_metrics = None
+try:
+    import shap
+    print(f"\n{'═'*55}")
+    print(f"  SHAP ANALYSIS — Feature Importance (test set)")
+    print(f"{'═'*55}")
+    
+    # SHAP Explainer per CatBoost
+    explainer = shap.TreeExplainer(best['model'])
+    shap_values = explainer.shap_values(best['X_test'])
+    
+    # Per classificazione multiclasse, shap_values è lista di 3 array (H, D, A)
+    # Calcola mean |SHAP| per feature su tutte le classi
+    if isinstance(shap_values, list):
+        mean_abs_shap = np.mean([np.mean(np.abs(sv), axis=0) for sv in shap_values], axis=0)
+    else:
+        mean_abs_shap = np.mean(np.abs(shap_values), axis=0)
+    
+    feature_names = list(best['X_test'].columns)
+    shap_df = pd.DataFrame({
+        'feature': feature_names,
+        'mean_abs_shap': mean_abs_shap
+    }).sort_values('mean_abs_shap', ascending=False)
+    
+    print(f"\n  Top 10 feature per mean |SHAP|:")
+    for _, row in shap_df.head(10).iterrows():
+        print(f"    {row['feature']:20s}  {row['mean_abs_shap']:.6f}")
+    
+    # Report specifico per i flag neopromossa
+    for flag in ['home_promoted', 'away_promoted']:
+        if flag in feature_names:
+            idx = feature_names.index(flag)
+            val = mean_abs_shap[idx]
+            print(f"\n  {flag}:")
+            print(f"    mean |SHAP| = {val:.6f}")
+            print(f"    rank = {shap_df[shap_df['feature']==flag].index[0]+1}/{len(feature_names)}")
+            # SHAP dependence (valore feature vs SHAP value per classe H)
+            try:
+                if isinstance(shap_values, list):
+                    sv_class = shap_values[0][:, idx]  # classe H (indice 0)
+                else:
+                    sv_class = shap_values[:, idx]
+                feat_vals = best['X_test'][flag].values
+                # Per feature binaria: media SHAP quando feature=1 vs feature=0
+                shap_1 = sv_class[feat_vals == 1].mean() if (feat_vals == 1).any() else 0
+                shap_0 = sv_class[feat_vals == 0].mean() if (feat_vals == 0).any() else 0
+                print(f"    mean SHAP (feature=1, classe H) = {shap_1:.6f}")
+                print(f"    mean SHAP (feature=0, classe H) = {shap_0:.6f}")
+                print(f"    delta = {shap_1 - shap_0:+.6f}")
+            except Exception as e:
+                print(f"    [warn] dependence plot non calcolato: {e}")
+            
+            shap_metrics = shap_metrics or {}
+            shap_metrics[flag] = {
+                "mean_abs_shap": float(val),
+                "rank": int(shap_df[shap_df['feature']==flag].index[0]+1),
+                "n_features_total": len(feature_names)
+            }
+        else:
+            print(f"\n  {flag}: NON PRESENTE nel test set")
+    
+    # Grafico summary SHAP (top 15)
+    try:
+        fig, ax = plt.subplots(figsize=(10, 6))
+        if isinstance(shap_values, list):
+            shap.summary_plot(shap_values[0], best['X_test'], feature_names=feature_names, 
+                             max_display=15, show=False, plot_type="bar")
+        else:
+            shap.summary_plot(shap_values, best['X_test'], feature_names=feature_names,
+                             max_display=15, show=False, plot_type="bar")
+        plt.title('SHAP Feature Importance (classe H) — Top 15')
+        plt.tight_layout()
+        plt.savefig(RESULTS_DIR / 'shap_summary.png', dpi=150, bbox_inches='tight')
+        plt.close()
+        print("  Salvato: models/shap_summary.png")
+    except Exception as e:
+        print(f"  [warn] grafico SHAP summary non salvato: {e}")
+
+except ImportError:
+    print(f"\n  [info] SHAP non installato (pip install shap) — salto analisi SHAP")
+except Exception as e:
+    print(f"  [warn] SHAP analysis fallita: {e}")
+
 draw_recall = cm[1, 1] / cm[1, :].sum() if cm[1, :].sum() > 0 else 0
 home_recall = cm[0, 0] / cm[0, :].sum() if cm[0, :].sum() > 0 else 0
 away_recall = cm[2, 2] / cm[2, :].sum() if cm[2, :].sum() > 0 else 0
@@ -327,6 +412,8 @@ if rps_bm is not None:
     final_metrics["beats_bookmaker_rps"] = bool(best['rps'] < rps_bm)
 if kelly_metrics is not None:
     final_metrics["kelly"] = kelly_metrics
+if shap_metrics is not None:
+    final_metrics["shap_neopromossa"] = shap_metrics
 
 with open(RESULTS_DIR / 'final_report.json', 'w') as f:
     json.dump(final_metrics, f, indent=2, ensure_ascii=False)
@@ -396,6 +483,24 @@ if kelly_metrics is not None:
 | Stake totale | {kelly_metrics['stake_totale_pct']}% del bankroll |
 
 ![Kelly Simulation](kelly_simulation.png)
+
+"""
+
+if shap_metrics is not None:
+    report_md += f"""---
+
+## 4b. SHAP Analysis — Flag Neopromossa
+
+> Mean |SHAP| misura quanto ogni feature sposta la predizione in media sul test set.
+> Se ≈ 0 → il flag non porta segnale e può essere rimosso. Se `home_promoted`
+> e `away_promoted` hanno valori simili → erano ridondanti, conviene unificarli.
+
+| Flag | mean |SHAP| | Rank su {shap_metrics[list(shap_metrics)[0]]['n_features_total']} feature |
+|------|-------------|------|
+| home_promoted | {shap_metrics['home_promoted']['mean_abs_shap']:.6f} | {shap_metrics['home_promoted']['rank']}/{shap_metrics['home_promoted']['n_features_total']} |
+| away_promoted | {shap_metrics['away_promoted']['mean_abs_shap']:.6f} | {shap_metrics['away_promoted']['rank']}/{shap_metrics['away_promoted']['n_features_total']} |
+
+![SHAP Summary](shap_summary.png)
 
 """
 

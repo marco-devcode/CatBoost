@@ -6,3 +6,4 @@ scikit-learn
 matplotlib
 seaborn
 streamlit
+shap>=0.44

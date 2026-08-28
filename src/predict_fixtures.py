@@ -466,6 +466,31 @@ def main():
                 m["bm"] = {"H": round(bm_odds[0], 2), "D": round(bm_odds[1], 2),
                            "A": round(bm_odds[2], 2)}
                 m["bm_prob"] = {LABELS[i]: round(bm_prob[i] * 100, 1) for i in range(3)}
+            # Metriche retrospettive (RPS bookmaker + Kelly sim) ricostruite
+            # dallo SNAPSHOT, cosi' il riepilogo resta coerente anche se la
+            # partita e' congelata e non viene ricalcolata.
+            if m["bm"] is not None and m["ok"] is not None and m["esito"] is not None:
+                y_idx = {'H': 0, 'D': 1, 'A': 2}[m["esito"]]
+                pb = np.array([m["bm_prob"][l] / 100.0 for l in LABELS])
+                bm_rows.append((y_idx, pb))
+                model_rows.append((y_idx, [m["prob"][l] / 100.0 for l in LABELS]))
+                # Kelly retrospettivo dallo snapshot (edge p_model > p_bookmaker)
+                best_k = -1.0
+                best_info = None
+                for i, lab in enumerate(LABELS):
+                    pk = m["prob"][lab] / 100.0
+                    if pk > pb[i]:
+                        kf = kelly_fraction(pk, m["bm"][lab])
+                        if kf > 0 and kf > best_k:
+                            best_k = kf
+                            best_info = (lab, pk, m["bm"][lab], kf)
+                if best_info is not None:
+                    lab, pk, odd, kf = best_info
+                    kelly_log.append({
+                        "home": m["home"], "away": m["away"], "date": m["date"],
+                        "pick": lab, "model_p": round(pk, 3), "odd": round(odd, 2),
+                        "kelly": round(kf, 4), "win": (m["esito"] == lab),
+                    })
         else:
             # Partita FUTURA (o mai vista): ricalcola col modello ATTUALE.
             feats = compute_features_for_match(history, m["home"], m["away"], row['Date'], h2h_cache, current_season_teams)

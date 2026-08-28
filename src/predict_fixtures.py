@@ -426,19 +426,30 @@ def main():
                 bm_odds = None
 
         k = _match_key(m["home"], m["away"], m["date"])
-        # Partita gia' giocata (con risultato reale): riusa le stime passate
-        # SOLO se il freeze e' attivo (modello invariato). Altrimenti ricalcola.
-        if played and freeze_active and k in prev_estimates:
+        # ── SNAPSHOT delle partite GIA' GIOCATE ──────────────────────────
+        # Regola utente: "le stime di 1X2 passate non si aggiornano quando
+        # escono i nuovi risultati". Quindi una partita con risultato reale
+        # riusa SEMPRE lo snapshot pubblicato (prob/pred/quote/risultato),
+        # anche se il modello e' stato riallenato. Non si ricalcola mai.
+        if played and k in prev_estimates:
             old = prev_estimates[k]
             m["prob"] = old.get("prob")
             m["pred"] = old.get("pred")
-            # Ricalcola le feature col modello ATTUALE (trasparenza), anche
-            # se le stime 1X2 restano quelle congelate del run precedente.
-            feats = compute_features_for_match(history, m["home"], m["away"], row['Date'], h2h_cache, current_season_teams)
-            m["features"] = {c: round(float(feats.get(c, 0.0)), 3) for c in FEATURE_ORDER}
+            m["bm"] = old.get("bm")
+            m["bm_prob"] = old.get("bm_prob")
+            m["kelly"] = old.get("kelly")
+            m["risultato"] = old.get("risultato")
+            m["esito"] = old.get("esito")
+            m["ok"] = old.get("ok")
+            m["features"] = old.get("features")
+            # Se lo snapshot non aveva le quote ma il CSV odierno le porta
+            # (es. football-data), le valorizziamo dal CSV (non dal freeze).
+            if m["bm"] is None and bm_odds is not None:
+                m["bm"] = {"H": round(bm_odds[0], 2), "D": round(bm_odds[1], 2),
+                           "A": round(bm_odds[2], 2)}
+                m["bm_prob"] = {LABELS[i]: round(bm_prob[i] * 100, 1) for i in range(3)}
         else:
-            # Ricalcola tutto (freeze disattivo per modello cambiato, oppure
-            # prima volta che vediamo il risultato, oppure partita futura).
+            # Partita FUTURA (o mai vista): ricalcola col modello ATTUALE.
             feats = compute_features_for_match(history, m["home"], m["away"], row['Date'], h2h_cache, current_season_teams)
             X = pd.DataFrame([{c: feats.get(c, 0.0) for c in FEATURE_ORDER}])
             probs = model.predict_proba(X)[0]

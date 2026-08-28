@@ -368,6 +368,21 @@ def main():
     fx = fx.drop_duplicates(subset=['Date', 'HomeTeam', 'AwayTeam'], keep='first').reset_index(drop=True)
     print(f"Fixture: {len(fx)} partite, {fx['giornata'].max()} giornate")
 
+    # ── Soglia di freeze (regola N-1) ───────────────────────────────────
+    # Una giornata N e' "bloccabile" (snapshot non piu ricalcolato) non appena
+    # la giornata N-1 ha almeno un risultato reale. Quindi le giornate con
+    # numero <= (ultima_giornata_giocata + 1) sono CONGELATE: le loro
+    # percentuali non si aggiornano piu (no hindsight bias).
+    # Calcoliamo l'ultima giornata con risultato reale dal calendario odierno.
+    fx_with_result = fx[fx['FTR'].apply(lambda x: isinstance(x, str) and x.strip().upper() in ('H', 'D', 'A'))]
+    if len(fx_with_result):
+        ultima_giocata = int(fx_with_result['giornata'].max())
+    else:
+        ultima_giocata = 0
+    freeze_until = ultima_giocata + 1   # giornate 1..freeze_until sono congelate
+    print(f"  Freeze (regola N-1): giornate 1..{freeze_until} bloccate "
+          f"(ultima giocata = {ultima_giocata})")
+
     # Squadre della Serie A corrente: derivate dal calendario stesso (fonte
     # autorevole), NON hardcodate. Serve per il flag neopromossa: chi e' in
     # questa lista ma ASSENTE dall'ultima stagione storica completa -> promosso.
@@ -426,12 +441,15 @@ def main():
                 bm_odds = None
 
         k = _match_key(m["home"], m["away"], m["date"])
-        # ── SNAPSHOT delle partite GIA' GIOCATE ──────────────────────────
-        # Regola utente: "le stime di 1X2 passate non si aggiornano quando
-        # escono i nuovi risultati". Quindi una partita con risultato reale
-        # riusa SEMPRE lo snapshot pubblicato (prob/pred/quote/risultato),
-        # anche se il modello e' stato riallenato. Non si ricalcola mai.
-        if played and k in prev_estimates:
+        giornata_n = int(row['giornata'])
+        # ── SNAPSHOT / FREEZE ─────────────────────────────────────────────
+        # Due casi in cui riusiamo lo snapshot (NON ricalcoliamo):
+        #  (a) partita GIA' GIOCATA (ha risultato reale), o
+        #  (b) giornata N con N <= freeze_until (la N-1 e' stata giocata):
+        #      regola utente "la giornata N si aggiorna solo fino ai risultati
+        #      della N-1" -> no hindsight bias.
+        # In entrambi i casi, se lo snapshot esiste, lo riusiamo integro.
+        if k in prev_estimates and (played or giornata_n <= freeze_until):
             old = prev_estimates[k]
             m["prob"] = old.get("prob")
             m["pred"] = old.get("pred")
@@ -578,6 +596,8 @@ def main():
             "fonte": source,
             "ultima_giornata_giocata": ultima_gg,
             "prossima_giornata": prossima_gg,
+            "freeze_until": freeze_until,
+            "freeze_regola": "La giornata N si aggiorna solo fino ai risultati della N-1 (no hindsight)",
             "model_trained_at": model_trained_at,
             **meta_extra,
         },

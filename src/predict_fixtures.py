@@ -25,6 +25,7 @@ non "sgonfia" le probabilita' gia' pubblicate.
 import sys
 import io
 import json
+import math
 import time
 import unicodedata
 import urllib.request
@@ -241,13 +242,18 @@ def bookmaker_prob(home_odd, draw_odd, away_odd):
     """Normalizza le quote B365 rimuovendo l'overround -> probabilita' 1X2."""
     try:
         h, d, a = float(home_odd), float(draw_odd), float(away_odd)
+        if not all(math.isfinite(x) for x in (h, d, a)):
+            return None
         if h <= 1.0 or d <= 1.0 or a <= 1.0:
             return None
         raw = [1.0 / h, 1.0 / d, 1.0 / a]
         tot = sum(raw)
-        if tot <= 0:
+        if not math.isfinite(tot) or tot <= 0:
             return None
-        return [x / tot for x in raw]  # [pH, pD, pA]
+        probs = [x / tot for x in raw]
+        if not all(math.isfinite(x) for x in probs):
+            return None
+        return probs  # [pH, pD, pA]
     except (TypeError, ValueError):
         return None
 
@@ -436,7 +442,9 @@ def main():
         bm_odds = None
         if bm_prob is not None:
             try:
-                bm_odds = [float(row['B365H']), float(row['B365D']), float(row['B365A'])]
+                candidate_odds = [float(row['B365H']), float(row['B365D']), float(row['B365A'])]
+                if all(math.isfinite(x) for x in candidate_odds):
+                    bm_odds = candidate_odds
             except (TypeError, ValueError):
                 bm_odds = None
 
@@ -587,11 +595,12 @@ def main():
         p_md = [r[1] for r in model_rows]
         rps_bm = ranked_probability_score(y_bm, p_bm)
         rps_md = ranked_probability_score(y_md, p_md)
-        meta_extra["bookmaker_rps"] = round(float(rps_bm), 4)
-        meta_extra["model_rps"] = round(float(rps_md), 4)
-        meta_extra["beats_bookmaker_rps"] = bool(rps_md < rps_bm)
-        print(f"  RPS modello={rps_md:.4f} | RPS bookmaker={rps_bm:.4f} "
-              f"| modello batte bookmaker: {rps_md < rps_bm}")
+        if math.isfinite(float(rps_bm)) and math.isfinite(float(rps_md)):
+            meta_extra["bookmaker_rps"] = round(float(rps_bm), 4)
+            meta_extra["model_rps"] = round(float(rps_md), 4)
+            meta_extra["beats_bookmaker_rps"] = bool(rps_md < rps_bm)
+            print(f"  RPS modello={rps_md:.4f} | RPS bookmaker={rps_bm:.4f} "
+                  f"| modello batte bookmaker: {rps_md < rps_bm}")
 
     if kelly_log:
         bankroll = 1000.0

@@ -35,6 +35,17 @@ function fmtVal(v: number): string {
   return v.toFixed(3);
 }
 
+function hasFiniteTriplet(
+  values: { H: number; D: number; A: number } | null | undefined
+): values is { H: number; D: number; A: number } {
+  return Boolean(
+    values &&
+      Number.isFinite(values.H) &&
+      Number.isFinite(values.D) &&
+      Number.isFinite(values.A)
+  );
+}
+
 function MatchFeatures({ m }: { m: MatchPrediction }) {
   const [open, setOpen] = useState(false);
   if (!m.features) return null;
@@ -60,7 +71,7 @@ function MatchFeatures({ m }: { m: MatchPrediction }) {
 function MatchCard({ m }: { m: MatchPrediction }) {
   const played = m.ok !== undefined;
   const maxKey = (["H", "D", "A"] as const).reduce((a, b) => (m.prob[a] >= m.prob[b] ? a : b));
-  const hasBm = m.bm && m.bm_prob;
+  const hasBm = hasFiniteTriplet(m.bm) && hasFiniteTriplet(m.bm_prob);
   return (
     <div className="match-card">
       <div className="match-teams">
@@ -157,7 +168,10 @@ export default function Home() {
   const matches = current && data?.giornate[String(current)] ? data.giornate[String(current)] : [];
 
   const meta = data?.meta;
-  const hasBmData = meta?.bookmaker_rps !== undefined && meta?.model_rps !== undefined;
+  const hasBmData =
+    Number.isFinite(meta?.bookmaker_rps) &&
+    Number.isFinite(meta?.model_rps) &&
+    typeof meta?.beats_bookmaker_rps === "boolean";
   const kelly = meta?.kelly;
 
   if (error)

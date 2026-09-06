@@ -468,9 +468,25 @@ def main():
             m["esito"] = old.get("esito")
             m["ok"] = old.get("ok")
             m["features"] = old.get("features")
-            # Se lo snapshot non aveva le quote ma il CSV odierno le porta
+            # Se lo snapshot non aveva quote valide ma il CSV odierno le porta
             # (es. football-data), le valorizziamo dal CSV (non dal freeze).
-            if m["bm"] is None and bm_odds is not None:
+            bm_old = m.get("bm")
+            bm_prob_old = m.get("bm_prob")
+            bm_snapshot_valid = (
+                isinstance(bm_old, dict)
+                and isinstance(bm_prob_old, dict)
+                and all(
+                    isinstance(bm_old.get(l), (int, float))
+                    and math.isfinite(float(bm_old.get(l)))
+                    for l in LABELS
+                )
+                and all(
+                    isinstance(bm_prob_old.get(l), (int, float))
+                    and math.isfinite(float(bm_prob_old.get(l)))
+                    for l in LABELS
+                )
+            )
+            if (not bm_snapshot_valid) and bm_odds is not None:
                 m["bm"] = {"H": round(bm_odds[0], 2), "D": round(bm_odds[1], 2),
                            "A": round(bm_odds[2], 2)}
                 m["bm_prob"] = {LABELS[i]: round(bm_prob[i] * 100, 1) for i in range(3)}

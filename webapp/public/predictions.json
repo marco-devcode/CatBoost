@@ -8,7 +8,7 @@
     "freeze_until": 3,
     "freeze_regola": "La giornata N si aggiorna solo fino ai risultati della N-1 (no hindsight)",
     "model_trained_at": "1970-01-01T00:00:01",
-    "bookmaker_rps": NaN,
+    "bookmaker_rps": null,
     "model_rps": 0.1322,
     "beats_bookmaker_rps": false,
     "kelly": {
@@ -540,14 +540,14 @@
         },
         "pred": "H",
         "bm": {
-          "H": NaN,
-          "D": NaN,
-          "A": NaN
+          "H": null,
+          "D": null,
+          "A": null
         },
         "bm_prob": {
-          "H": NaN,
-          "D": NaN,
-          "A": NaN
+          "H": null,
+          "D": null,
+          "A": null
         },
         "kelly": null,
         "risultato": "2-0",
@@ -585,14 +585,14 @@
         },
         "pred": "H",
         "bm": {
-          "H": NaN,
-          "D": NaN,
-          "A": NaN
+          "H": null,
+          "D": null,
+          "A": null
         },
         "bm_prob": {
-          "H": NaN,
-          "D": NaN,
-          "A": NaN
+          "H": null,
+          "D": null,
+          "A": null
         },
         "kelly": null,
         "risultato": "0-3",
@@ -630,14 +630,14 @@
         },
         "pred": "A",
         "bm": {
-          "H": NaN,
-          "D": NaN,
-          "A": NaN
+          "H": null,
+          "D": null,
+          "A": null
         },
         "bm_prob": {
-          "H": NaN,
-          "D": NaN,
-          "A": NaN
+          "H": null,
+          "D": null,
+          "A": null
         },
         "kelly": null,
         "risultato": "2-3",
@@ -675,14 +675,14 @@
         },
         "pred": "A",
         "bm": {
-          "H": NaN,
-          "D": NaN,
-          "A": NaN
+          "H": null,
+          "D": null,
+          "A": null
         },
         "bm_prob": {
-          "H": NaN,
-          "D": NaN,
-          "A": NaN
+          "H": null,
+          "D": null,
+          "A": null
         },
         "kelly": null,
         "risultato": "2-1",
@@ -720,14 +720,14 @@
         },
         "pred": "H",
         "bm": {
-          "H": NaN,
-          "D": NaN,
-          "A": NaN
+          "H": null,
+          "D": null,
+          "A": null
         },
         "bm_prob": {
-          "H": NaN,
-          "D": NaN,
-          "A": NaN
+          "H": null,
+          "D": null,
+          "A": null
         },
         "kelly": null,
         "risultato": "2-0",
@@ -765,14 +765,14 @@
         },
         "pred": "H",
         "bm": {
-          "H": NaN,
-          "D": NaN,
-          "A": NaN
+          "H": null,
+          "D": null,
+          "A": null
         },
         "bm_prob": {
-          "H": NaN,
-          "D": NaN,
-          "A": NaN
+          "H": null,
+          "D": null,
+          "A": null
         },
         "kelly": null,
         "risultato": "1-2",
@@ -810,14 +810,14 @@
         },
         "pred": "A",
         "bm": {
-          "H": NaN,
-          "D": NaN,
-          "A": NaN
+          "H": null,
+          "D": null,
+          "A": null
         },
         "bm_prob": {
-          "H": NaN,
-          "D": NaN,
-          "A": NaN
+          "H": null,
+          "D": null,
+          "A": null
         },
         "kelly": null,
         "risultato": "0-1",
@@ -855,14 +855,14 @@
         },
         "pred": "H",
         "bm": {
-          "H": NaN,
-          "D": NaN,
-          "A": NaN
+          "H": null,
+          "D": null,
+          "A": null
         },
         "bm_prob": {
-          "H": NaN,
-          "D": NaN,
-          "A": NaN
+          "H": null,
+          "D": null,
+          "A": null
         },
         "kelly": null,
         "risultato": "1-0",

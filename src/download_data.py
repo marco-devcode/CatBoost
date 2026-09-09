@@ -64,17 +64,21 @@ def fetch_season(season: str, retries: int = 3, delay: float = 3.0) -> pd.DataFr
 
 
 def main():
-    # Se il file raw esiste già e contiene la stagione corrente (2627),
+    # Se il file raw esiste già e contiene partite della stagione 2026/27 (date >= 2026),
     # usalo direttamente e salta il download (evita 503 da football-data.co.uk)
     if OUT_PATH.exists():
         try:
             existing = pd.read_csv(OUT_PATH, dtype=str, low_memory=False)
-            if 'season' in existing.columns and '2627' in existing['season'].values:
-                print(f"  OK  File locale trovato con stagione 2627 ({len(existing)} righe) — salto download")
-                print(f"\\nTotale grezzo  : {len(existing)} righe")
-                print(f"Stagioni OK    : {sorted(existing['season'].unique())}")
-                print(f"Salvato in     : {OUT_PATH}")
-                return
+            # Cerca date 2026 (formato DD/MM/YYYY o YYYY-MM-DD)
+            if 'Date' in existing.columns:
+                dates = existing['Date'].astype(str)
+                has_2026 = dates.str.contains(r'2026|/26$').any()
+                if has_2026:
+                    print(f"  OK  File locale trovato con stagione 2026/27 ({len(existing)} righe) — salto download")
+                    print(f"\\nTotale grezzo  : {len(existing)} righe")
+                    print(f"Stagioni OK    : {sorted(existing['Div'].unique()) if 'Div' in existing.columns else 'N/A'}")
+                    print(f"Salvato in     : {OUT_PATH}")
+                    return
         except Exception as e:
             print(f"  WARN Impossibile leggere file locale: {e}, provo download...")
 

@@ -99,6 +99,7 @@ for col in CRITICAL_COLS:
         f"❌ ERRORE: colonna '{col}' contiene {n_nan} valori NaN!"
 
 assert 4800 <= len(df) <= 6500, \
-    f"❌ ATTENZIONE: numero partite fuori range atteso ({len(df)} — atteso 4800-6200)"
+    f"⚠️ ATTENZIONE: numero partite fuori range storico atteso ({len(df)} — atteso 4800-6200). " \
+    f"Se < 100, verifica che il CSV contenga tutte le stagioni (non solo la corrente)."
 
 print("\n✓ Dataset pronto per Fase 3")

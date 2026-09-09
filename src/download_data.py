@@ -74,6 +74,11 @@ def main():
                 dates = existing['Date'].astype(str)
                 has_2026 = dates.str.contains(r'2026|/26$').any()
                 if has_2026:
+                    # Aggiungi colonna season per compatibilità con clean_data.py
+                    if 'season' not in existing.columns:
+                        existing['season'] = '2627'
+                        existing.to_csv(OUT_PATH, index=False)
+                        print(f"  OK  Aggiunta colonna 'season'=2627 al file locale")
                     print(f"  OK  File locale trovato con stagione 2026/27 ({len(existing)} righe) — salto download")
                     print(f"\\nTotale grezzo  : {len(existing)} righe")
                     print(f"Stagioni OK    : {sorted(existing['Div'].unique()) if 'Div' in existing.columns else 'N/A'}")

@@ -225,18 +225,46 @@ if __name__ == "__main__":
     print(f"Train: {len(X_train)} | Test: {len(X_test)}")
     print(f"Feature: {list(X_train.columns)}")
 
-    baseline_model = train_baseline(X_train, X_test, y_train, y_test)
-    baseline_metrics = evaluate_model(baseline_model, X_test, y_test, "Baseline")
+    MODEL_PATH = MODELS_DIR / "catboost_seriea_v1.cbm"
 
-    best_params, cv_results = hyperparameter_tuning(X_train, y_train)
-    final_model = train_final_model(X_train, y_train, best_params)
+    if len(X_train) == 0:
+        print("\nAVVERTENZA: X_train vuoto (dataset parziale < cutoff).")
+        print("Caricamento modello pre-addestrato esistente...")
 
-    final_metrics = evaluate_model(final_model, X_test, y_test, "Tuned")
+        if not MODEL_PATH.exists():
+            print(f"ERRORE: modello {MODEL_PATH} non trovato e nessun training possibile.")
+            print("Impossibile procedere senza dati storici o modello pre-addestrato.")
+            sys.exit(1)
 
-    save_model_and_metrics(final_model, final_metrics, list(X_train.columns), "v1")
+        final_model = CatBoostClassifier()
+        final_model.load_model(str(MODEL_PATH))
+        print(f"Modello caricato da {MODEL_PATH}")
+
+        # Valutazione sul test set disponibile
+        if len(X_test) > 0:
+            final_metrics = evaluate_model(final_model, X_test, y_test, "Loaded")
+        else:
+            print("Nessun dato di test disponibile per la valutazione.")
+            final_metrics = {"accuracy": 0.0, "rps": 0.0}
+
+        baseline_metrics = final_metrics
+        best_params = {}
+        cv_results = []
+    else:
+        baseline_model = train_baseline(X_train, X_test, y_train, y_test)
+        baseline_metrics = evaluate_model(baseline_model, X_test, y_test, "Baseline")
+
+        best_params, cv_results = hyperparameter_tuning(X_train, y_train)
+        final_model = train_final_model(X_train, y_train, best_params)
+
+        final_metrics = evaluate_model(final_model, X_test, y_test, "Tuned")
+
+        save_model_and_metrics(final_model, final_metrics, list(X_train.columns), "v1")
 
     print(f"\n{'═'*55}")
     print(f"  FASE 4 COMPLETATA")
-    print(f"  Baseline → Accuracy: {baseline_metrics['accuracy']:.4f}, RPS: {baseline_metrics['rps']:.4f}")
-    print(f"  Tuned    → Accuracy: {final_metrics['accuracy']:.4f}, RPS: {final_metrics['rps']:.4f}")
+    if 'baseline_metrics' in dir():
+        print(f"  Baseline → Accuracy: {baseline_metrics['accuracy']:.4f}, RPS: {baseline_metrics['rps']:.4f}")
+    if 'final_metrics' in dir():
+        print(f"  Tuned    → Accuracy: {final_metrics['accuracy']:.4f}, RPS: {final_metrics['rps']:.4f}")
     print(f"{'═'*55}")

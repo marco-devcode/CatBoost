@@ -1,11 +1,11 @@
 {
   "meta": {
-    "last_update": "2026-08-28T13:48:28",
+    "last_update": "2026-09-12T18:00:00",
     "stagione": "2627",
     "fonte": "football-data.co.uk",
-    "ultima_giornata_giocata": 1,
-    "prossima_giornata": 2,
-    "freeze_until": 2,
+    "ultima_giornata_giocata": 3,
+    "prossima_giornata": 4,
+    "freeze_until": 3,
     "freeze_regola": "La giornata N si aggiorna solo fino ai risultati della N-1 (no hindsight)",
     "model_trained_at": "1970-01-01T00:00:01",
     "bookmaker_rps": 0.1152,
@@ -19,11 +19,15 @@
       "scommesse": 10,
       "stake_totale_pct": 54.8,
       "fraction": 0.25
+    },
+    "stats": {
+      "corrette": 17,
+      "total": 30
     }
   },
   "stats": {
-    "corrette": 7,
-    "total": 10
+    "corrette": 17,
+    "total": 30
   },
   "giornate": {
     "1": [
@@ -559,9 +563,20 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 1.45,
+          "D": 4.5,
+          "A": 7.0
+        },
+        "bm_prob": {
+          "H": 65.4,
+          "D": 21.1,
+          "A": 13.5
+        },
+        "kelly": null,
+        "risultato": "2-0",
+        "esito": "H",
+        "ok": true
       },
       {
         "home": "Sassuolo",
@@ -593,9 +608,25 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 2.25,
+          "D": 3.25,
+          "A": 3.3
+        },
+        "bm_prob": {
+          "H": 42.1,
+          "D": 29.2,
+          "A": 28.7
+        },
+        "kelly": {
+          "pick": "A",
+          "model_p": 51.2,
+          "odd": 3.3,
+          "stake_pct": 7.5
+        },
+        "risultato": "2-1",
+        "esito": "H",
+        "ok": false
       },
       {
         "home": "Juventus",
@@ -627,9 +658,20 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 1.22,
+          "D": 6.5,
+          "A": 11.0
+        },
+        "bm_prob": {
+          "H": 77.0,
+          "D": 14.5,
+          "A": 8.5
+        },
+        "kelly": null,
+        "risultato": "2-0",
+        "esito": "H",
+        "ok": true
       },
       {
         "home": "Fiorentina",
@@ -661,9 +703,20 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 1.62,
+          "D": 4.1,
+          "A": 5.25
+        },
+        "bm_prob": {
+          "H": 58.7,
+          "D": 23.2,
+          "A": 18.1
+        },
+        "kelly": null,
+        "risultato": "0-3",
+        "esito": "A",
+        "ok": false
       },
       {
         "home": "Monza",
@@ -695,9 +748,20 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 3.1,
+          "D": 3.2,
+          "A": 2.4
+        },
+        "bm_prob": {
+          "H": 30.7,
+          "D": 29.7,
+          "A": 39.6
+        },
+        "kelly": null,
+        "risultato": "2-3",
+        "esito": "A",
+        "ok": true
       },
       {
         "home": "Lazio",
@@ -729,9 +793,25 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 2.0,
+          "D": 3.1,
+          "A": 4.33
+        },
+        "bm_prob": {
+          "H": 47.5,
+          "D": 30.6,
+          "A": 21.9
+        },
+        "kelly": {
+          "pick": "H",
+          "model_p": 50.2,
+          "odd": 2.0,
+          "stake_pct": 0.1
+        },
+        "risultato": "1-0",
+        "esito": "H",
+        "ok": true
       },
       {
         "home": "Cagliari",
@@ -763,9 +843,20 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 7.0,
+          "D": 4.5,
+          "A": 1.44
+        },
+        "bm_prob": {
+          "H": 13.5,
+          "D": 21.0,
+          "A": 65.5
+        },
+        "kelly": null,
+        "risultato": "0-1",
+        "esito": "A",
+        "ok": true
       },
       {
         "home": "Napoli",
@@ -797,9 +888,25 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 2.5,
+          "D": 3.0,
+          "A": 3.1
+        },
+        "bm_prob": {
+          "H": 37.9,
+          "D": 31.6,
+          "A": 30.5
+        },
+        "kelly": {
+          "pick": "H",
+          "model_p": 48.5,
+          "odd": 2.5,
+          "stake_pct": 3.54
+        },
+        "risultato": "1-2",
+        "esito": "A",
+        "ok": false
       },
       {
         "home": "Atalanta",
@@ -831,9 +938,20 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 1.85,
+          "D": 3.75,
+          "A": 4.0
+        },
+        "bm_prob": {
+          "H": 51.1,
+          "D": 25.2,
+          "A": 23.6
+        },
+        "kelly": null,
+        "risultato": "1-0",
+        "esito": "H",
+        "ok": true
       },
       {
         "home": "Lecce",
@@ -865,9 +983,20 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 8.0,
+          "D": 4.0,
+          "A": 1.48
+        },
+        "bm_prob": {
+          "H": 11.9,
+          "D": 23.8,
+          "A": 64.3
+        },
+        "kelly": null,
+        "risultato": "0-4",
+        "esito": "A",
+        "ok": true
       }
     ],
     "3": [
@@ -901,9 +1030,25 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 5.25,
+          "D": 3.4,
+          "A": 1.75
+        },
+        "bm_prob": {
+          "H": 18.0,
+          "D": 27.9,
+          "A": 54.1
+        },
+        "kelly": {
+          "pick": "A",
+          "model_p": 65.6,
+          "odd": 1.75,
+          "stake_pct": 4.93
+        },
+        "risultato": "1-4",
+        "esito": "A",
+        "ok": true
       },
       {
         "home": "Fiorentina",
@@ -935,9 +1080,25 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 1.9,
+          "D": 3.3,
+          "A": 4.5
+        },
+        "bm_prob": {
+          "H": 50.1,
+          "D": 28.8,
+          "A": 21.1
+        },
+        "kelly": {
+          "pick": "A",
+          "model_p": 46.5,
+          "odd": 4.5,
+          "stake_pct": 7.8
+        },
+        "risultato": "1-2",
+        "esito": "A",
+        "ok": true
       },
       {
         "home": "Inter",
@@ -969,9 +1130,25 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 1.67,
+          "D": 3.6,
+          "A": 5.5
+        },
+        "bm_prob": {
+          "H": 56.6,
+          "D": 26.2,
+          "A": 17.2
+        },
+        "kelly": {
+          "pick": "A",
+          "model_p": 39.1,
+          "odd": 5.5,
+          "stake_pct": 6.39
+        },
+        "risultato": "3-2",
+        "esito": "H",
+        "ok": false
       },
       {
         "home": "Roma",
@@ -1003,9 +1180,20 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 1.73,
+          "D": 3.6,
+          "A": 5.0
+        },
+        "bm_prob": {
+          "H": 54.7,
+          "D": 26.3,
+          "A": 18.9
+        },
+        "kelly": null,
+        "risultato": "2-1",
+        "esito": "H",
+        "ok": true
       },
       {
         "home": "Juventus",
@@ -1037,9 +1225,25 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 2.1,
+          "D": 3.25,
+          "A": 3.7
+        },
+        "bm_prob": {
+          "H": 45.2,
+          "D": 29.2,
+          "A": 25.6
+        },
+        "kelly": {
+          "pick": "H",
+          "model_p": 56.8,
+          "odd": 2.1,
+          "stake_pct": 4.38
+        },
+        "risultato": "1-1",
+        "esito": "D",
+        "ok": false
       },
       {
         "home": "Bologna",
@@ -1071,9 +1275,25 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 2.0,
+          "D": 3.4,
+          "A": 3.9
+        },
+        "bm_prob": {
+          "H": 47.6,
+          "D": 28.0,
+          "A": 24.4
+        },
+        "kelly": {
+          "pick": "H",
+          "model_p": 57.4,
+          "odd": 2.0,
+          "stake_pct": 3.7
+        },
+        "risultato": "2-2",
+        "esito": "D",
+        "ok": false
       },
       {
         "home": "Frosinone",
@@ -1105,9 +1325,25 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 2.7,
+          "D": 3.3,
+          "A": 2.6
+        },
+        "bm_prob": {
+          "H": 35.0,
+          "D": 28.6,
+          "A": 36.4
+        },
+        "kelly": {
+          "pick": "A",
+          "model_p": 45.0,
+          "odd": 2.6,
+          "stake_pct": 2.66
+        },
+        "risultato": "3-2",
+        "esito": "H",
+        "ok": false
       },
       {
         "home": "Parma",
@@ -1139,9 +1375,25 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 2.6,
+          "D": 3.1,
+          "A": 2.9
+        },
+        "bm_prob": {
+          "H": 36.6,
+          "D": 30.7,
+          "A": 32.8
+        },
+        "kelly": {
+          "pick": "H",
+          "model_p": 56.5,
+          "odd": 2.6,
+          "stake_pct": 7.33
+        },
+        "risultato": "1-1",
+        "esito": "D",
+        "ok": false
       },
       {
         "home": "Cagliari",
@@ -1173,9 +1425,25 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 2.0,
+          "D": 3.1,
+          "A": 4.33
+        },
+        "bm_prob": {
+          "H": 47.5,
+          "D": 30.6,
+          "A": 21.9
+        },
+        "kelly": {
+          "pick": "D",
+          "model_p": 54.4,
+          "odd": 3.1,
+          "stake_pct": 8.17
+        },
+        "risultato": "1-0",
+        "esito": "H",
+        "ok": false
       },
       {
         "home": "Udinese",
@@ -1207,9 +1475,25 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 2.9,
+          "D": 3.1,
+          "A": 2.55
+        },
+        "bm_prob": {
+          "H": 32.5,
+          "D": 30.4,
+          "A": 37.0
+        },
+        "kelly": {
+          "pick": "D",
+          "model_p": 45.2,
+          "odd": 3.1,
+          "stake_pct": 4.78
+        },
+        "risultato": "1-2",
+        "esito": "A",
+        "ok": false
       }
     ],
     "4": [

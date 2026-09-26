@@ -1,6 +1,6 @@
 # 🏆 Report Finale — CatBoost Serie A Match Prediction
 
-**Data**: 2026-09-26 06:36
+**Data**: 2026-09-26 07:02
 **Modello migliore**: Baseline (Pi-Rating + FE) (`v1_baseline`)
 
 ---
@@ -9,7 +9,7 @@
 
 | Modello | Feature | RPS ↓ | Accuracy |
 |---------|---------|-------|----------|
-| Baseline (Pi-Rating + FE) | 18 | 0.0511 | 66.67% ◄ **BEST**|
+| Baseline (Pi-Rating + FE) | 18 | 0.1347 | 53.27% ◄ **BEST**|
 
 ---
 
@@ -17,11 +17,11 @@
 
 | Metrica | Valore | Note |
 |---------|--------|------|
-| **Accuracy** | 0.6667 | Target > 0.52 |
-| **RPS** | 0.0511 | Più basso = meglio |
-| **Recall Home Win** | 100.00% | |
-| **Recall Draw** | 0.00% | Classe più difficile |
-| **Recall Away Win** | 0.00% | |
+| **Accuracy** | 0.5327 | Target > 0.52 |
+| **RPS** | 0.1347 | Più basso = meglio |
+| **Recall Home Win** | 74.71% | |
+| **Recall Draw** | 13.08% | Classe più difficile |
+| **Recall Away Win** | 57.62% | |
 
 ---
 
@@ -29,9 +29,9 @@
 
 | | RPS ↓ | Accuracy |
 |--|-------|----------|
-| **CatBoost (v1_baseline)** | 0.0511 | 66.67% |
-| **Bet365** | 0.2646 | 33.33% |
-| **Delta** | +0.2135 ✅ | +0.3333 ✅ |
+| **CatBoost (v1_baseline)** | 0.1347 | 53.27% |
+| **Bet365** | 0.1784 | 37.38% |
+| **Delta** | +0.0437 ✅ | +0.1589 ✅ |
 
 ---
 
@@ -42,12 +42,12 @@
 
 | Metrica | Valore |
 |---------|--------|
-| Scommesse piazzate | 6 |
+| Scommesse piazzate | 428 |
 | Bankroll iniziale | €1000 |
-| Bankroll finale | €5092.45 |
-| Profitto | €+4092.45 |
-| ROI | +409.2% |
-| Stake totale | 158.6% del bankroll |
+| Bankroll finale | €260593941538056160.00 |
+| Profitto | €+260593941538055168.00 |
+| ROI | +26059394153805516.0% |
+| Stake totale | 1.6992625964947146e+16% del bankroll |
 
 ![Kelly Simulation](kelly_simulation.png)
 
@@ -61,8 +61,8 @@
 
 | Flag | mean |SHAP| | Rank su 18 feature |
 |------|-------------|------|
-| home_promoted | 0.000000 | 17/18 |
-| away_promoted | 0.000000 | 18/18 |
+| home_promoted | 0.014192 | 17/18 |
+| away_promoted | 0.027331 | 18/18 |
 
 ![SHAP Summary](shap_summary.png)
 
@@ -73,13 +73,13 @@
 ```
               precision    recall  f1-score   support
 
-           H     1.0000    1.0000    1.0000         4
-           D     0.0000    0.0000    0.0000         1
-           A     0.0000    0.0000    0.0000         1
+           H     0.5292    0.7471    0.6195       170
+           D     0.3590    0.1308    0.1918       107
+           A     0.5839    0.5762    0.5800       151
 
-    accuracy                         0.6667         6
-   macro avg     0.3333    0.3333    0.3333         6
-weighted avg     0.6667    0.6667    0.6667         6
+    accuracy                         0.5327       428
+   macro avg     0.4907    0.4847    0.4638       428
+weighted avg     0.5059    0.5327    0.4986       428
 
 ```
 

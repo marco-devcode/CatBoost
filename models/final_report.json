@@ -1,29 +1,29 @@
 {
   "best_model": "v1_baseline",
   "best_model_desc": "Baseline (Pi-Rating + FE)",
-  "accuracy": 0.5164,
-  "rps_model": 0.1331,
-  "f1_macro": 0.4568,
-  "f1_weighted": 0.4828,
+  "accuracy": 0.6667,
+  "rps_model": 0.0511,
+  "f1_macro": 0.3333,
+  "f1_weighted": 0.6667,
   "f1_per_class": {
-    "H": 0.624,
-    "D": 0.2007,
-    "A": 0.5458
+    "H": 1.0,
+    "D": 0.0,
+    "A": 0.0
   },
   "precision_per_class": {
-    "H": 0.5438,
-    "D": 0.3471,
-    "A": 0.5279
+    "H": 1.0,
+    "D": 0.0,
+    "A": 0.0
   },
-  "recall_home": 0.7318,
-  "recall_draw": 0.1411,
-  "recall_away": 0.5649,
+  "recall_home": 1.0,
+  "recall_draw": 0.0,
+  "recall_away": 0.0,
   "recall_per_class": {
-    "H": 0.7318,
-    "D": 0.1411,
-    "A": 0.5649
+    "H": 1.0,
+    "D": 0.0,
+    "A": 0.0
   },
-  "n_test": 1522,
+  "n_test": 6,
   "n_features": 18,
   "features": [
     "pi_home_H",
@@ -45,34 +45,34 @@
     "home_promoted",
     "away_promoted"
   ],
-  "rps_bookmaker": 0.1722,
-  "accuracy_bookmaker": 0.3673,
+  "rps_bookmaker": 0.2646,
+  "accuracy_bookmaker": 0.3333,
   "beats_bookmaker_rps": true,
   "kelly": {
     "bankroll_iniziale": 1000.0,
-    "bankroll_finale": 1.5479793920462389e+50,
-    "profitto": 1.5479793920462389e+50,
-    "roi_pct": 1.547979392046239e+49,
-    "scommesse": 1522,
-    "stake_totale_pct": 1.2311177593279722e+49,
+    "bankroll_finale": 5092.45,
+    "profitto": 4092.45,
+    "roi_pct": 409.24,
+    "scommesse": 6,
+    "stake_totale_pct": 158.6,
     "fraction": 0.25
   },
   "shap_neopromossa": {
     "home_promoted": {
-      "mean_abs_shap": 0.01844662232427376,
+      "mean_abs_shap": 0.0,
       "rank": 17,
       "n_features_total": 18,
-      "shap_feature1_classH": -0.013926342962424704,
-      "shap_feature0_classH": 0.006394735884489929,
-      "delta_classH": -0.02032107884691463
+      "shap_feature1_classH": 0.0,
+      "shap_feature0_classH": 0.0,
+      "delta_classH": 0.0
     },
     "away_promoted": {
-      "mean_abs_shap": 0.02886621068256227,
+      "mean_abs_shap": 0.0,
       "rank": 18,
       "n_features_total": 18,
-      "shap_feature1_classH": 0.06724606108278246,
-      "shap_feature0_classH": -0.028939409100270555,
-      "delta_classH": 0.09618547018305301
+      "shap_feature1_classH": 0.0,
+      "shap_feature0_classH": 0.0,
+      "delta_classH": 0.0
     }
   }
 }

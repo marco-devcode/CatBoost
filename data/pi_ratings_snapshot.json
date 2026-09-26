@@ -1,85 +1,85 @@
 {
   "Atalanta": {
-    "attack": -0.1428,
-    "defence": -0.1895
+    "attack": -0.1424,
+    "defence": -0.1896
   },
   "Bologna": {
     "attack": -0.9944,
-    "defence": -0.1105
+    "defence": -0.111
   },
   "Cagliari": {
-    "attack": -0.5395,
-    "defence": 1.4242
+    "attack": -0.539,
+    "defence": 1.423
   },
   "Como": {
-    "attack": 0.2335,
-    "defence": -0.1225
+    "attack": 0.2333,
+    "defence": -0.1228
   },
   "Fiorentina": {
-    "attack": 0.1788,
-    "defence": -0.7162
+    "attack": 0.1797,
+    "defence": -0.7158
   },
   "Frosinone": {
-    "attack": 0.1623,
+    "attack": 0.1622,
     "defence": 0.3407
   },
   "Genoa": {
-    "attack": -0.7685,
-    "defence": -0.6301
+    "attack": -0.7681,
+    "defence": -0.6295
   },
   "Inter": {
-    "attack": 1.0578,
-    "defence": -0.2974
+    "attack": 1.0569,
+    "defence": -0.2968
   },
   "Juventus": {
-    "attack": 0.0909,
-    "defence": 0.5132
+    "attack": 0.0908,
+    "defence": 0.5134
   },
   "Lazio": {
-    "attack": 0.1127,
-    "defence": 0.707
+    "attack": 0.1131,
+    "defence": 0.7074
   },
   "Lecce": {
     "attack": 0.0577,
-    "defence": -0.4087
+    "defence": -0.4088
   },
   "Milan": {
-    "attack": 0.6033,
-    "defence": 0.3616
+    "attack": 0.6029,
+    "defence": 0.3614
   },
   "Monza": {
     "attack": -0.1402,
-    "defence": -0.3665
+    "defence": -0.3667
   },
   "Napoli": {
-    "attack": -0.2217,
-    "defence": 0.1795
+    "attack": -0.2219,
+    "defence": 0.1789
   },
   "Parma": {
-    "attack": -0.5606,
+    "attack": -0.5611,
     "defence": -0.3747
   },
   "Roma": {
-    "attack": 0.5162,
-    "defence": 0.9183
+    "attack": 0.5163,
+    "defence": 0.9174
   },
   "Sassuolo": {
     "attack": 0.3719,
-    "defence": -0.7361
+    "defence": -0.7356
   },
   "Torino": {
-    "attack": -0.4114,
-    "defence": -0.104
+    "attack": -0.4111,
+    "defence": -0.1032
   },
   "Udinese": {
-    "attack": 0.3943,
-    "defence": -0.3885
+    "attack": 0.3939,
+    "defence": -0.3879
   },
   "Venezia": {
     "attack": 0.0,
     "defence": 0.0
   },
   "_global": {
-    "home_advantage": 0.1462
+    "home_advantage": 0.1466
   }
 }

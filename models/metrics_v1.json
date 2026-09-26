@@ -1,6 +1,6 @@
 {
-  "accuracy": 0.490654,
-  "rps": 0.143133,
+  "accuracy": 0.521028,
+  "rps": 0.136052,
   "features": [
     "pi_home_H",
     "pi_away_H",
@@ -12,7 +12,6 @@
     "away_goal_diff_5",
     "home_rest_days",
     "away_rest_days",
-    "rest_advantage",
     "h2h_home_winrate",
     "home_goals_scored_5",
     "home_goals_conceded_5",

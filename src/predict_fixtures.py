@@ -429,9 +429,15 @@ def main():
           f"{sorted(current_season_teams)}")
 
     # ── Freeze stime passate ──────────────────────────────────────────
+    # Il freeze e' SEMPRE attivo per le partite con risultato reale, anche se il
+    # modello e' stato riaddestrato nel frattempo. Ricalcolare le percentuali
+    # di una partita gia' giocata userebbe informazioni che al momento della
+    # previsione non esistevano (hindsight bias), quindi lo snapshot resta.
+    # prev_estimates contiene solo partite giocate: la chiave e' data+squadre,
+    # cosi' un cambio di data non crea una partita nuova con lo stesso nome.
     prev_estimates = {}
     prev_model_trained_at = None
-    freeze_active = False
+    model_changed = False
     if OUT_JSON.exists():
         try:
             with open(OUT_JSON) as f:
@@ -441,13 +447,12 @@ def main():
                 for m in ms:
                     if m.get("ok") is not None:
                         prev_estimates[_match_key(m["home"], m["away"], m["date"])] = m
-            freeze_active = (prev_model_trained_at == model_trained_at)
-            n = len(prev_estimates)
-            print(f"  Freeze {'ATTIVO' if freeze_active else 'DISATTIVO (modello cambiato)'}:"
-                  f" {n} stime di partite gia' giocate")
+            model_changed = (prev_model_trained_at != model_trained_at)
+            print(f"  Freeze ATTIVO su {len(prev_estimates)} partite giocate"
+                  + (" (modello riaddestrato: gli snapshot restano invariati)"
+                     if model_changed else ""))
         except Exception as e:
             print(f"  [warn] predictions.json precedente illeggibile: {e}")
-            freeze_active = False
 
     # ── Predizioni + bookmaker + kelly ────────────────────────────────
     LABELS = ['H', 'D', 'A']

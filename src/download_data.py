@@ -64,29 +64,10 @@ def fetch_season(season: str, retries: int = 3, delay: float = 3.0) -> pd.DataFr
 
 
 def main():
-    # Se il file raw esiste già e contiene partite della stagione 2026/27 (date >= 2026),
-    # usalo direttamente e salta il download (evita 503 da football-data.co.uk)
-    if OUT_PATH.exists():
-        try:
-            existing = pd.read_csv(OUT_PATH, dtype=str, low_memory=False)
-            # Cerca date 2026 (formato DD/MM/YYYY o YYYY-MM-DD)
-            if 'Date' in existing.columns:
-                dates = existing['Date'].astype(str)
-                has_2026 = dates.str.contains(r'2026|/26$').any()
-                if has_2026:
-                    # Aggiungi colonna season per compatibilità con clean_data.py
-                    if 'season' not in existing.columns:
-                        existing['season'] = '2627'
-                        existing.to_csv(OUT_PATH, index=False)
-                        print(f"  OK  Aggiunta colonna 'season'=2627 al file locale")
-                    print(f"  OK  File locale trovato con stagione 2026/27 ({len(existing)} righe) — salto download")
-                    print(f"\\nTotale grezzo  : {len(existing)} righe")
-                    print(f"Stagioni OK    : {sorted(existing['Div'].unique()) if 'Div' in existing.columns else 'N/A'}")
-                    print(f"Salvato in     : {OUT_PATH}")
-                    return
-        except Exception as e:
-            print(f"  WARN Impossibile leggere file locale: {e}, provo download...")
-
+    # Lo storico completo e' la base del modello: addestrarlo sulle sole
+    # partite della stagione corrente (50 righe) non basta a stimare i pesi su
+    # 18 feature e produce previsioni arbitrarie. Quindi scarichiamo TUTTE le
+    # stagioni elencate in SEASONS, ogni volta.
     dfs = []
     for s in SEASONS:
         try:
@@ -100,7 +81,7 @@ def main():
             print(f"  OK  Stagione {s}: {len(df)} partite")
         except Exception as e:
             print(f"  ERR Stagione {s} fallita (forse non ancora disponibile): {e}")
-        time.sleep(1.0)   # pausa cortesia tra stagioni
+        time.sleep(0.4)   # pausa cortesia tra stagioni
 
     if not dfs:
         raise RuntimeError("Nessuna stagione scaricata. Controlla la connessione.")

@@ -18,8 +18,11 @@ export interface MatchPrediction {
     odd: number;
     stake_pct: number;
   } | null;
-  // Feature usate dal modello (per trasparenza), in ordine FEATURE_ORDER
-  features?: Record<string, number>;
+  // Feature usate dal modello (per trasparenza), in ordine FEATURE_ORDER.
+  // Il valore puo' essere null: il valore mancante (squadra con meno di 5
+  // partite con statistiche) non e' rappresentabile in JSON come NaN, quindi
+  // la pipeline lo scrive come null.
+  features?: Record<string, number | null>;
 }
 
 export interface KellySummary {

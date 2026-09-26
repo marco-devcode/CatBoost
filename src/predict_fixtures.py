@@ -636,7 +636,23 @@ def main():
         print(f"  Kelly (fraction={KELLY_FRACTION}): {len(kelly_log)} scommesse, "
               f"bankroll finale €{bankroll:.2f} (ROI {roi:.1f}%)")
 
-    out = {
+    # ── JSON-safe: NaN/Infinity NON sono JSON valido. Python li serializza
+    # come NaN/Infinity e Safari/WebKit (JSON.parse) rifiuta l'intero file con
+    # "The string did not match the expected pattern" (Chrome lo tollera, quindi
+    # il bug restava invisibile). Convertiamo in null, che è JSON valido e
+    # corrisponde al "valore mancante" che CatBoost si aspetta.
+    def _json_safe(o):
+        if isinstance(o, dict):
+            return {k: _json_safe(v) for k, v in o.items()}
+        if isinstance(o, (list, tuple)):
+            return [_json_safe(v) for v in o]
+        if isinstance(o, float):
+            return None if (np.isnan(o) or np.isinf(o)) else o
+        if o is None or isinstance(o, (bool, int, str)):
+            return o
+        return o
+
+    out = _json_safe({
         "meta": {
             "last_update": pd.Timestamp.now().isoformat(timespec="seconds"),
             "stagione": SEASON_FD,
@@ -650,11 +666,14 @@ def main():
         },
         "stats": {"corrette": corrette, "total": len(giocate)},
         "giornate": dict(sorted(giornate.items(), key=lambda kv: int(kv[0]))),
-    }
+    })
 
     WEBAPP_PUBLIC.mkdir(parents=True, exist_ok=True)
     with open(OUT_JSON, 'w') as f:
-        json.dump(out, f, indent=2, ensure_ascii=False)
+        # allow_nan=False -> solleva invece di scrivere NaN. Belt and braces:
+        # _json_safe già ripulisce, ma se resta un NaN vogliamo che esploda qui
+        # in CI e non sul browser dell'utente.
+        json.dump(out, f, indent=2, ensure_ascii=False, allow_nan=False)
     print(f"\nGiornate: {len(giornate)} | Giocate: {len(giocate)} "
           f"| Corrette: {corrette} ({(corrette/max(len(giocate),1)*100):.0f}%)")
     print(f"Salvato: {OUT_JSON}")

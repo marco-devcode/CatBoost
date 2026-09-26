@@ -30,7 +30,9 @@ const FEATURE_LABELS: Record<string, string> = {
   away_goals5: "Gol trasf. (ult. 5)",
 };
 
-function fmtVal(v: number): string {
+function fmtVal(v: number | null | undefined): string {
+  // Le feature mancanti arrivano come null (JSON non puo' rappresentare NaN).
+  if (v === null || v === undefined || Number.isNaN(v)) return "n/d";
   if (Number.isInteger(v)) return v.toString();
   return v.toFixed(3);
 }

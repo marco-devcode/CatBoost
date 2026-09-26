@@ -152,9 +152,12 @@ def compute_features_for_match(df, home, away, match_date, h2h_cache=None,
         except Exception:
             return float(REST_CAP)
 
+    # rest_advantage NON e' una feature del modello: e' esattamente
+    # home_rest_days - away_rest_days (verificato: coincide su tutte le righe),
+    # quindi non aggiunge informazione. Il modello riceve solo i due livelli
+    # assoluti, da cui ricava il vantaggio da solo.
     feats['home_rest_days'] = rest_days(home)
     feats['away_rest_days'] = rest_days(away)
-    feats['rest_advantage'] = feats['home_rest_days'] - feats['away_rest_days']
 
     # Rolling goals (replica di features.add_rolling_goals): media gol fatti/subiti
     # negli ultimi 5 match CASA per la di casa, TRASFERTA per l'ospite.
@@ -207,7 +210,9 @@ FEATURE_ORDER = [
     'pi_home_H', 'pi_away_H', 'pi_home_A', 'pi_away_A',
     'home_form_5', 'away_form_5',
     'home_goal_diff_5', 'away_goal_diff_5',
-    'home_rest_days', 'away_rest_days', 'rest_advantage',
+    # Riposo: i due livelli assoluti. rest_advantage NON e' inclusa perche' e'
+    # la loro differenza (home - away) e quindi ridondante.
+    'home_rest_days', 'away_rest_days',
     'h2h_home_winrate',
     'home_goals_scored_5', 'home_goals_conceded_5',
     'away_goals_scored_5', 'away_goals_conceded_5',

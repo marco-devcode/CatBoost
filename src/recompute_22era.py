@@ -39,7 +39,7 @@ FEATURE_ORDER = [
     "pi_home_H", "pi_away_H", "pi_home_A", "pi_away_A",
     "home_form_5", "away_form_5",
     "home_goal_diff_5", "away_goal_diff_5",
-    "home_rest_days", "away_rest_days", "rest_advantage",
+    "home_rest_days", "away_rest_days",
     "h2h_home_winrate",
     "home_goals_scored_5", "home_goals_conceded_5",
     "away_goals_scored_5", "away_goals_conceded_5",
@@ -145,7 +145,6 @@ def compute_features(hist, home, away, match_date, h2h_cache, current_season_tea
     hd, ad = rest(home), rest(away)
     feats["home_rest_days"] = hd
     feats["away_rest_days"] = ad
-    feats["rest_advantage"] = hd - ad
 
     def roll_goals(team, is_home):
         tcol = "HomeTeam" if is_home else "AwayTeam"

@@ -6,8 +6,8 @@ Misura Accuracy e F1 (macro) su entrambi per rispondere alla domanda:
 
 Feature set A (CON):  pi_home_H, pi_away_H, pi_home_A, pi_away_A
                       + home_form_5, away_form_5, home_goal_diff_5, away_goal_diff_5,
-                        home_rest_days, away_rest_days, rest_advantage, h2h_home_winrate
-Feature set B (SENZA): solo le 8 non-Pi-Rating
+                        home_rest_days, away_rest_days, h2h_home_winrate
+Feature set B (SENZA): solo le 7 non-Pi-Rating
 """
 import sys
 import json

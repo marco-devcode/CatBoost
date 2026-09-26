@@ -246,8 +246,9 @@ FEATURE_COLS = [
     # Forma recente
     'home_form_5', 'away_form_5',
     'home_goal_diff_5', 'away_goal_diff_5',
-    # Riposo
-    'home_rest_days', 'away_rest_days', 'rest_advantage',
+    # Riposo: i due livelli assoluti, saturati a REST_CAP. rest_advantage non
+    # e' una feature: e' esattamente la loro differenza, quindi ridondante.
+    'home_rest_days', 'away_rest_days',
     # Head to head
     'h2h_home_winrate',
     # Rolling goals (ultimi 5, casa/trasferta)

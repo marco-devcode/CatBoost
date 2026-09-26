@@ -112,6 +112,23 @@ export default function KellyPage() {
     ? ((kelly.vinte ?? bets.filter((b) => b.win).length) / kelly.scommesse) * 100
     : 0;
 
+  // Esempio: la puntata con l'edge piu' ampio, per mostrare il caso peggiore
+  // (frazione di Kelly piu' aggressiva) e rendere la spiegazione concreta.
+  const example =
+    bets.length > 0
+      ? bets.reduce((best, b) =>
+          b.model_p - b.bm_p > best.model_p - best.bm_p ? b : best
+        )
+      : null;
+  const fullKellyPct = example
+    ? (((example.model_p / 100) * example.odd - 1) / (example.odd - 1)) * 100
+    : 0;
+  const betBankrollBefore = example
+    ? example.n === 1
+      ? kelly!.bankroll_iniziale
+      : bets[example.n - 2].bankroll_dopo
+    : 0;
+
   if (!kelly || bets.length === 0)
     return (
       <div className="container">
@@ -178,6 +195,105 @@ export default function KellyPage() {
           {kelly.fraction * 100}% della frazione di Kelly piena calcolata su
           quella quota. Non è un consiglio di scommessa.
         </div>
+      </div>
+
+      <h2 className="kelly-h2">Come funziona questa simulazione</h2>
+
+      <div className="kelly-explain">
+        <p>
+          <b>Cosa sia il Kelly criterion.</b> Kelly (1956) risponde a una domanda:
+          se hai una stima di probabilità <i>p</i> e una quota <i>o</i> che
+          paga <i>o</i> volte la puntata in caso di vittoria, che percentuale del
+          bankroll conviene giocare? La formula della frazione piena è
+        </p>
+        <p className="kelly-formula">
+          f* = (p·o − 1) / (o − 1)
+        </p>
+        <p>
+          Il termine <i>p·o</i> è il ritorno atteso moltiplicato per la quota; −1
+          toglie la puntata che hai impegnato. Se <i>p·o ≤ 1</i> il risultato è
+          ≤ 0 e la formula dice di non giocare: la quota non contiene abbastanza
+          margine per compensare l&apos;errore della stima.
+        </p>
+
+        <p>
+          <b>Perché il 25% e non la frazione piena.</b> Kelly pieno è corretto
+          solo se la probabilità <i>p</i> è esatta. In realtà <i>p</i> è una
+          stima di un modello, quindi sbaglia. Il Kelly pieno cresce
+          esponenzialmente con l&apos;errore: se <i>p</i> è sovrastimata, la
+          frazione ottima calcolata è troppo grande e il bankroll crolla molto
+          prima che tu possa accorgertene. Su questa stagione (
+          {kelly.vinte ?? 0} vinte su {kelly.scommesse}, ROI{" "}
+          {kelly.roi_pct >= 0 ? "+" : ""}
+          {kelly.roi_pct.toFixed(1)}%) la differenza non è teorica: è il
+          risultato reale. Praticando il <b>Kelly frazionato</b> (in letteratura{" "}
+          <i>Fractional Kelly</i>), usando un quarto della frazione piena, si
+          sacrifica circa metà del rendimento atteso a lungo periodo in cambio di
+          una volatilità molto più contenuta: un&apos;underperformance porta a
+          perdite piccole invece che al fallimento del bankroll.
+        </p>
+
+        <p>
+          <b>Come viene scelta la puntata.</b> La pipeline simula partite
+          <i>già giocate</i> e su ognuna sceglie l&apos;esito su cui il modello ha
+          probabilità maggiore di quella del bookmaker (edge = p_modello −
+          p_bookmaker, entrambe private dell&apos;overround). Su quella scommessa
+          calcola la frazione di Kelly piena e ne prende il {kelly.fraction * 100}
+          %. La puntata in euro è quella frazione applicata al bankroll{" "}
+          <i>di quel momento</i>, quindi le scommesse successive sono più grandi o
+          più piccole a seconda di come sta andando il bankroll — è il
+          compounding.
+        </p>
+
+        <p>
+          <b>Esempio reale da questa pagina.</b>{" "}
+          {example ? (
+            <>
+              Partita #{example.n}{" "}
+              {example.home}–{example.away}, pick {example.pick_label} a quota{" "}
+              {example.odd.toFixed(2)}, il modello dava{" "}
+              {example.model_p.toFixed(1).replace(".", ",")}% contro il{" "}
+              {example.bm_p.toFixed(1).replace(".", ",")}% del bookmaker (edge{" "}
+              {(example.model_p - example.bm_p).toFixed(1).replace(".", ",")} punti).
+              Con p = {(example.model_p / 100).toFixed(3).replace(".", ",")} e
+              o = {example.odd.toFixed(2).replace(".", ",")} la frazione piena è{" "}
+              {fullKellyPct.toFixed(2).replace(".", ",")}%; il{" "}
+              {(kelly.fraction * 100).toFixed(0)}% di quella è{" "}
+              <b>{example.kelly_pct.toFixed(2).replace(".", ",")}%</b>, cioè €
+              {example.stake.toFixed(2).replace(".", ",")} su un bankroll di €
+              {betBankrollBefore.toFixed(2).replace(".", ",")}. La scommessa{" "}
+              {example.win ? (
+                <>
+                  ha vinto e ha reso €{example.payout.toFixed(2).replace(".", ",")},
+                  portando il bankroll a €
+                  {example.bankroll_dopo.toFixed(2).replace(".", ",")}.
+                </>
+              ) : (
+                <>
+                  è persa: il bankroll è sceso a €
+                  {example.bankroll_dopo.toFixed(2).replace(".", ",")}, e la
+                  puntata si rifà sulle {" "}
+                  {example.n === bets.length ? "€1000 iniziali" : `€${betBankrollBefore.toFixed(2).replace(".", ",")}`}{" "}
+                  di allora.
+                </>
+              )}
+            </>
+          ) : (
+            <>Non ci sono puntate con edge sufficiente per mostrare un esempio.</>
+          )}
+        </p>
+
+        <p>
+          <b>Cosa NON misura.</b> La simulazione non dice quanto il modello
+          guadagnerebbe in media a lungo periodo: mostra cosa sarebbe successo
+          su {kelly.scommesse} partite specifiche, con queste quote, in questo
+          ordine. L&apos;ordine conta (il compounding amplifica sia le vincite
+          sia le perdite), il campione è piccolo, e le quote contengono già il
+          margine del banco. Per valutare la qualità del modello in astratto
+          conviene guardare l&apos;RPS, che misura la calibrazione e non dipende
+          dalla sequenza.{" "}
+          <b>Nessuna di queste cifre è un consiglio di scommessa.</b>
+        </p>
       </div>
 
       <h2 className="kelly-h2">Tutte le puntate, in ordine</h2>

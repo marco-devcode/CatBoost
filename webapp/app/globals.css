@@ -699,3 +699,33 @@ body {
   font-weight: 600;
   color: var(--text);
 }
+
+/* ── Spiegazione simulazione Kelly ─────────────────────────────────── */
+.kelly-explain {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 0.82rem;
+  line-height: 1.65;
+  color: var(--muted);
+}
+
+.kelly-explain p { margin-bottom: 12px; }
+.kelly-explain p:last-child { margin-bottom: 0; }
+
+.kelly-explain b { color: var(--text); }
+.kelly-explain i { color: var(--text); font-style: italic; }
+
+.kelly-formula {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.95rem;
+  text-align: center;
+  color: var(--text) !important;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 8px;
+  margin: 14px 0;
+  letter-spacing: 0.02em;
+}

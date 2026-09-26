@@ -14,6 +14,7 @@ che restano il dato reale della partita.
 """
 import json
 import math
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -29,6 +30,10 @@ MODEL_PATH = MODELS / "catboost_seriea_v1.cbm"
 RATINGS = DATA / "serie_a_ratings.csv"
 CLEAN = DATA / "serie_a_clean.csv"
 WINDOW = 5
+
+# Stessa soglia di saturazione usata in training e in predict.py.
+sys.path.insert(0, str(ROOT / "src"))
+from features import REST_CAP  # noqa: E402
 
 FEATURE_ORDER = [
     "pi_home_H", "pi_away_H", "pi_home_A", "pi_away_A",
@@ -135,7 +140,7 @@ def compute_features(hist, home, away, match_date, h2h_cache, current_season_tea
         sub = past[(past["HomeTeam"] == team) | (past["AwayTeam"] == team)]
         if len(sub) == 0:
             return 7.0
-        return float((match_date - sub["Date"].max()).days)
+        return float(min((match_date - sub["Date"].max()).days, REST_CAP))
 
     hd, ad = rest(home), rest(away)
     feats["home_rest_days"] = hd

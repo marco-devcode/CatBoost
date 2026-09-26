@@ -30,6 +30,11 @@ MODELS_DIR = ROOT / "models"
 
 WINDOW = 5
 
+# Soglia di saturazione dei giorni di riposo. Unica sorgente di verita': viene
+# importata da features.py cosi' training e inferenza non possono divergere.
+# Vedi la nota lunga su REST_CAP in features.add_rest_days.
+from features import REST_CAP  # noqa: E402
+
 
 def load_history():
     """Carica il dataset pulito + Pi-Rating."""
@@ -133,15 +138,19 @@ def compute_features_for_match(df, home, away, match_date, h2h_cache=None,
     feats['away_goal_diff_5'] = team_goaldiff(away, False)
 
     # Rest days (approssimato: giorni dall'ultima partita di ciascuna squadra)
+    # Saturati a REST_CAP: oltre la soglia il recupero e' completo e i giorni
+    # in piu' non devono cambiare la stima. Deve corrispondere ESATTAMENTE a
+    # features.add_rest_days, altrimenti training e inferenza vedono la stessa
+    # feature con significato diverso.
     def rest_days(team):
         sub = past[(past['HomeTeam'] == team) | (past['AwayTeam'] == team)].sort_values('Date')
         if len(sub) == 0 or match_date is None:
-            return 7.0
+            return float(REST_CAP)
         last = sub['Date'].max()
         try:
-            return float((match_date - last).days)
+            return float(min((match_date - last).days, REST_CAP))
         except Exception:
-            return 7.0
+            return float(REST_CAP)
 
     feats['home_rest_days'] = rest_days(home)
     feats['away_rest_days'] = rest_days(away)

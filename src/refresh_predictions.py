@@ -24,6 +24,10 @@ OUT  = ROOT / "webapp" / "public" / "predictions.json"
 RAW  = ROOT / "data" / "serie_a_raw.csv"
 RATINGS = ROOT / "data" / "serie_a_ratings.csv"
 
+# Stessa soglia di saturazione dei giorni di riposo usata in training.
+sys.path.insert(0, str(ROOT / "src"))
+from features import REST_CAP  # noqa: E402
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # CALENDARIO: le date vengono dalla fonte autorevole (football-data.co.uk) o
 # TheSportsDB. NON hardcodare qui: la season 2627 non e' ancora finita e le date
@@ -176,11 +180,12 @@ def compute_features(home, away, match_date, history):
     feats['away_goal_diff_5'] = team_gd(away, False)
 
     # ── Rest days ────────────────────────────────────────────────────────
+    # Saturati a REST_CAP, coerentemente con features.add_rest_days e predict.py.
     def rest_days(team):
         sub = past[(past['HomeTeam'] == team) | (past['AwayTeam'] == team)]
-        if len(sub) == 0: return 7.0
+        if len(sub) == 0: return float(REST_CAP)
         last_ts = sub['Date'].max()
-        return float((match_ts - last_ts).days)
+        return float(min((match_ts - last_ts).days, REST_CAP))
 
     hd = rest_days(home)
     ad = rest_days(away)

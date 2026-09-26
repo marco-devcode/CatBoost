@@ -106,8 +106,25 @@ def add_rolling_goals(df, window=5):
 # ═══════════════════════════════════════════════════════════════════════════════
 # 5.3 Rest Days (giorni di riposo)
 # ═══════════════════════════════════════════════════════════════════════════════
+# REST_CAP: oltre questa soglia il recupero muscolare e' completo e i giorni
+# in piu' non cambiano la prestazione. Il lettering empirico sul calcio (e la
+# pratica comune) mette la soglia attorno ai 7 giorni. Sopra, la feature viene
+# appiattita: 8 e 40 giorni di riposo danno lo stesso identico valore.
+#
+# Serve anche a tagliare gli outlier del dataset: lo storico contiene squadre
+# che rientravano dopo anni di assenza (storico parziale, promozioni), che
+# producevano rest_days di 400-3000 giorni. Non hanno nessun significato
+# fisiologico e il modello non ha dati nella regione 20-3000 per costruire
+# split affidabili.
+REST_CAP = 7
+
+
 def add_rest_days(df):
-    """Calcola i giorni di riposo per ogni squadra prima di ogni partita."""
+    """Calcola i giorni di riposo per ogni squadra prima di ogni partita.
+
+    I giorni sono saturati a REST_CAP: sotto la soglia il recupero conta,
+    sopra no. Vedi nota su REST_CAP.
+    """
     df = df.copy()
 
     home_dates = df[['Date', 'HomeTeam']].rename(columns={'HomeTeam': 'team'})
@@ -135,9 +152,15 @@ def add_rest_days(df):
     df = df.merge(home_rest, on=['Date', 'HomeTeam'], how='left')
     df = df.merge(away_rest, on=['Date', 'AwayTeam'], how='left')
 
-    df['home_rest_days'] = df['home_rest_days'].fillna(7)
-    df['away_rest_days'] = df['away_rest_days'].fillna(7)
+    df['home_rest_days'] = df['home_rest_days'].fillna(REST_CAP)
+    df['away_rest_days'] = df['away_rest_days'].fillna(REST_CAP)
 
+    # Satura: oltre REST_CAP il riposo e' comunque completo.
+    df['home_rest_days'] = df['home_rest_days'].clip(upper=REST_CAP)
+    df['away_rest_days'] = df['away_rest_days'].clip(upper=REST_CAP)
+
+    # rest_advantage derivato DOPO la saturazione, cosi' resta coerente e non
+    # reintroduce l'informazione che la saturazione ha appena rimosso.
     df['rest_advantage'] = df['home_rest_days'] - df['away_rest_days']
 
     return df

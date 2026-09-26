@@ -513,9 +513,12 @@ def main():
                             best_info = (lab, pk, m["bm"][lab], kf)
                 if best_info is not None:
                     lab, pk, odd, kf = best_info
+                    _bm_p = bm_prob[LABELS.index(lab)] if bm_prob is not None else 0.0
                     kelly_log.append({
                         "home": m["home"], "away": m["away"], "date": m["date"],
+                        "giornata": g, "esito": m.get("esito"),
                         "pick": lab, "model_p": round(pk, 3), "odd": round(odd, 2),
+                        "bm_p": round(_bm_p, 4),
                         "kelly": round(kf, 4), "win": (m["esito"] == lab),
                     })
         else:
@@ -564,7 +567,9 @@ def main():
                     win = (ftr == lab)
                     kelly_log.append({
                         "home": m["home"], "away": m["away"], "date": m["date"],
+                        "giornata": g, "esito": ftr,
                         "pick": lab, "model_p": round(pk, 3), "odd": round(odd, 2),
+                        "bm_p": round(bm_prob[LABELS.index(lab)], 4) if bm_prob is not None else 0.0,
                         "kelly": round(kf, 4), "win": win,
                     })
             # Partita futura: bookmaker + Kelly (prob/features gia' calcolate)
@@ -629,14 +634,45 @@ def main():
             bankroll += stake * (bet["odd"] - 1) if bet["win"] else -stake
         profit = bankroll - 1000.0
         roi = (profit / 1000.0) * 100.0
+        # Ricalcola il log con bankroll progressivo, cosi' la pagina puo' mostrare
+        # ogni puntata reale (stake in €, quota, esito, bankroll dopo).
+        bets = []
+        bb = 1000.0
+        for i, bet in enumerate(kelly_log, 1):
+            stake = bb * bet["kelly"]
+            won = bet["win"]
+            delta = stake * (bet["odd"] - 1) if won else -stake
+            bets.append({
+                "n": i,
+                "giornata": bet.get("giornata"),
+                "home": bet["home"],
+                "away": bet["away"],
+                "date": bet["date"],
+                "pick": bet["pick"],
+                "pick_label": {"H": "Casa", "D": "Pareggio", "A": "Trasferta"}[bet["pick"]],
+                "odd": bet["odd"],
+                "model_p": round(bet["model_p"] * 100, 1),
+                "bm_p": round(bet.get("bm_p", 0) * 100, 1),
+                "kelly_pct": round(bet["kelly"] * 100, 2),
+                "stake": round(stake, 2),
+                "esito": bet.get("esito"),
+                "win": bool(won),
+                "payout": round(stake * bet["odd"], 2) if won else 0.0,
+                "delta": round(delta, 2),
+                "bankroll_dopo": round(bb + delta, 2),
+            })
+            bb += delta
         meta_extra["kelly"] = {
             "bankroll_iniziale": 1000.0,
             "bankroll_finale": round(float(bankroll), 2),
             "profitto": round(float(profit), 2),
             "roi_pct": round(float(roi), 2),
             "scommesse": len(kelly_log),
+            "vinte": sum(1 for b in bets if b["win"]),
+            "perse": sum(1 for b in bets if not b["win"]),
             "stake_totale_pct": round(float(stakes_total / 1000.0) * 100, 1),
             "fraction": KELLY_FRACTION,
+            "scommesse_dettaglio": bets,
         }
         print(f"  Kelly (fraction={KELLY_FRACTION}): {len(kelly_log)} scommesse, "
               f"bankroll finale €{bankroll:.2f} (ROI {roi:.1f}%)")

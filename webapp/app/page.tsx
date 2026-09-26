@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { MatchPrediction, PredictionsData } from "@/lib/types";
 
 function formatDate(iso: string): string {
@@ -35,6 +36,33 @@ function fmtVal(v: number | null | undefined): string {
   if (v === null || v === undefined || Number.isNaN(v)) return "n/d";
   if (Number.isInteger(v)) return v.toString();
   return v.toFixed(3);
+}
+
+// ── Interpretazione del confronto Bookmaker via RPS ──────────────────
+//
+// RPS = Ranked Probability Score. Si calcola sulle 3 probabilita' 1X2 messe
+// in ordine cumulato (casa, pareggio, trasferta) e misura quanto sbaglia chi
+// mette i propri pesi sui risultati probabili. Piu' il punteggio e' basso, meglio
+// e'. Riferimento: ~0.20 e' il valore "neutro" della letteratura per il calcio,
+// la skill media di un bookmaker professionista sta intorno a 0.19-0.20.
+function rpsInterpretation(
+  modelRps: number,
+  bmRps: number,
+  beats: boolean,
+  nMatches: number
+): string {
+  const gap = modelRps - bmRps; // positivo = il modello e' peggio
+  const pct = bmRps > 0 ? Math.abs(gap / bmRps) * 100 : 0;
+
+  if (Math.abs(gap) < 0.005) {
+    return `Il modello e il bookmaker sono sostanzialmente equivalenti (scarto ${gap >= 0 ? "+" : ""}${gap.toFixed(4)}, ${pct.toFixed(1)}%): il modello non aggiunge informazione utile sul mercato.`;
+  }
+
+  if (beats) {
+    return `Il modello e migliore del bookmaker di ${pct.toFixed(1)}% su RPS (${gap.toFixed(4)}). In pratica: quando il modello e il mercato dicono cose diverse, il modello ha ragione piu' spesso del bookmaker — quindi su queste partite c'e' un edge scommettibile. Attenzione pero': RPS premia la calibrazione, non il profitto. Un modello puo' battere il bookmaker su RPS e perdere soldi, perche' le quote contengono gia' il margine del banco e il RPS non lo considera. Su ${nMatches} partite il margine di errore resta ampio.`;
+  }
+
+  return `Il modello e peggio del bookmaker di ${pct.toFixed(1)}% su RPS (+${gap.toFixed(4)}). In pratica: sulle partite in cui il modello si discosta dal mercato, il modello si sbaglia piu' spesso del bookmaker. Con una sola stagione (${nMatches} partite) il campione e troppo piccolo per distinguere abilita' reale dal rumore — la differenza e ${pct.toFixed(1)}%, non abbastanza per concludere che il modello abbia edge.`;
 }
 
 function MatchFeatures({ m }: { m: MatchPrediction }) {
@@ -225,14 +253,16 @@ export default function Home() {
               </span>
             </div>
           </div>
+          <p className="compare-note">{rpsInterpretation(meta!.model_rps!, meta!.bookmaker_rps!, meta!.beats_bookmaker_rps!, data.stats.total)}</p>
         </div>
       )}
 
       {kelly && (
         <div className="kelly-bar">
-          <div className="kelly-title">
+          <Link href="/kelly" className="kelly-title kelly-title-link">
             💰 Kelly Simulation {kelly.fraction * 100}% · bankroll €1000 (test set)
-          </div>
+            <span className="kelly-cta">Vedi le puntate →</span>
+          </Link>
           <div className="kelly-grid">
             <div className="kelly-cell">
               <span className="kelly-num">€{kelly.bankroll_finale.toFixed(0)}</span>

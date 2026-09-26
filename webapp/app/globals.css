@@ -500,3 +500,202 @@ body {
 }
 
 
+
+/* ── Interpretazione RPS ──────────────────────────────────────────── */
+.compare-note {
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: var(--muted);
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+/* ── Card Kelly cliccabile ─────────────────────────────────────────── */
+.kelly-title-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 6px;
+  transition: color 0.15s ease;
+}
+
+.kelly-title-link:hover { color: var(--home); }
+
+.kelly-cta {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--home);
+  white-space: nowrap;
+  border: 1px solid var(--home);
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+
+.kelly-h2 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 22px 0 10px;
+  color: var(--text);
+}
+
+.kelly-back {
+  margin: 24px 0 8px;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.kelly-back a {
+  color: var(--home);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.kelly-back a:hover { text-decoration: underline; }
+
+/* ── Pagina Kelly: schede puntate ──────────────────────────────────── */
+.bets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bet-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left-width: 3px;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.bet-card.win { border-left-color: var(--home); }
+.bet-card.lose { border-left-color: #ef4444; }
+
+.bet-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.bet-n {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 5px;
+  padding: 1px 6px;
+}
+
+.bet-gg {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.bet-res {
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.bet-res.win { color: var(--home); }
+.bet-res.lose { color: #ef4444; }
+
+.bet-match {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.bet-vs {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 0.8rem;
+  margin: 0 4px;
+}
+
+.bet-date {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.bet-pick {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+}
+
+.bet-pick-label {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.bet-pick b {
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.bet-pick-odd {
+  margin-left: auto;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--home);
+}
+
+.bet-grid {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.bet-cell {
+  flex: 1;
+  text-align: center;
+  min-width: 0;
+}
+
+.bet-num {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.bet-lab {
+  display: block;
+  font-size: 0.62rem;
+  color: var(--muted);
+  margin-top: 2px;
+  line-height: 1.2;
+}
+
+.bet-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.78rem;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+
+.bet-delta { font-weight: 700; }
+.bet-delta.good { color: var(--home); }
+.bet-delta.bad { color: #ef4444; }
+
+.bet-bankroll {
+  margin-left: auto;
+  font-weight: 600;
+  color: var(--text);
+}

@@ -25,14 +25,38 @@ export interface MatchPrediction {
   features?: Record<string, number | null>;
 }
 
+export interface KellyBet {
+  n: number;
+  giornata?: string;
+  home: string;
+  away: string;
+  date: string;
+  pick: "H" | "D" | "A";
+  pick_label: "Casa" | "Pareggio" | "Trasferta";
+  odd: number;
+  model_p: number;
+  bm_p: number;
+  kelly_pct: number;
+  stake: number;
+  esito?: "H" | "D" | "A";
+  win: boolean;
+  payout: number;
+  delta: number;
+  bankroll_dopo: number;
+}
+
 export interface KellySummary {
   bankroll_iniziale: number;
   bankroll_finale: number;
   profitto: number;
   roi_pct: number;
   scommesse: number;
+  vinte?: number;
+  perse?: number;
   stake_totale_pct: number;
   fraction: number;
+  // Dettaglio di ogni puntata effettivamente simulata
+  scommesse_dettaglio?: KellyBet[];
 }
 
 export interface PredictionsData {

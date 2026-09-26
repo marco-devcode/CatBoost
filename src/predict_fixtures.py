@@ -44,8 +44,6 @@ WEBAPP_PUBLIC = ROOT / "webapp" / "public"
 OUT_JSON = WEBAPP_PUBLIC / "predictions.json"
 
 FIXTURES_URL = "https://www.football-data.co.uk/mmz4281/{season}/I1.csv"
-# TheSportsDB: la chiave pubblica di test "123" restituisce gli eventi completi
-# per-giornata via eventsround.php (il bulk eventsseason.php e' limitato a ~5-15).
 TSDB_KEY = "123"
 TSDB_LEAGUE_ID = "4332"   # Serie A
 TSDB_ROUNDS = 38
@@ -134,8 +132,6 @@ def fetch_football_data(season: str):
         df = pd.read_csv(io.BytesIO(raw), on_bad_lines='skip', encoding='latin-1')
         if 'HomeTeam' not in df.columns:
             return None
-        # Normalizza i nomi squadra (football-data usa gia' i nomi canonici,
-        # ma per sicurezza applichiamo norm_team)
         df['HomeTeam'] = df['HomeTeam'].map(norm_team)
         df['AwayTeam'] = df['AwayTeam'].map(norm_team)
         return df
@@ -211,7 +207,6 @@ def fetch_thesportsdb(season: str):
 
     df = pd.DataFrame(all_rows)
     if len(df):
-        # dedup (eventi possono comparire in piu' chiamate)
         df = df.drop_duplicates(subset=['Date', 'HomeTeam', 'AwayTeam'])
         df = df.sort_values('Date').reset_index(drop=True)
         print(f"  TheSportsDB: {len(df)} partite su {df['giornata'].nunique()} giornate")
@@ -273,6 +268,58 @@ def ranked_probability_score(y_true, y_proba):
     return rps / max(len(y_true), 1)
 
 
+def _overlay_b365_from_local_csv(fx: pd.DataFrame) -> int:
+    """Overlay quote B365 dalla serie_a_raw.csv locale sulle fixture mancanti.
+
+    Quando football-data.co.uk è down (HTTP 503), le quote B365 mancano dal
+    calendario. Il CSV locale (scaricato manualmente o da un run precedente)
+    contiene le quote per le partite già giocate: le overlay qui per avere bm
+    completi nella dashboard senza rilanciare la pipeline remota.
+    """
+    RAW_PATH = DATA_DIR / "serie_a_raw.csv"
+    if not RAW_PATH.exists():
+        return 0
+    try:
+        raw_local = pd.read_csv(RAW_PATH, dtype=str, low_memory=False)
+        if 'Date' not in raw_local.columns or 'B365H' not in raw_local.columns:
+            return 0
+        def _norm_date(d):
+            d = str(d).strip()
+            if '/' in d:   # DD/MM/YYYY
+                return pd.Timestamp(pd.to_datetime(d, dayfirst=True, errors='coerce'))
+            return pd.Timestamp(pd.to_datetime(d, errors='coerce'))
+        raw_local['Date'] = raw_local['Date'].map(_norm_date)
+        raw_local = raw_local.dropna(subset=['Date'])
+        raw_local['HomeTeam'] = raw_local['HomeTeam'].map(norm_team)
+        raw_local['AwayTeam'] = raw_local['AwayTeam'].map(norm_team)
+        filled = 0
+        for _, lr in raw_local.iterrows():
+            b365h = str(lr.get('B365H', '')).strip()
+            if not b365h or b365h == 'nan':
+                continue
+            try:
+                fh = float(lr['B365H'])
+                fd = float(lr['B365D'])
+                fa = float(lr['B365A'])
+            except (TypeError, ValueError):
+                continue
+            mask = ((fx['Date'] == lr['Date']) &
+                    (fx['HomeTeam'] == lr['HomeTeam']) &
+                    (fx['AwayTeam'] == lr['AwayTeam']))
+            if not mask.any():
+                continue
+            # Overlay solo se il valore attuale è NaN
+            for col, val in [('B365H', fh), ('B365D', fd), ('B365A', fa)]:
+                cur = fx.loc[mask, col]
+                if cur.isna().all() or all(str(v).strip() in ('', 'nan') for v in cur):
+                    fx.loc[mask, col] = val
+            filled += mask.sum()
+        return filled
+    except Exception as e:
+        print(f"  [warn] overlay B365 locale fallito: {e}")
+        return 0
+
+
 def main():
     print("=" * 55)
     print(f"PREDIZIONI FIXTURE Serie A {SEASON_FD[:2]}/{SEASON_FD[2:]}")
@@ -282,9 +329,6 @@ def main():
         raise FileNotFoundError(f"{MODEL_PATH} non trovato: esegui prima src/model.py")
     model = CatBoostClassifier()
     model.load_model(str(MODEL_PATH))
-    # Timestamp del modello allenato: se cambia rispetto al run precedente,
-    # il freeze delle stime passate viene ignorato (una correzione di bug nel
-    # modello deve propagarsi). Altrimenti le stime giocate restano stabili.
     model_trained_at = pd.Timestamp(MODEL_PATH.stat().st_mtime).isoformat(timespec="seconds")
 
     sys.path.insert(0, str(ROOT / 'src'))
@@ -295,19 +339,11 @@ def main():
     print(f"Storico: {len(history)} partite")
 
     # ── Calendario ────────────────────────────────────────────────────
-    # 1) football-data.co.uk: porta le giornate DISPONIBILI + quote B365.
-    #    All'inizio della stagione ha SOLO le prime giornate giocate.
-    # 2) TheSportsDB: ha l'INTERO calendario 26/27 (tutte le 38 giornate,
-    #    con date + intRound), ma SENZA quote. Lo usiamo per integrare le
-    #    giornate future non ancora presenti su football-data, cosi' la
-    #    dashboard mostra le prediction di CatBoost sulle prossime giornate.
     fx, source = None, None
     fd = fetch_football_data(SEASON_FD)
     if fd is not None and len(fd):
         fx, source = fd, "football-data.co.uk"
-        # Normalizza Date in datetime64 (FD la legge come stringa DD/MM/YYYY)
         fx['Date'] = pd.to_datetime(fx['Date'], dayfirst=True, errors='coerce')
-        # Assicura colonna giornata (FD non l'ha: la deriviamo da TSDB dopo)
         if 'giornata' not in fx.columns:
             fx['giornata'] = np.nan
         # Integra le giornate future mancanti da TheSportsDB
@@ -323,9 +359,6 @@ def main():
             add_mask = [(_key(r) not in fd_keys) for _, r in tsdb.iterrows()]
             add = tsdb[add_mask]
             if len(add):
-                # Mappa round di TSDB (affidabile per tutte le 38) su TUTTE le
-                # righe (anche FD) cosi' le partite giocate restano nella loro
-                # giornata reale invece di essere rimappate dal clustering.
                 round_map = {_key(r): int(r['giornata']) for _, r in tsdb.iterrows()
                              if pd.notna(r['giornata'])}
                 fx['giornata'] = fx.apply(
@@ -364,16 +397,21 @@ def main():
         fx = fx.drop(columns=['giornata'])
         fx = assign_giornate(fx)
     fx['giornata'] = fx['giornata'].astype(int)
-    # Deduplicazione finale per (data, squadre) a prova di bug nel merge
-    fx = fx.drop_duplicates(subset=['Date', 'HomeTeam', 'AwayTeam'], keep='first').reset_index(drop=True)
     print(f"Fixture: {len(fx)} partite, {fx['giornata'].max()} giornate")
+
+    # ── Overlay quote B365 dal CSV locale (serie_a_raw.csv) ───────────────────────────
+    # Quando football-data.co.uk è down (503), le quote B365 mancano dal calendario.
+    # Il CSV locale (scaricato manualmente o da un run precedente) contiene le quote
+    # per le partite già giocate: le overlay qui per avere bm completi nella dashboard.
+    n_filled = _overlay_b365_from_local_csv(fx)
+    if n_filled:
+        print(f"  Overlay B365 dal CSV locale: {n_filled} partite con quote")
 
     # ── Soglia di freeze (regola N-1) ───────────────────────────────────
     # Una giornata N e' "bloccabile" (snapshot non piu ricalcolato) non appena
     # la giornata N-1 ha almeno un risultato reale. Quindi le giornate con
     # numero <= (ultima_giornata_giocata + 1) sono CONGELATE: le loro
     # percentuali non si aggiornano piu (no hindsight bias).
-    # Calcoliamo l'ultima giornata con risultato reale dal calendario odierno.
     fx_with_result = fx[fx['FTR'].apply(lambda x: isinstance(x, str) and x.strip().upper() in ('H', 'D', 'A'))]
     if len(fx_with_result):
         ultima_giocata = int(fx_with_result['giornata'].max())
@@ -391,11 +429,6 @@ def main():
           f"{sorted(current_season_teams)}")
 
     # ── Freeze stime passate ──────────────────────────────────────────
-    # Carica le stime gia' pubblicate. Se il modello NON e' cambiato rispetto
-    # al run precedente, le partite GIA' GIOCATE mantengono le loro prob/pred
-    # (non driftano quando escono i nuovi risultati). Se il modello e' stato
-    # riallenato (correzione di bug), il freeze viene ignorato e tutto si
-    # ricalcola col modello nuovo.
     prev_estimates = {}
     prev_model_trained_at = None
     freeze_active = False
@@ -406,7 +439,7 @@ def main():
             prev_model_trained_at = old.get("meta", {}).get("model_trained_at")
             for g, ms in old.get("giornate", {}).items():
                 for m in ms:
-                    if m.get("ok") is not None:  # gia' giocata nella vecchia run
+                    if m.get("ok") is not None:
                         prev_estimates[_match_key(m["home"], m["away"], m["date"])] = m
             freeze_active = (prev_model_trained_at == model_trained_at)
             n = len(prev_estimates)
@@ -420,9 +453,9 @@ def main():
     LABELS = ['H', 'D', 'A']
     h2h_cache = {}
     giornate: dict[str, list] = {}
-    bm_rows = []   # (y_true, bm_prob) per RPS bookmaker sulle giocate
-    model_rows = []  # (y_true, model_prob) per RPS modello sulle giocate
-    kelly_log = []  # simulate scommesse sulle giocate con value
+    bm_rows = []
+    model_rows = []
+    kelly_log = []
 
     for _, row in fx.iterrows():
         g = str(row['giornata'])
@@ -431,7 +464,7 @@ def main():
         ftr = row.get('FTR')
         played = isinstance(ftr, str) and ftr.strip().upper() in ('H', 'D', 'A')
 
-        # Quote bookmaker (solo football-data le porta)
+        # Quote bookmaker
         bm_prob = bookmaker_prob(row.get('B365H'), row.get('B365D'), row.get('B365A'))
         bm_odds = None
         if bm_prob is not None:
@@ -443,12 +476,6 @@ def main():
         k = _match_key(m["home"], m["away"], m["date"])
         giornata_n = int(row['giornata'])
         # ── SNAPSHOT / FREEZE ─────────────────────────────────────────────
-        # Due casi in cui riusiamo lo snapshot (NON ricalcoliamo):
-        #  (a) partita GIA' GIOCATA (ha risultato reale), o
-        #  (b) giornata N con N <= freeze_until (la N-1 e' stata giocata):
-        #      regola utente "la giornata N si aggiorna solo fino ai risultati
-        #      della N-1" -> no hindsight bias.
-        # In entrambi i casi, se lo snapshot esiste, lo riusiamo integro.
         if k in prev_estimates and (played or giornata_n <= freeze_until):
             old = prev_estimates[k]
             m["prob"] = old.get("prob")
@@ -461,20 +488,15 @@ def main():
             m["ok"] = old.get("ok")
             m["features"] = old.get("features")
             # Se lo snapshot non aveva le quote ma il CSV odierno le porta
-            # (es. football-data), le valorizziamo dal CSV (non dal freeze).
             if m["bm"] is None and bm_odds is not None:
                 m["bm"] = {"H": round(bm_odds[0], 2), "D": round(bm_odds[1], 2),
                            "A": round(bm_odds[2], 2)}
                 m["bm_prob"] = {LABELS[i]: round(bm_prob[i] * 100, 1) for i in range(3)}
-            # Metriche retrospettive (RPS bookmaker + Kelly sim) ricostruite
-            # dallo SNAPSHOT, cosi' il riepilogo resta coerente anche se la
-            # partita e' congelata e non viene ricalcolata.
             if m["bm"] is not None and m["ok"] is not None and m["esito"] is not None:
                 y_idx = {'H': 0, 'D': 1, 'A': 2}[m["esito"]]
                 pb = np.array([m["bm_prob"][l] / 100.0 for l in LABELS])
                 bm_rows.append((y_idx, pb))
                 model_rows.append((y_idx, [m["prob"][l] / 100.0 for l in LABELS]))
-                # Kelly retrospettivo dallo snapshot (edge p_model > p_bookmaker)
                 best_k = -1.0
                 best_info = None
                 for i, lab in enumerate(LABELS):
@@ -527,7 +549,7 @@ def main():
                 for i, lab in enumerate(LABELS):
                     pk = m["prob"][lab] / 100.0
                     pb = bm_prob[i]
-                    if pk > pb:  # il modello stima piu' probabile del bookmaker
+                    if pk > pb:
                         kf = kelly_fraction(pk, bm_odds[i])
                         if kf > 0 and kf > best_k:
                             best_k = kf

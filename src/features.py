@@ -271,13 +271,31 @@ def add_promotion_flags(df, current_season_teams=None):
     return df
 
 
-def build_feature_matrix(df, cutoff='2022-08-01'):
-    """Costruisce la matrice feature completa e fa il split temporale."""
+def build_feature_matrix(df, cutoff='2025-08-01'):
+    """Costruisce la matrice feature completa e fa il split temporale.
+
+    Se il dataset e' parziale (solo stagione corrente, es. 2627 con 50 righe) il
+    cutoff temporale lascia ZERO righe di training: CatBoost fallirebbe con
+    "Labels variable is empty". In quel caso si ripiega su uno split
+    posizionale (80/20 cronologico) che mantiene l'ordine temporale.
+    """
     df_clean = df[FEATURE_COLS + ['Date', 'FTR']].copy()
     df_clean = df_clean.dropna(subset=FEATURE_COLS + ['FTR'])
 
     df_train = df_clean[df_clean['Date'] < cutoff].copy()
     df_test  = df_clean[df_clean['Date'] >= cutoff].copy()
+
+    if len(df_train) == 0:
+        # Dataset parziale: niente storia pre-cutoff. Split posizionale 80/20
+        # sempre in ordine cronologico, così nessun lookahead.
+        n = len(df_clean)
+        cut = max(int(n * 0.8), 1)
+        df_train = df_clean.iloc[:cut].copy()
+        df_test  = df_clean.iloc[cut:].copy()
+        print(f"  [split adattivo] nessuna riga pre-{cutoff}: uso split posizionale "
+              f"80/20 -> train={len(df_train)}, test={len(df_test)}")
+    else:
+        print(f"  [split temporale] cutoff={cutoff} -> train={len(df_train)}, test={len(df_test)}")
 
     feature_cols = [c for c in df_clean.columns if c not in ('Date', 'FTR')]
 

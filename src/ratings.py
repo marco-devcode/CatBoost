@@ -148,11 +148,20 @@ def compute_pi_ratings(df: pd.DataFrame):
     return df, final_ratings
 
 
-def create_train_test_split(df: pd.DataFrame, cutoff: str = '2022-08-01'):
+def create_train_test_split(df: pd.DataFrame, cutoff: str = '2025-08-01'):
     feature_cols = ['pi_home_H', 'pi_away_H', 'pi_home_A', 'pi_away_A']
 
     df_train = df[df['Date'] < cutoff].copy()
     df_test  = df[df['Date'] >= cutoff].copy()
+
+    # Split adattivo per dataset parziale (solo stagione corrente): se il cutoff
+    # lascia 0 righe di train, usa 80/20 temporale invece di fallire.
+    if len(df_train) == 0 and len(df_test) >= 5:
+        df_sorted = df_test.sort_values('Date').reset_index(drop=True)
+        split_idx = max(1, int(len(df_sorted) * 0.8))
+        df_train = df_sorted.iloc[:split_idx].copy()
+        df_test  = df_sorted.iloc[split_idx:].copy()
+        print(f"  Split adattivo (dataset parziale): train={len(df_train)}, test={len(df_test)}")
 
     X_train = df_train[feature_cols].reset_index(drop=True)
     y_train = df_train['FTR'].map({'H': 0, 'D': 1, 'A': 2}).reset_index(drop=True)

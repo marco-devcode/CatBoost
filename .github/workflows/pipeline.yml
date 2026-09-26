@@ -59,6 +59,12 @@ jobs:
       - name: Predizioni fixtures (dashboard)
         run: python src/predict_fixtures.py
 
+      # Ricalcola SOLO le partite la cui stima e' stata prodotta dal modello
+      # addestrato sul dataset troncato (22 righe) invece che su quello completo
+      # (5642 righe). Le partite fuori perimetro non vengono toccate.
+      - name: Ricalcolo partite modello-22
+        run: python src/recompute_22era.py
+
       - name: Commit artefatti generati
         run: |
           mkdir -p data models results webapp/public

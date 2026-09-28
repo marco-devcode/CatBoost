@@ -55,14 +55,16 @@ jobs:
           pip install -r requirements.txt
 
       # Quote prepartita da TheOddsAPI. La chiave sta nei secret del repo,
-      # MAI nel tree: predict_fixtures la legge da THEODDSAPI_KEY e, se
-      # assente, continua con le quote delle sole partite gia' giocate.
+      # MAI nel tree. VA DICHIARATA SULLO STEP CHE LA USA: dichiararla qui
+      # come solo un controllo di presenza non la inoltra agli step successivi,
+      # e predict_fixtures scriveva "chiave non trovata" pur stampando prima
+      # "Chiave presente" (misleading: il secret c'era, la env no).
       - name: Quote TheOddsAPI (secret)
         env:
           THEODDSAPI_KEY: ${{ secrets.THEODDSAPI_KEY }}
         run: |
           if [ -n "$THEODDSAPI_KEY" ]; then
-            echo "Chiave TheOddsAPI presente"
+            echo "Chiave TheOddsAPI presente e inoltrata agli step successivi"
           else
             echo "ATTENZIONE: secret THEODDSAPI_KEY non impostato."
             echo "Le previsioni future avranno bm=null (solo le giocate avranno quote)."
@@ -89,7 +91,12 @@ jobs:
           LEAGUE: ${{ matrix.league }}
         run: python src/evaluate.py
 
+      # predict_fixtures.py e' lo step che chiama davvero TheOddsAPI: senza
+      # la env QUI la chiave non arriva e le quote future restano null,
+      # anche se il secret e' impostato (e' successo al primo run).
       - name: Predizioni fixtures (dashboard)
+        env:
+          THEODDSAPI_KEY: ${{ secrets.THEODDSAPI_KEY }}
         run: python src/predict_fixtures.py --league ${{ matrix.league }}
 
       # Ogni lega committa solo i propri artefatti: due job paralleli che

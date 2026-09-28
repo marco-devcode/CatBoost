@@ -302,7 +302,16 @@ ODDS_HOST = "api.the-odds-api.com"   # NON theoddsapi.com: dominio diverso
 
 
 def _odds_key() -> str | None:
-    """Chiave TheOddsAPI da env o da file locale. Nessun fallback hardcoded."""
+    """Chiave TheOddsAPI dalla env THEODDSAPI_KEY, con fallback su file locale.
+
+    Su GitHub Actions la env e' l'unico modo: il file qui non esiste, quindi
+    se la env manca il fallback fallisce ed e' corretto. Su Termux il file
+    locale fa da fallback, cosi gli script funzionano senza setup.
+
+    Il messaggio d'errore distingue i due casi: "secret non impostato" su CI e
+    "chiave non trovata in locale" sul dispositivo, invece di un generico
+    "non trovata" che faceva credere a un problema di permessi.
+    """
     key = os.environ.get("THEODDSAPI_KEY")
     if key:
         return key.strip()
@@ -330,8 +339,12 @@ def fetch_odds(league, bookmaker: str | None = None) -> dict:
         return {}
     key = _odds_key()
     if not key:
-        print("  [odds] chiave TheOddsAPI non trovata: quote prepartita "
-              "disponibili solo sulle partite gia' giocate")
+        dove = ("secret THEODDSAPI_KEY non impostato o non inoltrato "
+                "(su CI la env deve stare sullo step che usa l'API)"
+                if os.environ.get("GITHUB_ACTIONS")
+                else "chiave non trovata in ~/.hermes/secrets/theoddsapi.key")
+        print(f"  [odds] {dove}: quote prepartita disponibili solo "
+              f"sulle partite gia' giocate")
         return {}
 
     bookmaker = bookmaker if bookmaker is not None else league.odds_bookmaker

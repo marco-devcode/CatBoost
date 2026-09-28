@@ -535,6 +535,6 @@ report_md += f"""---
 *Generato automaticamente da `src/evaluate.py`*
 """
 
-with open(RESULTS_DIR / 'REPORT_FINALE.md', 'w', encoding='utf-8') as f:
+with open(RESULTS_DIR / f'REPORT_FINALE_{LEAGUE.key}.md', 'w', encoding='utf-8') as f:
     f.write(report_md)
-print("  Salvato: models/REPORT_FINALE.md")
+print(f"  Salvato: models/REPORT_FINALE_{LEAGUE.key}.md")

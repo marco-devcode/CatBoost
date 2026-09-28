@@ -35,6 +35,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     strategy:
+      # NON in parallelo. I due job scrivono artefatti su main e lo spingono:
+      # in parallelo il secondo fa rebase su un commit che il primo sta ancora
+      # scrivendo, e il conflitto si risolve solo a mano. Con max-parallel: 1
+      # il secondo parte quando il primo ha finito, e i due push sono
+      # sequenziali. Il costo e' qualche minuto di attesa in piu'; il
+      # vantaggio e' che la pipeline non fallisce piu' per concorrenza.
+      max-parallel: 1
       fail-fast: false
       matrix:
         league: [seriea, eredivisie]

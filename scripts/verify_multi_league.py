@@ -61,15 +61,53 @@ for p in sorted((ROOT / "src").glob("*.py")):
             hard.append(f"{p.name}:{i}")
 check(not hard, f"nessun hardcode di lega fuori leagues.py ({hard})")
 
-# 4. Path distinti per lega
+# 4. Path distinti per lega.
+#    Include i path che gli script SCRIVONO a runtime (modello, JSON, report,
+#    REPORT_FINALE): un path condiviso fa fallire la pipeline per conflitto
+#    git, non per un bug di logica. Dopo aver fallito due run di fila per
+#    questo, il controllo e' diventato esplicito.
 seen = {}
 for lg in LEAGUES.values():
     for kind, path in (("split", lg.split_path("X_train_v2")),
                        ("model", lg.model_path),
-                       ("json", lg.json_path)):
+                       ("json", lg.json_path),
+                       ("report", lg.report_path("final_report"))):
         seen.setdefault(path, []).append(f"{lg.key}:{kind}")
 dups = {p: v for p, v in seen.items() if len(v) > 1}
 check(not dups, f"nessun path condiviso fra leghe ({list(dups.values())})")
+
+# 4b. Nessun path di OUTPUT condiviso scritto a mano negli script.
+#     E' il controllo che avrebbe evitato due run rosse consecutive
+#     (conflitto su models/REPORT_FINALE.md, scritto da entrambe le leghe).
+#     Nota: la regex deve coprire ANCHE le f-string, altrimenti
+#     `RESULTS_DIR / f'X_{LEAGUE.key}.md'` — che e' corretto — viene
+#     scambiato per un path condiviso, e il check diventa rumore.
+import re as _re
+import re
+# I PNG sono esclusi dal commit della pipeline di proposito (binari non
+# mergeabili), quindi un path .png non e' un pericolo: non segnalarlo, o il
+# check diventa rumore che si impara a ignorare.
+_BINARI_OK = re.compile(r"\.png['\"]\s*$")
+shared_writes = []
+for p in sorted((ROOT / "src").glob("*.py")):
+    if p.name == "leagues.py":
+        continue
+    for i, line in enumerate(p.read_text(encoding="utf-8").split("\n"), 1):
+        code = line.split("#")[0]
+        m = _re.search(r"(RESULTS_DIR|MODELS_DIR|DATA_DIR|WEBAPP_PUBLIC)\s*/\s*(.+)$", code)
+        if not m:
+            continue
+        if ".png" in m.group(2):
+            continue
+        expr = m.group(2)
+        # Accetta solo: nome fisso (pericoloso), oppure espressione che
+        # contiene il suffisso di lega o un path derivato da league.
+        if _re.search(r"LEAGUE|league|split_prefix|model_name|json_name|"
+                      r"data_prefix|report_path|split_path|json_path|model_path", expr):
+            continue
+        shared_writes.append(f"{p.name}:{i}: {code.strip()[:70]}")
+check(not shared_writes,
+      f"nessun path di output condiviso scritto a mano ({shared_writes})")
 
 # 5. Ogni lega ha il suo JSON su disco.
 #    La Eredivisie nasce con la pipeline: il file non esiste finche' il

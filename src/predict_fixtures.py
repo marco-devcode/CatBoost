@@ -322,12 +322,29 @@ def main(league):
             m["esito"] = old.get("esito")
             m["ok"] = old.get("ok")
             m["features"] = old.get("features")
-            # Se lo snapshot non aveva le quote ma il CSV odierno le porta
-            if m["bm"] is None and bm_odds is not None:
+            # Se lo snapshot non aveva le quote ma il CSV/le quote di oggi le
+            # portano, si ricostruiscono. Il caso reale (Eredivisie, prima
+            # run) era peggio: lo snapshot aveva bm = {"H": None, "D": None,
+            # "A": None} — un dict PRESENTE ma con valori null, che il test
+            # `bm is not None` lascia passare e poi fa None/100.0 -> la
+            # pipeline muore dopo aver allenato il modello. Percio' qui si
+            # controlla che i valori siano NUMERICI, non che il dict esista.
+            def _bm_valido(d):
+                return (isinstance(d, dict)
+                        and all(isinstance(d.get(l), (int, float)) for l in LABELS))
+
+            if not _bm_valido(m.get("bm")) and bm_odds is not None:
                 m["bm"] = {"H": round(bm_odds[0], 2), "D": round(bm_odds[1], 2),
                            "A": round(bm_odds[2], 2)}
+            if not _bm_valido(m.get("bm_prob")) and bm_prob is not None:
                 m["bm_prob"] = {LABELS[i]: round(bm_prob[i] * 100, 1) for i in range(3)}
-            if m["bm"] is not None and m["ok"] is not None and m["esito"] is not None:
+            # Quote senza probabilita' non sono confrontabili: si azzerano
+            # insieme, altrimenti la UI mostrerebbe una quota senza edge.
+            if not _bm_valido(m.get("bm")) or not _bm_valido(m.get("bm_prob")):
+                m["bm"] = None
+                m["bm_prob"] = None
+            if (m["bm"] is not None and m["ok"] is not None and m["esito"] is not None
+                    and all(m["prob"].get(l) is not None for l in LABELS)):
                 y_idx = {'H': 0, 'D': 1, 'A': 2}[m["esito"]]
                 pb = np.array([m["bm_prob"][l] / 100.0 for l in LABELS])
                 bm_rows.append((y_idx, pb))

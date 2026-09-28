@@ -3,8 +3,9 @@ import Link from "next/link";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Serie A — Predizioni",
-  description: "Predizioni CatBoost + Pi-Rating per la Serie A",
+  title: "CatBoost — Predizioni",
+  description:
+    "Predizioni CatBoost + Pi-Rating per Serie A ed Eredivisie",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

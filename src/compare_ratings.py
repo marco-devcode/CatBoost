@@ -21,13 +21,18 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 from ratings import compute_pi_ratings, DECAY_HALF_LIFE_YEARS
 from features import (add_rolling_form, add_rolling_goals, add_rest_days,
-                      add_h2h, add_shots_proxy, FEATURE_COLS, OPTIONAL_COLS)
+                      add_h2h, add_shots_proxy, FEATURE_COLS)
+from leagues import get_league
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
-RAW_PATH = DATA_DIR / "serie_a_clean.csv"
+# Lega risolta da riga di comando o da LEAGUE nell'ambiente.
+# (OPTIONAL_COLS non esiste piu' in features.py: l'import faceva fallire
+# questo script — e il workflow compare.yml che lo esegue — su main.)
+LEAGUE = get_league(None)
+RAW_PATH = LEAGUE.clean_path
 
-CUTOFF = '2022-08-01'
+CUTOFF = '2025-08-01'
 
 
 def load_features():
@@ -90,7 +95,7 @@ def train_eval(Xtr, Xte, ytr, yte, label):
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("CONFRONTO: CatBoost CON vs SENZA Pi-Rating (Serie A)")
+    print(f"CONFRONTO: CatBoost CON vs SENZA Pi-Rating ({LEAGUE.name})")
     print("=" * 60)
 
     df = load_features()

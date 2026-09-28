@@ -1,6 +1,6 @@
 # src/ratings.py
 """
-Calcolo Pi-Rating (Dixon-Coles) per la Serie A, implementato a mano
+Calcolo Pi-Rating (Dixon-Coles) per un campionato, implementato a mano
 (senza dipendere da penaltyblog, che falliva silenziosamente lasciando
 i rating ai valori di default -> feature costanti).
 
@@ -26,14 +26,13 @@ from scipy.optimize import minimize
 
 sys.stdout.reconfigure(encoding='utf-8')
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from leagues import get_league  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
 MODELS_DIR = ROOT / "models"
 MODELS_DIR.mkdir(exist_ok=True)
-
-RAW_PATH = DATA_DIR / "serie_a_clean.csv"
-OUT_PATH = DATA_DIR / "serie_a_ratings.csv"
-RATINGS_SNAPSHOT_PATH = DATA_DIR / "pi_ratings_snapshot.json"
 
 # Decay temporale: mezza vita in anni (una partita di N anni fa pesa 0.5**(N/mezza_vita))
 DECAY_HALF_LIFE_YEARS = 2.0
@@ -148,7 +147,7 @@ def compute_pi_ratings(df: pd.DataFrame):
     return df, final_ratings
 
 
-def create_train_test_split(df: pd.DataFrame, cutoff: str = '2025-08-01'):
+def create_train_test_split(df: pd.DataFrame, league, cutoff: str = '2025-08-01'):
     feature_cols = ['pi_home_H', 'pi_away_H', 'pi_home_A', 'pi_away_A']
 
     df_train = df[df['Date'] < cutoff].copy()
@@ -156,24 +155,28 @@ def create_train_test_split(df: pd.DataFrame, cutoff: str = '2025-08-01'):
 
     # Split adattivo per dataset parziale (solo stagione corrente): se il cutoff
     # lascia 0 righe di train, usa 80/20 temporale invece di fallire.
+    # Questo evita il crash "Labels variable is empty" ma NON rende valido il
+    # modello: con poche decine di righe i pesi sono rumore.
     if len(df_train) == 0 and len(df_test) >= 5:
         df_sorted = df_test.sort_values('Date').reset_index(drop=True)
         split_idx = max(1, int(len(df_sorted) * 0.8))
         df_train = df_sorted.iloc[:split_idx].copy()
         df_test  = df_sorted.iloc[split_idx:].copy()
-        print(f"  Split adattivo (dataset parziale): train={len(df_train)}, test={len(df_test)}")
+        print(f"  [split adattivo] train={len(df_train)}, test={len(df_test)} "
+              f"— ATTENZIONE: storico parziale, i pesi non sono stimabili")
 
     X_train = df_train[feature_cols].reset_index(drop=True)
     y_train = df_train['FTR'].map({'H': 0, 'D': 1, 'A': 2}).reset_index(drop=True)
     X_test  = df_test[feature_cols].reset_index(drop=True)
     y_test  = df_test['FTR'].map({'H': 0, 'D': 1, 'A': 2}).reset_index(drop=True)
 
-    X_train.to_csv(DATA_DIR / 'X_train.csv', index=False)
-    X_test.to_csv(DATA_DIR / 'X_test.csv', index=False)
-    y_train.to_csv(DATA_DIR / 'y_train.csv', index=False)
-    y_test.to_csv(DATA_DIR / 'y_test.csv', index=False)
+    # Split e test per lega: due campionati non possono condividere i file.
+    X_train.to_csv(league.split_path('X_train'), index=False)
+    X_test.to_csv(league.split_path('X_test'), index=False)
+    y_train.to_csv(league.split_path('y_train'), index=False)
+    y_test.to_csv(league.split_path('y_test'), index=False)
 
-    print(f"\nSplit temporale (cutoff={cutoff}):")
+    print(f"\nSplit temporale ({league.name}, cutoff={cutoff}):")
     print(f"  Train: {len(X_train)} partite")
     print(f"  Test : {len(X_test)} partite")
     print(f"  Feature: {feature_cols}")
@@ -181,27 +184,27 @@ def create_train_test_split(df: pd.DataFrame, cutoff: str = '2025-08-01'):
     return X_train, X_test, y_train, y_test
 
 
-if __name__ == "__main__":
+def main(league):
     print("=" * 55)
-    print("FASE 3 — Calcolo Pi-Rating Serie A (Dixon-Coles, MLE)")
+    print(f"FASE 3 — Calcolo Pi-Rating {league.name} (Dixon-Coles, MLE)")
     print("=" * 55)
 
-    df = pd.read_csv(RAW_PATH, parse_dates=['Date'])
+    df = pd.read_csv(league.clean_path, parse_dates=['Date'])
     print(f"Dataset: {len(df)} partite, {df['HomeTeam'].nunique()} squadre")
     print(f"Periodo: {df['Date'].min().date()} → {df['Date'].max().date()}")
 
-    print(f"\nCalcolo Pi-Rating (ricalcolo per stagione)...")
+    print(f"\nCalcolo Pi-Rating (fit globale con decay)...")
     df_rated, final_ratings = compute_pi_ratings(df)
 
-    df_rated.to_csv(OUT_PATH, index=False)
-    print(f"\nDataset con Pi-Rating salvato in {OUT_PATH}")
+    df_rated.to_csv(league.ratings_path, index=False)
+    print(f"\nDataset con Pi-Rating salvato in {league.ratings_path}")
 
-    with open(RATINGS_SNAPSHOT_PATH, 'w') as f:
+    with open(league.ratings_snapshot_path, 'w') as f:
         json.dump(final_ratings, f, indent=2)
-    print(f"Pi-Rating snapshot salvato in {RATINGS_SNAPSHOT_PATH}")
+    print(f"Pi-Rating snapshot salvato in {league.ratings_snapshot_path}")
 
     print(f"\n{'─'*50}")
-    print("Statistiche Pi-Rating:")
+    print(f"Statistiche Pi-Rating {league.name}:")
     for col in ['pi_home_H', 'pi_away_H', 'pi_home_A', 'pi_away_A']:
         print(f"  {col:<12}: mean={df_rated[col].mean():+.3f}, std={df_rated[col].std():.3f}")
 
@@ -214,6 +217,13 @@ if __name__ == "__main__":
         d = final_ratings[team]['defence']
         print(f"  {team:<20} att={att:+.3f}  def={d:+.3f}")
 
-    X_train, X_test, y_train, y_test = create_train_test_split(df_rated)
+    X_train, X_test, y_train, y_test = create_train_test_split(df_rated, league)
 
-    print(f"\n✓ Fase 3 completata — pronto per Fase 4")
+    print(f"\nFase 3 completata per {league.name}")
+
+
+if __name__ == "__main__":
+    import argparse
+    ap = argparse.ArgumentParser(description="Calcolo Pi-Rating (Dixon-Coles)")
+    ap.add_argument("--league", default=None, help="chiave lega (default: seriea)")
+    main(get_league(ap.parse_args().league))

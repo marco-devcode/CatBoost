@@ -1,60 +1,57 @@
 # src/download_data.py
 """
-Scarica le stagioni Serie A da football-data.co.uk e le salva concatenate in
-data/serie_a_raw.csv.
+Scarica lo storico COMPLETO di un campionato da football-data.co.uk e lo
+salva in data/<prefix>_raw.csv.
 
-Formato football-data.co.uk:
-  - Serie A = codice I1
-  - URL: https://www.football-data.co.uk/mmz4281/{season}/I1.csv
+Formato football-data.co.uk (URL: .../mmz4281/{season}/{CODE}.csv):
+  - Serie A = I1, Eredivisie = N1
   - Colonne utili: Date, HomeTeam, AwayTeam, FTHG, FTAG, FTR, Season,
     B365H/B365D/B365A (quote), HST/AST (tiri in porta)
 
-Le stagioni sono nel formato YY1YY2 (es. 2425 = 2024/25).
+Le stagioni sono nel formato YY1YY2 (es. 2425 = 2024/25) e arrivano da
+leagues.League.seasons: questo script non ha piu' hardcode di lega.
+
+Uso:
+    python src/download_data.py --league seriea
+    python src/download_data.py --league eredivisie
 """
+import argparse
+import io
 import sys
 import time
-import pandas as pd
 import urllib.request
-import io
 from pathlib import Path
 
-sys.stdout.reconfigure(encoding='utf-8')
+import pandas as pd
 
-ROOT     = Path(__file__).resolve().parent.parent
-DATA_DIR = ROOT / "data"
-DATA_DIR.mkdir(exist_ok=True)
-OUT_PATH = DATA_DIR / "serie_a_raw.csv"
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from leagues import get_league  # noqa: E402
 
-# Storico + nuove stagioni. Aggiungi qui sotto le stagioni future quando escono
-# (es. 2627 per il 2026/27, se football-data le pubblica).
-SEASONS = [
-    '1011', '1112', '1213', '1314', '1415',
-    '1516', '1617', '1718', '1819', '1920',
-    '2021', '2122', '2223', '2324',
-    '2425', '2526', '2627',
-]
-
-# Serie A = I1 su football-data.co.uk
-BASE_URL = "https://www.football-data.co.uk/mmz4281/{season}/I1.csv"
+sys.stdout.reconfigure(encoding="utf-8")
 
 HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-                  'AppleWebKit/537.36 (KHTML, like Gecko) '
-                  'Chrome/124.0 Safari/537.36'
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                  "AppleWebKit/537.36 (KHTML, like Gecko) "
+                  "Chrome/124.0 Safari/537.36"
 }
 
 
-def fetch_season(season: str, retries: int = 3, delay: float = 3.0) -> pd.DataFrame:
-    """Scarica un CSV con retry e User-Agent per evitare 10054/403."""
-    url = BASE_URL.format(season=season)
+def fetch_season(url: str, season: str, retries: int = 3,
+                 delay: float = 3.0) -> pd.DataFrame:
+    """Scarica un CSV con retry e User-Agent per evitare 10054/403.
+
+    Nota: www.football-data.co.uk risponde 302 verso football-data.co.uk.
+    urllib segue i redirect di default, quindi NON disabilitarli: senza -L
+    si scarica un file vuoto e si conclude che la fonte e' down.
+    """
     last = Exception("unknown error")
     for attempt in range(1, retries + 1):
         try:
             req = urllib.request.Request(url, headers=HEADERS)
             with urllib.request.urlopen(req, timeout=30) as resp:
                 raw = resp.read()
-            df = pd.read_csv(io.BytesIO(raw), on_bad_lines='skip', encoding='latin-1')
-            return df
+            return pd.read_csv(io.BytesIO(raw), on_bad_lines="skip",
+                               encoding="latin-1")
         except Exception as exc:
             last = exc
             if attempt < retries:
@@ -63,36 +60,45 @@ def fetch_season(season: str, retries: int = 3, delay: float = 3.0) -> pd.DataFr
     raise last
 
 
-def main():
+def main(league):
     # Lo storico completo e' la base del modello: addestrarlo sulle sole
-    # partite della stagione corrente (50 righe) non basta a stimare i pesi su
-    # 18 feature e produce previsioni arbitrarie. Quindi scarichiamo TUTTE le
-    # stagioni elencate in SEASONS, ogni volta.
+    # partite della stagione corrente non basta a stimare i pesi su 17 feature
+    # e produce previsioni arbitrarie. Quindi scarichiamo TUTTE le stagioni
+    # elencate in League.seasons, ogni volta, senza short-circuit sul
+    # contenuto del file locale (un guard di quel tipo ha troncato lo storico
+    # da 5600 a 22 righe, in silenzio, due volte).
     dfs = []
-    for s in SEASONS:
+    for s in league.seasons:
         try:
-            df = fetch_season(s)
+            df = fetch_season(league.fd_url.format(season=s), s)
             # Normalizza la colonna stagione -> formato YY1YY2
-            if 'Season' in df.columns:
-                df['season'] = df['Season'].astype(str).str.replace('-', '', regex=False)
+            if "Season" in df.columns:
+                df["season"] = (df["Season"].astype(str)
+                                .str.replace("-", "", regex=False))
             else:
-                df['season'] = s
+                df["season"] = s
             dfs.append(df)
             print(f"  OK  Stagione {s}: {len(df)} partite")
         except Exception as e:
-            print(f"  ERR Stagione {s} fallita (forse non ancora disponibile): {e}")
+            print(f"  ERR Stagione {s} fallita "
+                  f"(forse non ancora disponibile): {e}")
         time.sleep(0.4)   # pausa cortesia tra stagioni
 
     if not dfs:
         raise RuntimeError("Nessuna stagione scaricata. Controlla la connessione.")
 
-    serie_a = pd.concat(dfs, ignore_index=True)
-    serie_a.to_csv(OUT_PATH, index=False)
-    print(f"\nTotale grezzo  : {len(serie_a)} righe")
-    print(f"Stagioni OK    : {sorted(serie_a['season'].unique())}")
-    print(f"Salvato in     : {OUT_PATH}")
+    raw = pd.concat(dfs, ignore_index=True)
+    raw.to_csv(league.raw_path, index=False)
+    print(f"\nTotale grezzo  : {len(raw)} righe")
+    print(f"Stagioni OK    : {sorted(raw['season'].unique())}")
+    print(f"Salvato in     : {league.raw_path}")
 
 
 if __name__ == "__main__":
-    print("=== Download Serie A da football-data.co.uk ===")
-    main()
+    ap = argparse.ArgumentParser(
+        description="Download storico da football-data.co.uk")
+    ap.add_argument("--league", default=None, help="chiave lega (default: seriea)")
+    args = ap.parse_args()
+    lg = get_league(args.league)
+    print(f"=== Download {lg.name} ({lg.fd_code}) da football-data.co.uk ===")
+    main(lg)

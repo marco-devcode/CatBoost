@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Final Evaluation — CatBoost Serie A
+Final Evaluation — CatBoost (un campionato alla volta)
 Confronta i modelli, seleziona il migliore e genera il report.
 Inclusa: Kelly betting simulation (FASE6 §6) su test set.
 """
@@ -19,6 +19,9 @@ from sklearn.calibration import calibration_curve
 
 sys.stdout.reconfigure(encoding='utf-8')
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from leagues import get_league  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
 RESULTS_DIR = ROOT / "models"
@@ -26,6 +29,12 @@ RESULTS_DIR.mkdir(exist_ok=True)
 MODELS_DIR = ROOT / "models"
 
 RESULTS_DIR.mkdir(exist_ok=True)
+
+# evaluate.py e' uno script lineare: tutto il corpo gira all'import, quindi
+# argparse qui non serve e non puo' precedere gli usi. La lega si risolve da
+# un argomento di riga o dalla variabile d'ambiente LEAGUE, che get_league()
+# gia' legge. In CI: LEAGUE=eredivisie python src/evaluate.py
+LEAGUE = get_league(None)
 
 CLASS_SHORT  = ['H', 'D', 'A']
 LABEL_MAP    = {'H': 0, 'D': 1, 'A': 2}
@@ -49,13 +58,14 @@ def odds_to_prob(bh, bd, ba):
 
 KELLY_FRACTION = 0.25  # Kelly ridotto al 25% per gestione del rischio
 
-print("╔" + "═"*58 + "╗")
-print("║  VALUTAZIONE FINALE — CatBoost Serie A                     ║")
-print("╚" + "═"*58 + "╝")
+print("╔" + "═" * 58 + "╗")
+print(f"║  VALUTAZIONE FINALE — CatBoost {LEAGUE.name}"
+      .ljust(59) + "║")
+print("╚" + "═" * 58 + "╝")
 
 # ── Carica test data ───────────────────────────────────────────────────
-X_test_v2 = pd.read_csv(DATA_DIR / 'X_test_v2.csv')
-y_test_v2 = pd.read_csv(DATA_DIR / 'y_test_v2.csv').squeeze()
+X_test_v2 = pd.read_csv(LEAGUE.split_path('X_test_v2'))
+y_test_v2 = pd.read_csv(LEAGUE.split_path('y_test_v2')).squeeze()
 
 print(f"\n[Data] v2 test: {X_test_v2.shape}")
 
@@ -63,8 +73,8 @@ print(f"\n[Data] v2 test: {X_test_v2.shape}")
 b365_present = False
 df_test_b365 = None
 try:
-    raw = pd.read_csv(DATA_DIR / 'serie_a_raw.csv', low_memory=False)
-    df_full = pd.read_csv(DATA_DIR / 'serie_a_features.csv', parse_dates=['Date'])
+    raw = pd.read_csv(LEAGUE.raw_path, low_memory=False)
+    df_full = pd.read_csv(LEAGUE.features_path, parse_dates=['Date'])
     df_full = df_full.reset_index(drop=True)
     raw = raw.reset_index(drop=True)
     if 'B365H' in raw.columns:
@@ -81,10 +91,10 @@ except Exception as e:
 # ── Definizione modelli ─────────────────────────────────────────────────
 models_info = {
     'v1_baseline': {
-        'path': MODELS_DIR / 'catboost_seriea_v1.cbm',
+        'path': LEAGUE.model_path,
         'X_test': X_test_v2,
         'y_test': y_test_v2,
-        'desc': 'Baseline (Pi-Rating + FE)',
+        'desc': f'Baseline (Pi-Rating + FE) — {LEAGUE.name}',
     },
 }
 
@@ -124,7 +134,7 @@ for key, info in models_info.items():
     }
 
 if not results:
-    print("\n⚠️ Nessun modello da valutare. Esegui prima src/model.py per allenare catboost_seriea_v1.cbm")
+    print(f"\nNessun modello da valutare. Esegui prima src/model.py --league {LEAGUE.key}")
     raise SystemExit(0)
 
 # ── Trova il migliore ───────────────────────────────────────────────────
@@ -417,12 +427,12 @@ if kelly_metrics is not None:
 if shap_metrics is not None:
     final_metrics["shap_neopromossa"] = shap_metrics
 
-with open(RESULTS_DIR / 'final_report.json', 'w') as f:
+with open(LEAGUE.report_path('final_report'), 'w') as f:
     json.dump(final_metrics, f, indent=2, ensure_ascii=False)
 print("\n  Salvato: models/final_report.json")
 
 # ── Report Markdown ─────────────────────────────────────────────────────
-report_md = f"""# 🏆 Report Finale — CatBoost Serie A Match Prediction
+report_md = f"""# 🏆 Report Finale — CatBoost {LEAGUE.name} Match Prediction
 
 **Data**: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M')}
 **Modello migliore**: {best['desc']} (`{best_key}`)

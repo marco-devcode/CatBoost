@@ -31,15 +31,15 @@ MODELS_DIR = ROOT / "models"
 WINDOW = 5
 
 # Soglia di saturazione dei giorni di riposo. Unica sorgente di verita': viene
-# importata da features.py cosi' training e inferenza non possono divergere.
+# importata da leagues.py (che la espone a features.py e a predict.py) cosi'
+# training e inferenza non possono divergere.
 # Vedi la nota lunga su REST_CAP in features.add_rest_days.
-from features import REST_CAP  # noqa: E402
+from leagues import REST_CAP, get_league  # noqa: E402
 
 
-def load_history():
-    """Carica il dataset pulito + Pi-Rating."""
-    ratings = pd.read_csv(DATA_DIR / "serie_a_ratings.csv", parse_dates=['Date'])
-    return ratings
+def load_history(league):
+    """Carica il dataset pulito + Pi-Rating di una lega."""
+    return pd.read_csv(league.ratings_path, parse_dates=['Date'])
 
 
 def _last_complete_season_teams(history):
@@ -220,17 +220,18 @@ FEATURE_ORDER = [
 ]
 
 
-def predict_match(home, away, match_date=None, model_path=None,
+def predict_match(home, away, match_date=None, league=None,
                   current_season_teams=None):
-    if model_path is None:
-        model_path = MODELS_DIR / "catboost_seriea_v1.cbm"
+    if league is None:
+        raise ValueError("predict_match richiede un league")
+    model_path = league.model_path
     if not model_path.exists():
         raise FileNotFoundError(
             f"Modello non trovato in {model_path}. Esegui prima src/model.py "
-            f"(o la GitHub Action) per allenarlo."
+            f"--league {league.key} (o la GitHub Action) per allenarlo."
         )
 
-    df = load_history()
+    df = load_history(league)
     if match_date:
         match_date = pd.Timestamp(match_date)
 
@@ -250,19 +251,24 @@ def predict_match(home, away, match_date=None, model_path=None,
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Predici un match Serie A")
+    import argparse
+    ap = argparse.ArgumentParser(description="Predici un match")
     ap.add_argument("home")
     ap.add_argument("away")
-    ap.add_argument("--date", default=None, help="Data match (YYYY-MM-DD) per il contesto temporale")
+    ap.add_argument("--date", default=None,
+                    help="Data match (YYYY-MM-DD) per il contesto temporale")
+    ap.add_argument("--league", default=None, help="chiave lega (default: seriea)")
     args = ap.parse_args()
 
+    league = get_league(args.league)
     try:
-        out, feats = predict_match(args.home, args.away, args.date)
+        out, feats = predict_match(args.home, args.away, args.date, league)
     except FileNotFoundError as e:
         print(f"ERRORE: {e}")
         sys.exit(1)
 
     print(f"\n{'='*50}")
+    print(f"  {league.name}")
     print(f"  {args.home}  vs  {args.away}")
     if args.date:
         print(f"  (contesto: {args.date})")

@@ -1,20 +1,28 @@
 # src/features.py
 """
-Fase 5 — Feature Engineering per CatBoost Serie A.
+Fase 5 — Feature Engineering per CatBoost (un campionato alla volta).
 
 Aggiunge feature contestuali al di sopra dei 4 Pi-Rating baseline:
   1. Rolling Form (punti ultimi 5 match) — home/away separati
   2. Rolling Goals (gol fatti/subiti ultimi 5 match)
   3. Goal Difference Rolling
-  4. Rest Days (giorni di riposo)
+  4. Rest Days (giorni di riposo, saturati a REST_CAP)
   5. Head-to-Head storico
   6. Shots on Target proxy per xG
+  7. Flag neopromossa (home_promoted / away_promoted)
 
 Tutte le feature usano shift(1) per evitare data leakage.
 
-Feature canoniche (FEATURE_COLS) allineate 1:1 con predict.FEATURE_ORDER
-perche' CatBoost fa match per NOME colonna: training e inferenza devono
-ricevere ESATTAMENTE le stesse feature, nello stesso ordine.
+FEATURE_COLS (17) e' la feature set CANONICA condivisa da TUTTE le leghe e
+deve combaciare 1:1 con predict.FEATURE_ORDER: CatBoost fa match per NOME
+colonna, quindi training e inferenza devono ricevere esattamente le stesse
+feature, nello stesso ordine. Se divergono, l'inferenza passa feature diverse
+da quelle su cui il modello e' stato addestrato -> output rumore, specialmente
+sulle squadre con feature mancanti (neopromosse senza Pi-Rating freschi).
+
+Uso:
+    python src/features.py --league seriea
+    python src/features.py --league eredivisie
 """
 import sys
 import numpy as np
@@ -23,13 +31,12 @@ from pathlib import Path
 
 sys.stdout.reconfigure(encoding='utf-8')
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from leagues import get_league, REST_CAP  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
 RESULTS_DIR = ROOT / "results"
-
-RATINGS_PATH = DATA_DIR / "serie_a_ratings.csv"
-RAW_PATH = DATA_DIR / "serie_a_clean.csv"
-OUT_PATH = DATA_DIR / "serie_a_features.csv"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -237,24 +244,28 @@ def add_shots_proxy(df, window=5):
 # ═══════════════════════════════════════════════════════════════════════════════
 # Assemblaggio Feature Matrix
 # ═══════════════════════════════════════════════════════════════════════════════
-# Feature canoniche (ordinate come in predict.FEATURE_ORDER per allineare
-# training <-> inferenza). Tutte obbligatorie; i debutti (rolling goals NaN)
+# Feature canoniche (17), ordinate come predict.FEATURE_ORDER per allineare
+# training <-> inferenza. Tutte obbligatorie; i debutti (rolling goals NaN)
 # sono gestiti nativamente da CatBoost (valore mancante permesso).
+#
+# rest_advantage NON e' una feature: e' esattamente home_rest_days -
+# away_rest_days (verificato: coincide su TUTTE le righe, Serie A ed
+# Eredivisie), quindi aggiunge zero informazione ed e' ridondante
+# deterministica. Resta calcolata sul dataset solo per ispezione.
 FEATURE_COLS = [
     # Pi-rating (baseline)
     'pi_home_H', 'pi_away_H', 'pi_home_A', 'pi_away_A',
     # Forma recente
     'home_form_5', 'away_form_5',
     'home_goal_diff_5', 'away_goal_diff_5',
-    # Riposo: i due livelli assoluti, saturati a REST_CAP. rest_advantage non
-    # e' una feature: e' esattamente la loro differenza, quindi ridondante.
+    # Riposo: i due livelli assoluti, saturati a REST_CAP
     'home_rest_days', 'away_rest_days',
     # Head to head
     'h2h_home_winrate',
     # Rolling goals (ultimi 5, casa/trasferta)
     'home_goals_scored_5', 'home_goals_conceded_5',
     'away_goals_scored_5', 'away_goals_conceded_5',
-    # Flag neopromossa (il modello impara lo sconto da solo dai dati)
+    # Flag neopromossa (asimmetrici: il modello impara lo sconto da solo)
     'home_promoted', 'away_promoted',
 ]
 
@@ -334,12 +345,12 @@ def build_feature_matrix(df, cutoff='2025-08-01'):
 # ═══════════════════════════════════════════════════════════════════════════════
 # MAIN
 # ═══════════════════════════════════════════════════════════════════════════════
-if __name__ == "__main__":
+def main(league):
     print("=" * 55)
-    print("FASE 5 — Feature Engineering (Serie A)")
+    print(f"FASE 5 — Feature Engineering ({league.name})")
     print("=" * 55)
 
-    df = pd.read_csv(RATINGS_PATH, parse_dates=['Date'])
+    df = pd.read_csv(league.ratings_path, parse_dates=['Date'])
     print(f"Dataset: {len(df)} partite")
 
     print("\n5.1 — Rolling Form...")
@@ -351,7 +362,7 @@ if __name__ == "__main__":
     print("5.3 — Rest Days...")
     df = add_rest_days(df)
 
-    print("5.4 — Head-to-Head (può richiedere 1-2 min)...")
+    print("5.4 — Head-to-Head (puo' richiedere 1-2 min)...")
     df = add_h2h(df, window=5)
 
     print("5.4b — Flag neopromozione (stagione corrente)...")
@@ -361,16 +372,23 @@ if __name__ == "__main__":
     df = add_promotion_flags(df, current_season_teams=cur_teams)
 
     print("5.5 — Shots on Target proxy...")
-    df_raw = pd.read_csv(RAW_PATH)
+    df_raw = pd.read_csv(league.clean_path)
     if 'HST' in df_raw.columns and 'AST' in df_raw.columns:
-        df['HST'] = df_raw['HST'].values
-        df['AST'] = df_raw['AST'].values
-        df = add_shots_proxy(df, window=5)
+        # Allineato per posizione: df e df_raw hanno lo stesso ordine di
+        # righe solo se sono passati dallo stesso clean_path, quindi si
+        # verifica la lunghezza prima di assegnare .values.
+        if len(df_raw) == len(df):
+            df['HST'] = df_raw['HST'].values
+            df['AST'] = df_raw['AST'].values
+            df = add_shots_proxy(df, window=5)
+        else:
+            print(f"  [skip] shots proxy: lunghezze diverse "
+                  f"(clean={len(df_raw)}, ratings={len(df)})")
 
-    df.to_csv(OUT_PATH, index=False)
-    print(f"\nDataset con feature salvato in {OUT_PATH}")
+    df.to_csv(league.features_path, index=False)
+    print(f"\nDataset con feature salvato in {league.features_path}")
 
-    print(f"\n{'─'*50}")
+    print(f"\n{'-'*50}")
     print("Feature generate:")
     all_feature_cols = [c for c in df.columns if c not in
                         ('Date', 'HomeTeam', 'AwayTeam', 'FTHG', 'FTAG', 'FTR', 'season',
@@ -380,16 +398,57 @@ if __name__ == "__main__":
 
     X_train, X_test, y_train, y_test, feature_cols = build_feature_matrix(df)
 
-    print(f"\n{'─'*50}")
-    print(f"Feature matrix:")
+    print(f"\n{'-'*50}")
+    print(f"Feature matrix ({league.name}):")
     print(f"  Feature ({len(feature_cols)}): {feature_cols}")
     print(f"  Train: {X_train.shape}")
     print(f"  Test : {X_test.shape}")
 
-    X_train.to_csv(DATA_DIR / 'X_train_v2.csv', index=False)
-    X_test.to_csv(DATA_DIR / 'X_test_v2.csv', index=False)
-    y_train.to_csv(DATA_DIR / 'y_train_v2.csv', index=False)
-    y_test.to_csv(DATA_DIR / 'y_test_v2.csv', index=False)
-    print(f"\nSplit v2 salvato in data/")
+    # Split v2 per lega: due campionati non possono condividere i file.
+    X_train.to_csv(league.split_path('X_train_v2'), index=False)
+    X_test.to_csv(league.split_path('X_test_v2'), index=False)
+    y_train.to_csv(league.split_path('y_train_v2'), index=False)
+    y_test.to_csv(league.split_path('y_test_v2'), index=False)
+    print(f"\nSplit v2 salvato in data/ ({league.data_prefix}_*)")
 
-    print(f"\n✓ Fase 5 completata — pronto per re-training")
+    # Verifica di allineamento training/inferenza: se predict.FEATURE_ORDER
+    # divergesse, il modello riceverebbe feature diverse da quelle su cui
+    # e' stato addestrato. Fallo fallire qui, in CI, non sul sito.
+    # predict.py importa catboost, che in alcuni ambienti non e' installato:
+    # in quel caso si confronta la costante letta dal sorgente, senza import.
+    feature_order = None
+    try:
+        import predict as _predict
+        feature_order = _predict.FEATURE_ORDER
+    except ModuleNotFoundError as exc:
+        import ast
+        src = (DATA_DIR.parent / "src" / "predict.py").read_text(encoding="utf-8")
+        for node in ast.parse(src).body:
+            if isinstance(node, ast.Assign) and any(
+                    getattr(t, "id", None) == "FEATURE_ORDER" for t in node.targets):
+                feature_order = ast.literal_eval(node.value)
+                break
+        print(f"  (predict.py non importabile: {exc}; "
+              f"FEATURE_ORDER letto dal sorgente)")
+
+    if feature_order is None:
+        print("  ATTENZIONE: impossibile verificare FEATURE_ORDER, skip")
+    elif feature_order != feature_cols:
+        print("\nERRORE: FEATURE_COLS e predict.FEATURE_ORDER divergono!")
+        print(f"  solo in features: {[c for c in feature_cols if c not in feature_order]}")
+        print(f"  solo in predict: {[c for c in feature_order if c not in feature_cols]}")
+        if [c for c in feature_cols if c in feature_order] != \
+           [c for c in feature_order if c in feature_cols]:
+            print("  ATTENZIONE: anche l'ORDINE diverge")
+        raise SystemExit(1)
+    else:
+        print(f"Allineamento OK: {len(feature_cols)} feature, training == inferenza")
+
+    print(f"\nFase 5 completata per {league.name} — pronto per il training")
+
+
+if __name__ == "__main__":
+    import argparse
+    ap = argparse.ArgumentParser(description="Feature Engineering")
+    ap.add_argument("--league", default=None, help="chiave lega (default: seriea)")
+    main(get_league(ap.parse_args().league))

@@ -38,6 +38,37 @@ body {
   font-weight: 700;
 }
 
+/* Selettore campionato: due bottoni, quello attivo evidenziato. */
+.league-switch {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.league-btn {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.league-btn:hover {
+  color: var(--text);
+  border-color: var(--muted);
+}
+
+.league-btn.active {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+  font-weight: 600;
+}
+
 .update-line {
   display: flex;
   align-items: center;

@@ -4,6 +4,12 @@ Ricalcola le probabilita' SOLO delle partite la cui stima e' stata prodotta dal
 modello addestrato sul dataset troncato da 22 righe (dopo il commit 515455e),
 e non su quello trainato su 5642 partite.
 
+NOTA: questo script e' deliberatamente SOLO Serie A e NON e' stato reso
+multi-lega. Era un intervento TANTUM con un allowlist di partite esplicita
+(20 partite, GG4+GG5); generalizzarlo romperebbe la tracciabilita' di
+quell'operazione. Per l'Eredivisie il freeze vale dalla nascita, quindi non
+esiste un caso "ricalcolare" da copiare.
+
 Perimetro: 20 partite (GG4 + GG5), gia' incontrate come "cambiata" tra i commit.
 Fuori perimetro: GG1-GG3, la cui prob proviene ancora dal training da 4508 righe
 del commit 68c0b24, e tutte le partite senza risultato (gia' ricalcolate dalla

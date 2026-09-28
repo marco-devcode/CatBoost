@@ -1,27 +1,43 @@
-name: Pipeline Serie A
+name: Pipeline Campionati
 
-# Esegue l'intera pipeline CatBoost per la Serie A:
-#   download -> clean -> ratings (Dixon-Coles) -> features -> model -> evaluate
-#   -> predizioni fixtures 26/27 -> webapp/public/predictions.json
-# Su runner GitHub (ubuntu) dove le dipendenze pesanti (catboost) si installano.
-# - Ogni lunedi e giovedi alle 06:00 UTC (aggiorna modello + predizioni dashboard)
+# Esegue l'intera pipeline CatBoost per OGNI campionato configurato in
+# src/leagues.py:
+#   download -> clean -> ratings (Dixon-Coles) -> features -> model
+#   -> evaluate -> predizioni fixtures -> webapp/public/predictions_<lega>.json
+# - Ogni lunedi e giovedi alle 06:00 UTC
 # - Manuale da tab Actions -> Run workflow
-# Il push finale degli artefatti (predictions.json incluso) fa scattare il
-# redeploy automatico su Vercel.
+# Il push finale degli artefatti fa scattare il redeploy automatico su Vercel.
+#
+# Un modello per campionato: Pi-Rating e dataset sono diversi (Eredivisie
+# 4885 partite / 18 squadre, Serie A ~6100 / 20), e un modello unico finirebbe
+# per fare la media delle due leghe.
+#
+# La matrice fallisce se UNA lega fallisce: e' preferibile vedere il job
+# rosso che scoprire settimane dopo che una lega e' ferma con un JSON vuoto.
 
 on:
   schedule:
     - cron: "0 6 * * 1"
     - cron: "0 6 * * 4"
   workflow_dispatch:
+    inputs:
+      league:
+        description: "Campionato (vuoto = tutte)"
+        required: false
+        default: ""
 
 permissions:
   contents: write
 
 jobs:
   pipeline:
+    name: ${{ matrix.league }}
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        league: [seriea, eredivisie]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,27 +54,46 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      # Quote prepartita da TheOddsAPI. La chiave sta nei secret del repo,
+      # MAI nel tree: predict_fixtures la legge da THEODDSAPI_KEY e, se
+      # assente, continua con le quote delle sole partite gia' giocate.
+      - name: Quote TheOddsAPI (secret)
+        env:
+          THEODDSAPI_KEY: ${{ secrets.THEODDSAPI_KEY }}
+        run: |
+          if [ -n "$THEODDSAPI_KEY" ]; then
+            echo "Chiave TheOddsAPI presente"
+          else
+            echo "ATTENZIONE: secret THEODDSAPI_KEY non impostato."
+            echo "Le previsioni future avranno bm=null (solo le giocate avranno quote)."
+          fi
+
       - name: Download dati (football-data.co.uk)
-        run: python src/download_data.py
+        run: python src/download_data.py --league ${{ matrix.league }}
 
       - name: Clean dati
-        run: python src/clean_data.py
+        run: python src/clean_data.py --league ${{ matrix.league }}
 
       - name: Pi-Rating (Dixon-Coles)
-        run: python src/ratings.py
+        run: python src/ratings.py --league ${{ matrix.league }}
 
       - name: Feature engineering
-        run: python src/features.py
+        run: python src/features.py --league ${{ matrix.league }}
 
       - name: Train CatBoost
-        run: python src/model.py
+        run: python src/model.py --league ${{ matrix.league }}
 
+      # evaluate.py e' uno script lineare: la lega si risolve dalla env.
       - name: Evaluate + report
+        env:
+          LEAGUE: ${{ matrix.league }}
         run: python src/evaluate.py
 
       - name: Predizioni fixtures (dashboard)
-        run: python src/predict_fixtures.py
+        run: python src/predict_fixtures.py --league ${{ matrix.league }}
 
+      # Ogni lega committa solo i propri artefatti: due job paralleli che
+      # committano tutto si pesterebbero a vicenda sullo stesso index.
       - name: Commit artefatti generati
         run: |
           mkdir -p data models results webapp/public
@@ -68,6 +103,13 @@ jobs:
           if git diff --cached --quiet; then
             echo "Nessun artefatto da committare"
           else
-            git commit -m "ci: pipeline automatica Serie A ($(date +%Y-%m-%d))"
-            git push
+            git commit -m "ci: pipeline ${{ matrix.league }} ($(date +%Y-%m-%d))"
+            # Se un altro job ha committato nel frattempo, rebase e riprova.
+            for i in 1 2 3; do
+              if git push; then exit 0; fi
+              echo "Push rifiutato (concorrenza): rebase e riprovo ($i/3)"
+              git pull --rebase --autostash origin main || true
+            done
+            echo "Push fallito dopo 3 tentativi"
+            exit 1
           fi

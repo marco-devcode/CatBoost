@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { KellyBet, PredictionsData } from "@/lib/types";
+import { LEAGUES } from "@/lib/leagues";
 
 function fmtDate(iso: string): string {
   return new Date(iso).toLocaleDateString("it-IT", {
@@ -74,20 +75,30 @@ function BetCard({ b }: { b: KellyBet }) {
 }
 
 export default function KellyPage() {
+  const [leagueKey, setLeagueKey] = useState<string>(LEAGUES[0].key);
   const [data, setData] = useState<PredictionsData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+    const league = LEAGUES.find((l) => l.key === leagueKey) ?? LEAGUES[0];
     (async () => {
+      setData(null);
+      setError(null);
       try {
-        const res = await fetch("/predictions.json");
+        const res = await fetch(league.json);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        setData(await res.json());
+        const json = await res.json();
+        if (!cancelled) setData(json);
       } catch (e) {
-        setError(e instanceof Error ? e.message : "Errore caricamento dati");
+        if (!cancelled)
+          setError(e instanceof Error ? e.message : "Errore caricamento dati");
       }
     })();
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [leagueKey]);
 
   if (error)
     return (
@@ -133,7 +144,20 @@ export default function KellyPage() {
     return (
       <div className="container">
         <header className="header">
-          <h1>💰 Simulazione Kelly</h1>
+          <h1>💰 Simulazione Kelly — {data.meta.league_name ?? "Serie A"}</h1>
+          <nav className="league-switch" aria-label="Campionato">
+            {LEAGUES.map((l) => (
+              <button
+                key={l.key}
+                type="button"
+                className={l.key === leagueKey ? "league-btn active" : "league-btn"}
+                onClick={() => setLeagueKey(l.key)}
+                aria-current={l.key === leagueKey}
+              >
+                {l.name}
+              </button>
+            ))}
+          </nav>
         </header>
         <p className="loading">
           Nessuna puntata registrata. La simulazione compare quando ci sono
@@ -148,7 +172,23 @@ export default function KellyPage() {
   return (
     <div className="container">
       <header className="header">
-        <h1>💰 Simulazione Kelly — puntate effettive</h1>
+        <h1>
+          💰 Simulazione Kelly — puntate effettive ·{" "}
+          {data.meta.league_name ?? "Serie A"}
+        </h1>
+        <nav className="league-switch" aria-label="Campionato">
+          {LEAGUES.map((l) => (
+            <button
+              key={l.key}
+              type="button"
+              className={l.key === leagueKey ? "league-btn active" : "league-btn"}
+              onClick={() => setLeagueKey(l.key)}
+              aria-current={l.key === leagueKey}
+            >
+              {l.name}
+            </button>
+          ))}
+        </nav>
         <div className="update-line">
           <span className="pulse" />
           Aggiornato al{" "}

@@ -1,6 +1,6 @@
 # src/model.py
 """
-Fase 4 — Modello CatBoost per predizione risultati Serie A.
+Fase 4 — Modello CatBoost per predizione risultati (un campionato alla volta).
 Contiene: training baseline, hyperparameter tuning, valutazione.
 """
 import sys
@@ -17,6 +17,9 @@ from sklearn.metrics import classification_report, confusion_matrix
 
 sys.stdout.reconfigure(encoding='utf-8')
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from leagues import get_league  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
 RESULTS_DIR = ROOT / "models"
@@ -27,12 +30,16 @@ MODELS_DIR.mkdir(exist_ok=True)
 FEATURE_COLS_BASELINE = ['pi_home_H', 'pi_away_H', 'pi_home_A', 'pi_away_A']
 
 
-def load_data():
-    """Carica i dati splittati dalla Fase 3 (features.py -> *v2.csv)."""
-    X_train = pd.read_csv(DATA_DIR / 'X_train_v2.csv')
-    X_test  = pd.read_csv(DATA_DIR / 'X_test_v2.csv')
-    y_train = pd.read_csv(DATA_DIR / 'y_train_v2.csv').squeeze()
-    y_test  = pd.read_csv(DATA_DIR / 'y_test_v2.csv').squeeze()
+def load_data(league):
+    """Carica i dati splittati dalla Fase 5 (features.py -> *_v2.csv).
+
+    I path passano da League.split_path: due campionati non possono leggere
+    lo stesso split.
+    """
+    X_train = pd.read_csv(league.split_path('X_train_v2'))
+    X_test  = pd.read_csv(league.split_path('X_test_v2'))
+    y_train = pd.read_csv(league.split_path('y_train_v2')).squeeze()
+    y_test  = pd.read_csv(league.split_path('y_test_v2')).squeeze()
     return X_train, X_test, y_train, y_test
 
 
@@ -190,22 +197,28 @@ def train_final_model(X_train, y_train, best_params):
 # ═══════════════════════════════════════════════════════════════════════════════
 # 4.5 Salvataggio
 # ═══════════════════════════════════════════════════════════════════════════════
-def save_model_and_metrics(model, metrics, feature_cols, label="v1"):
-    """Salva modello e metriche."""
-    model_path = MODELS_DIR / f'catboost_seriea_{label}.cbm'
+def save_model_and_metrics(model, metrics, feature_cols, league, label="v1"):
+    """Salva modello e metriche per una lega.
+
+    Il path viene da League.model_path, cosi' due leghe non possono
+    sovrascrivere lo stesso .cbm. `label` resta per varianti (v1, v2...).
+    """
+    model_path = (league.model_path if label == "v1"
+                  else MODELS_DIR / f"{league.model_name}_{label}.cbm")
     model.save_model(str(model_path))
     print(f"\nModello salvato in {model_path}")
 
     model_check = CatBoostClassifier()
     model_check.load_model(str(model_path))
 
-    metrics_path = RESULTS_DIR / f'metrics_{label}.json'
+    metrics_path = league.report_path(f'metrics_{label}')
     serializable = {
         k: (round(v, 6) if isinstance(v, float) else v)
         for k, v in metrics.items()
         if k not in ('probs', 'preds')
     }
     serializable['features'] = feature_cols
+    serializable['league'] = league.key
     with open(metrics_path, 'w') as f:
         json.dump(serializable, f, indent=2)
     print(f"Metriche salvate in {metrics_path}")
@@ -216,16 +229,17 @@ def save_model_and_metrics(model, metrics, feature_cols, label="v1"):
 # ═══════════════════════════════════════════════════════════════════════════════
 # MAIN
 # ═══════════════════════════════════════════════════════════════════════════════
-if __name__ == "__main__":
-    print("╔" + "═"*53 + "╗")
-    print("║  FASE 4 — CatBoost Model Training & Evaluation (Serie A)  ║")
-    print("╚" + "═"*53 + "╝")
+def main(league):
+    print("╔" + "═" * 53 + "╗")
+    title = f"FASE 4 — CatBoost Model Training & Evaluation ({league.name})"
+    print("║" + title.ljust(54)[:53] + "║")
+    print("╚" + "═" * 53 + "╝")
 
-    X_train, X_test, y_train, y_test = load_data()
+    X_train, X_test, y_train, y_test = load_data(league)
     print(f"Train: {len(X_train)} | Test: {len(X_test)}")
-    print(f"Feature: {list(X_train.columns)}")
+    print(f"Feature ({len(X_train.columns)}): {list(X_train.columns)}")
 
-    MODEL_PATH = MODELS_DIR / "catboost_seriea_v1.cbm"
+    MODEL_PATH = league.model_path
 
     if len(X_train) == 0:
         print("\nAVVERTENZA: X_train vuoto (dataset parziale < cutoff).")
@@ -259,12 +273,21 @@ if __name__ == "__main__":
 
         final_metrics = evaluate_model(final_model, X_test, y_test, "Tuned")
 
-        save_model_and_metrics(final_model, final_metrics, list(X_train.columns), "v1")
+        save_model_and_metrics(final_model, final_metrics,
+                               list(X_train.columns), league, "v1")
 
     print(f"\n{'═'*55}")
-    print(f"  FASE 4 COMPLETATA")
+    print(f"  FASE 4 COMPLETATA — {league.name}")
+    print(f"  Modello: {league.model_name}")
     if 'baseline_metrics' in dir():
         print(f"  Baseline → Accuracy: {baseline_metrics['accuracy']:.4f}, RPS: {baseline_metrics['rps']:.4f}")
     if 'final_metrics' in dir():
         print(f"  Tuned    → Accuracy: {final_metrics['accuracy']:.4f}, RPS: {final_metrics['rps']:.4f}")
     print(f"{'═'*55}")
+
+
+if __name__ == "__main__":
+    import argparse
+    ap = argparse.ArgumentParser(description="Training CatBoost")
+    ap.add_argument("--league", default=None, help="chiave lega (default: seriea)")
+    main(get_league(ap.parse_args().league))

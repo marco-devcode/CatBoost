@@ -63,6 +63,10 @@ export interface PredictionsData {
   meta: {
     last_update: string;
     stagione: string;
+    // Campionato: presente da quando il repo serve piu' leghe. Il JSON e'
+    // per lega (predictions_<lega>.json) e questo campo identifica quale.
+    league?: string;
+    league_name?: string;
     ultima_giornata_giocata?: number;
     prossima_giornata?: number;
     nota?: string;
@@ -74,4 +78,11 @@ export interface PredictionsData {
   };
   stats: { corrette: number; total: number };
   giornate: Record<string, MatchPrediction[]>;
+}
+
+/** Campionato selezionabile in UI. I JSON sono uno per lega. */
+export interface LeagueOption {
+  key: string;
+  name: string;
+  json: string;
 }

@@ -7,3 +7,16 @@ env/
 webapp/node_modules/
 webapp/.next/
 webapp/tsconfig.tsbuildinfo
+
+# ── Segreti: MAI committati ──────────────────────────────────────────────
+# Le chiavi API (TheOddsAPI, api-football) vivono in ~/.hermes/secrets/ o
+# nei secret del repo GitHub, mai nel tree. Se una chiave finisce qui per
+# errore, il .gitignore da solo NON basta: va rimossa anche dalla history
+# con git filter-branch / BFG, perche' resterebbe nel repo per sempre.
+.env
+.env.*
+*.key
+secrets/
+*.pem
+credentials.json
+service-account*.json

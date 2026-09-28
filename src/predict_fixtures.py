@@ -37,181 +37,16 @@ from catboost import CatBoostClassifier
 
 sys.stdout.reconfigure(encoding='utf-8')
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from leagues import get_league, WEBAPP_PUBLIC  # noqa: E402
+import sources  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
 MODELS_DIR = ROOT / "models"
-WEBAPP_PUBLIC = ROOT / "webapp" / "public"
-OUT_JSON = WEBAPP_PUBLIC / "predictions.json"
+WEBAPP_PUBLIC = WEBAPP_PUBLIC
 
-FIXTURES_URL = "https://www.football-data.co.uk/mmz4281/{season}/I1.csv"
-TSDB_KEY = "123"
-TSDB_LEAGUE_ID = "4332"   # Serie A
-TSDB_ROUNDS = 38
-HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
-SEASON_FD = "2627"        # formato football-data
-SEASON_TSDB = "2026-2027" # formato TheSportsDB
-
-MODEL_PATH = MODELS_DIR / "catboost_seriea_v1.cbm"
 KELLY_FRACTION = 0.25      # Kelly ridotto al 25% per gestione del rischio
-
-# Nomi squadre TheSportsDB -> nomi storico football-data
-ALIASES = {
-    "internazionale": "Inter", "inter milan": "Inter", "fc internazionale": "Inter",
-    "ac milan": "Milan", "milan fc": "Milan",
-    "ssc napoli": "Napoli", "napoli fc": "Napoli",
-    "ss lazio": "Lazio", "lazio fc": "Lazio",
-    "as roma": "Roma", "roma fc": "Roma",
-    "acf fiorentina": "Fiorentina", "fiorentina fc": "Fiorentina",
-    "atalanta bc": "Atalanta", "atalanta fc": "Atalanta",
-    "bologna fc": "Bologna", "bologna fc 1909": "Bologna",
-    "genoa cfc": "Genoa", "genoa cricket club": "Genoa",
-    "torino fc": "Torino",
-    "udinese calcio": "Udinese",
-    "cagliari calcio": "Cagliari",
-    "parma calcio": "Parma", "parma fc": "Parma",
-    "hellas verona": "Verona", "verona fc": "Verona",
-    "us lecce": "Lecce", "lecce fc": "Lecce",
-    "empoli fc": "Empoli",
-    "frosinone calcio": "Frosinone",
-    "venezia fc": "Venezia", "venezia calcio": "Venezia",
-    "ac monza": "Monza", "monza fc": "Monza",
-    "us sassuolo calcio": "Sassuolo", "sassuolo calcio": "Sassuolo",
-    "como 1907": "Como",
-    "pisa sporting club": "Pisa", "ac pisa": "Pisa", "pisa sc": "Pisa",
-    "cremonese": "Cremonese", "us cremonese": "Cremonese",
-    "spezia calcio": "Spezia", "us spezia": "Spezia",
-    "juventus fc": "Juventus", "juventus": "Juventus",
-}
-
-
-def norm_team(name: str) -> str:
-    """Normalizza il nome squadra al formato dello storico football-data."""
-    s = unicodedata.normalize("NFKD", str(name)).encode("ascii", "ignore").decode()
-    s = " ".join(s.lower().strip().split())
-    if s in ALIASES:
-        return ALIASES[s]
-    # togli prefissi/suffissi comuni e anno di fondazione
-    stop = {"fc", "calcio", "ac", "as", "ss", "ssc", "us", "asd", "bc",
-            "cfc", "sc", "spa", "1907", "1909", "1893", "1899", "1926"}
-    tokens = [t for t in s.split() if t not in stop]
-    base = " ".join(tokens) if tokens else s
-    return ALIASES.get(base, base.title())
-
-
-def _http_get(url: str, retries: int = 3) -> bytes | None:
-    for attempt in range(1, retries + 1):
-        try:
-            req = urllib.request.Request(url, headers=HEADERS)
-            with urllib.request.urlopen(req, timeout=30) as resp:
-                return resp.read()
-        except urllib.error.HTTPError as e:
-            if e.code == 429 and attempt < retries:
-                wait = 10 * attempt  # rate-limit: attesa lunga
-                print(f"  [429 rate-limit] attendo {wait}s...")
-                time.sleep(wait)
-                continue
-            print(f"  [retry {attempt}/{retries}] {e}")
-            if attempt < retries:
-                time.sleep(3 * attempt)
-        except Exception as e:
-            print(f"  [retry {attempt}/{retries}] {e}")
-            if attempt < retries:
-                time.sleep(3 * attempt)
-    return None
-
-
-def fetch_football_data(season: str):
-    """CSV football-data. None se non ancora disponibile.
-
-    Estrae anche le quote B365 (H/D/A) se presenti nel CSV.
-    """
-    raw = _http_get(FIXTURES_URL.format(season=season))
-    if raw is None:
-        return None
-    try:
-        df = pd.read_csv(io.BytesIO(raw), on_bad_lines='skip', encoding='latin-1')
-        if 'HomeTeam' not in df.columns:
-            return None
-        df['HomeTeam'] = df['HomeTeam'].map(norm_team)
-        df['AwayTeam'] = df['AwayTeam'].map(norm_team)
-        return df
-    except Exception as e:
-        print(f"  football-data parse error: {e}")
-        return None
-
-
-def _parse_events(events: list) -> list:
-    """Converte eventi TheSportsDB in righe football-data-like.
-
-    TheSportsDB NON espone le quote B365, quindi bm resta None.
-    """
-    rows = []
-    for ev in events:
-        home = norm_team(ev.get("strHomeTeam", ""))
-        away = norm_team(ev.get("strAwayTeam", ""))
-        date = ev.get("dateEvent")
-        rnd = ev.get("intRound")
-        if not home or not away or not date:
-            continue
-        hs, as_ = ev.get("intHomeScore"), ev.get("intAwayScore")
-        fthg = ftag = ftr = np.nan
-        if hs is not None and as_ is not None:
-            try:
-                fthg, ftag = int(hs), int(as_)
-                ftr = "H" if fthg > ftag else ("D" if fthg == ftag else "A")
-            except (ValueError, TypeError):
-                pass
-        rows.append({
-            "Date": pd.to_datetime(date),
-            "HomeTeam": home, "AwayTeam": away,
-            "FTHG": fthg, "FTAG": ftag, "FTR": ftr,
-            "B365H": np.nan, "B365D": np.nan, "B365A": np.nan,
-            "giornata": int(rnd) if rnd else np.nan,
-        })
-    return rows
-
-
-def fetch_thesportsdb(season: str):
-    """Calendario completo: una chiamata eventsround.php per ogni giornata.
-    La chiave di test '123' non espone il bulk stagionale completo."""
-    def fetch_round(rnd: int):
-        url = (f"https://www.thesportsdb.com/api/v1/json/{TSDB_KEY}"
-               f"/eventsround.php?id={TSDB_LEAGUE_ID}&r={rnd}&s={season}")
-        raw = _http_get(url)
-        if raw is None:
-            return []
-        try:
-            payload = json.loads(raw.decode('utf-8'))
-        except Exception as e:
-            print(f"  [gg {rnd}] json error: {e}")
-            return []
-        return _parse_events(payload.get("events") or [])
-
-    all_rows = []
-    missed = []
-    for rnd in range(1, TSDB_ROUNDS + 1):
-        rows = fetch_round(rnd)
-        if not rows:
-            missed.append(rnd)
-        all_rows.extend(rows)
-        time.sleep(0.6)  # rate-limit gentile
-
-    # Seconda passata per le giornate mancate (di solito 429 transitori)
-    if missed:
-        print(f"  Seconda passata per {len(missed)} giornate: {missed}")
-        time.sleep(15)
-        for rnd in missed:
-            rows = fetch_round(rnd)
-            all_rows.extend(rows)
-            time.sleep(1.5)
-
-    df = pd.DataFrame(all_rows)
-    if len(df):
-        df = df.drop_duplicates(subset=['Date', 'HomeTeam', 'AwayTeam'])
-        df = df.sort_values('Date').reset_index(drop=True)
-        print(f"  TheSportsDB: {len(df)} partite su {df['giornata'].nunique()} giornate")
-    return df if len(df) else None
-
 
 def assign_giornate(df: pd.DataFrame) -> pd.DataFrame:
     """Clustering cronologico in giornate (solo se la fonte non ha il round)."""
@@ -268,109 +103,71 @@ def ranked_probability_score(y_true, y_proba):
     return rps / max(len(y_true), 1)
 
 
-def _overlay_b365_from_local_csv(fx: pd.DataFrame) -> int:
-    """Overlay quote B365 dalla serie_a_raw.csv locale sulle fixture mancanti.
-
-    Quando football-data.co.uk è down (HTTP 503), le quote B365 mancano dal
-    calendario. Il CSV locale (scaricato manualmente o da un run precedente)
-    contiene le quote per le partite già giocate: le overlay qui per avere bm
-    completi nella dashboard senza rilanciare la pipeline remota.
-    """
-    RAW_PATH = DATA_DIR / "serie_a_raw.csv"
-    if not RAW_PATH.exists():
-        return 0
-    try:
-        raw_local = pd.read_csv(RAW_PATH, dtype=str, low_memory=False)
-        if 'Date' not in raw_local.columns or 'B365H' not in raw_local.columns:
-            return 0
-        def _norm_date(d):
-            d = str(d).strip()
-            if '/' in d:   # DD/MM/YYYY
-                return pd.Timestamp(pd.to_datetime(d, dayfirst=True, errors='coerce'))
-            return pd.Timestamp(pd.to_datetime(d, errors='coerce'))
-        raw_local['Date'] = raw_local['Date'].map(_norm_date)
-        raw_local = raw_local.dropna(subset=['Date'])
-        raw_local['HomeTeam'] = raw_local['HomeTeam'].map(norm_team)
-        raw_local['AwayTeam'] = raw_local['AwayTeam'].map(norm_team)
-        filled = 0
-        for _, lr in raw_local.iterrows():
-            b365h = str(lr.get('B365H', '')).strip()
-            if not b365h or b365h == 'nan':
-                continue
-            try:
-                fh = float(lr['B365H'])
-                fd = float(lr['B365D'])
-                fa = float(lr['B365A'])
-            except (TypeError, ValueError):
-                continue
-            mask = ((fx['Date'] == lr['Date']) &
-                    (fx['HomeTeam'] == lr['HomeTeam']) &
-                    (fx['AwayTeam'] == lr['AwayTeam']))
-            if not mask.any():
-                continue
-            # Overlay solo se il valore attuale è NaN
-            for col, val in [('B365H', fh), ('B365D', fd), ('B365A', fa)]:
-                cur = fx.loc[mask, col]
-                if cur.isna().all() or all(str(v).strip() in ('', 'nan') for v in cur):
-                    fx.loc[mask, col] = val
-            filled += mask.sum()
-        return filled
-    except Exception as e:
-        print(f"  [warn] overlay B365 locale fallito: {e}")
-        return 0
-
-
-def main():
+def main(league):
     print("=" * 55)
-    print(f"PREDIZIONI FIXTURE Serie A {SEASON_FD[:2]}/{SEASON_FD[2:]}")
+    print(f"PREDIZIONI FIXTURE {league.name} "
+          f"{league.season_fd[:2]}/{league.season_fd[2:]}")
     print("=" * 55)
+
+    MODEL_PATH = league.model_path
+    OUT_JSON = league.json_path
+    SEASON_FD = league.season_fd
 
     if not MODEL_PATH.exists():
-        raise FileNotFoundError(f"{MODEL_PATH} non trovato: esegui prima src/model.py")
+        raise FileNotFoundError(
+            f"{MODEL_PATH} non trovato: esegui prima "
+            f"src/model.py --league {league.key}")
     model = CatBoostClassifier()
     model.load_model(str(MODEL_PATH))
     model_trained_at = pd.Timestamp(MODEL_PATH.stat().st_mtime).isoformat(timespec="seconds")
 
-    sys.path.insert(0, str(ROOT / 'src'))
     from predict import (load_history, compute_features_for_match, FEATURE_ORDER,
                          is_promoted)
 
-    history = load_history()
+    history = load_history(league)
     print(f"Storico: {len(history)} partite")
 
     # ── Calendario ────────────────────────────────────────────────────
-    fx, source = None, None
-    fd = fetch_football_data(SEASON_FD)
-    if fd is not None and len(fd):
-        fx, source = fd, "football-data.co.uk"
-        fx['Date'] = pd.to_datetime(fx['Date'], dayfirst=True, errors='coerce')
-        if 'giornata' not in fx.columns:
+    # Ordine di preferenza:
+    #   1. openfootball  -> calendario COMPLETO (giocate + future) e giornata
+    #                       esplicita. E' la fonte primaria.
+    #   2. football-data -> stagioni dove openfootball non copre (Serie A puo'
+    #                       restare su TSDB, che ha le future).
+    #   3. TheSportsDB   -> solo se la lega e' nel free tier.
+    print("  Calendario da openfootball...")
+    fx = sources.fetch_openfootball(league)
+    source = "openfootball"
+    fd = None
+
+    if fx is None:
+        print("  openfootball non disponibile -> football-data.co.uk")
+        fd = sources.fetch_football_data(league)
+        if fd is not None and len(fd):
+            fx, source = fd, "football-data.co.uk"
             fx['giornata'] = np.nan
-        # Integra le giornate future mancanti da TheSportsDB
-        print("  Integrazione giornate future da TheSportsDB...")
-        tsdb = fetch_thesportsdb(SEASON_TSDB)
-        if tsdb is not None:
-            tsdb['Date'] = pd.to_datetime(tsdb['Date'], errors='coerce')
-            # Chiave di dedup su data(giorno)+squadre, formato normalizzato
-            def _key(row):
-                return (pd.Timestamp(row['Date']).strftime('%Y-%m-%d'),
-                        str(row['HomeTeam']), str(row['AwayTeam']))
-            fd_keys = set(_key(r) for _, r in fx.iterrows())
-            add_mask = [(_key(r) not in fd_keys) for _, r in tsdb.iterrows()]
-            add = tsdb[add_mask]
-            if len(add):
-                round_map = {_key(r): int(r['giornata']) for _, r in tsdb.iterrows()
-                             if pd.notna(r['giornata'])}
-                fx['giornata'] = fx.apply(
-                    lambda r: round_map.get(_key(r), np.nan), axis=1)
-                fx = pd.concat([fx, add], ignore_index=True)
-                print(f"    +{len(add)} partite future aggiunte (senza quote B365)")
-    else:
-        print("  football-data non disponibile -> fallback TheSportsDB")
-        tsdb = fetch_thesportsdb(SEASON_TSDB)
-        if tsdb is not None:
-            tsdb['Date'] = pd.to_datetime(tsdb['Date'], errors='coerce')
-            fx, source = tsdb, "thesportsdb.com"
+            # Integra le giornate future mancanti da TheSportsDB
+            if league.tsdb_league:
+                print("  Integrazione giornate future da TheSportsDB...")
+                tsdb = sources.fetch_thesportsdb(league)
+                if tsdb is not None:
+                    def _key(row):
+                        return (pd.Timestamp(row['Date']).strftime('%Y-%m-%d'),
+                                str(row['HomeTeam']), str(row['AwayTeam']))
+                    fd_keys = set(_key(r) for _, r in fx.iterrows())
+                    add_mask = [(_key(r) not in fd_keys) for _, r in tsdb.iterrows()]
+                    add = tsdb[add_mask]
+                    if len(add):
+                        round_map = {_key(r): int(r['giornata']) for _, r in tsdb.iterrows()
+                                     if pd.notna(r['giornata'])}
+                        fx['giornata'] = fx.apply(
+                            lambda r: round_map.get(_key(r), np.nan), axis=1)
+                        fx = pd.concat([fx, add], ignore_index=True)
+                        print(f"    +{len(add)} partite future aggiunte")
+        else:
+            print("  football-data non disponibile -> TheSportsDB")
+            tsdb = sources.fetch_thesportsdb(league)
+            if tsdb is not None:
+                fx, source = tsdb, "thesportsdb.com"
 
     if fx is None or not len(fx):
         print("Nessuna fonte calendario disponibile: scrivo JSON vuoto.")
@@ -379,6 +176,8 @@ def main():
             json.dump({
                 "meta": {
                     "last_update": pd.Timestamp.now().isoformat(timespec="seconds"),
+                    "league": league.key,
+                    "league_name": league.name,
                     "stagione": SEASON_FD,
                     "nota": "Calendario non ancora disponibile dalle fonti",
                 },
@@ -389,23 +188,54 @@ def main():
 
     print(f"Fonte calendario: {source}")
     fx = fx.dropna(subset=['Date', 'HomeTeam', 'AwayTeam'])
-    # Giornata: priorità a chi ce l'ha (TSDB intRound), altrimenti clustering
+    # Giornata: priorita' a chi ce l'ha (openfootball/TSDB), altrimenti clustering
     if 'giornata' not in fx.columns:
         fx['giornata'] = np.nan
     fx['giornata'] = pd.to_numeric(fx['giornata'], errors='coerce')
     if fx['giornata'].isna().any():
-        fx = fx.drop(columns=['giornata'])
-        fx = assign_giornate(fx)
+        # NON chiamare assign_giornate se solo alcune righe mancano: il
+        # clustering cronologico rimapperebbe TUTTE le giornate sbagliato
+        # (le partite football-data finirebbero nella giornata sbagliata).
+        if fx['giornata'].notna().sum() == 0:
+            fx = fx.drop(columns=['giornata'])
+            fx = assign_giornate(fx)
+        else:
+            fx['giornata'] = fx['giornata'].fillna(0).astype(int)
     fx['giornata'] = fx['giornata'].astype(int)
-    print(f"Fixture: {len(fx)} partite, {fx['giornata'].max()} giornate")
+    print(f"Fixture: {len(fx)} partite, {fx['giornata'].nunique()} giornate")
 
-    # ── Overlay quote B365 dal CSV locale (serie_a_raw.csv) ───────────────────────────
-    # Quando football-data.co.uk è down (503), le quote B365 mancano dal calendario.
-    # Il CSV locale (scaricato manualmente o da un run precedente) contiene le quote
-    # per le partite già giocate: le overlay qui per avere bm completi nella dashboard.
-    n_filled = _overlay_b365_from_local_csv(fx)
-    if n_filled:
-        print(f"  Overlay B365 dal CSV locale: {n_filled} partite con quote")
+    # ── Quote B365 dalle partite GIA GIOCATE (football-data) ─────────
+    # football-data pubblica le quote solo per le partite giocate; per le
+    # future arriva TheOddsAPI. openfootball non ha quote.
+    if fd is not None and 'B365H' in fx.columns:
+        n_b365 = fx['B365H'].notna().sum()
+        if n_b365:
+            print(f"  Quote B365 (partite giocate): {n_b365}")
+
+    # ── Quote PREPARTITA da TheOddsAPI ──────────────────────────────────
+    # Copre solo l'orizzonte vicino (comportamento normale del mercato):
+    # le partite future lontane non hanno ancora quote. Le giocate NON
+    # vengono sovrascritte: il loro snapshot e' congelato e le quote
+    # storiche restano quelle di football-data.
+    odds_map = sources.fetch_odds(league)
+    n_odds = 0
+    for col, lab in (("B365H", "H"), ("B365D", "D"), ("B365A", "A")):
+        if col not in fx.columns:
+            fx[col] = np.nan
+    for idx, row in fx.iterrows():
+        ftr = row.get('FTR')
+        if isinstance(ftr, str) and ftr.strip().upper() in ('H', 'D', 'A'):
+            continue   # gia' giocata: non toccare
+        key = (str(row['HomeTeam']), str(row['AwayTeam']),
+               pd.Timestamp(row['Date']).strftime('%Y-%m-%d'))
+        q = odds_map.get(key)
+        if q:
+            fx.at[idx, 'B365H'] = q['H']
+            fx.at[idx, 'B365D'] = q['D']
+            fx.at[idx, 'B365A'] = q['A']
+            n_odds += 1
+    if n_odds:
+        print(f"  Quote prepartita (TheOddsAPI): {n_odds} partite future")
 
     # ── Soglia di freeze (regola N-1) ───────────────────────────────────
     # Una giornata N e' "bloccabile" (snapshot non piu ricalcolato) non appena
@@ -696,6 +526,8 @@ def main():
     out = _json_safe({
         "meta": {
             "last_update": pd.Timestamp.now().isoformat(timespec="seconds"),
+            "league": league.key,
+            "league_name": league.name,
             "stagione": SEASON_FD,
             "fonte": source,
             "ultima_giornata_giocata": ultima_gg,
@@ -712,7 +544,7 @@ def main():
     WEBAPP_PUBLIC.mkdir(parents=True, exist_ok=True)
     with open(OUT_JSON, 'w') as f:
         # allow_nan=False -> solleva invece di scrivere NaN. Belt and braces:
-        # _json_safe già ripulisce, ma se resta un NaN vogliamo che esploda qui
+        # _json_safe gia' ripulisce, ma se resta un NaN vogliamo che esploda qui
         # in CI e non sul browser dell'utente.
         json.dump(out, f, indent=2, ensure_ascii=False, allow_nan=False)
     print(f"\nGiornate: {len(giornate)} | Giocate: {len(giocate)} "
@@ -721,4 +553,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+    ap = argparse.ArgumentParser(description="Genera le previsioni dal calendario")
+    ap.add_argument("--league", default=None, help="chiave lega (default: seriea)")
+    main(get_league(ap.parse_args().league))

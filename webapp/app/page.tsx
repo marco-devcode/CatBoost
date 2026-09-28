@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { MatchPrediction, PredictionsData } from "@/lib/types";
+import { LEAGUES } from "@/lib/leagues";
 
 function formatDate(iso: string): string {
   const d = new Date(iso);
@@ -157,22 +158,36 @@ function MatchCard({ m }: { m: MatchPrediction }) {
 }
 
 export default function Home() {
+  const [leagueKey, setLeagueKey] = useState<string>(LEAGUES[0].key);
   const [data, setData] = useState<PredictionsData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [roundOverride, setRoundOverride] = useState<number | null>(null);
   const [showVars, setShowVars] = useState(false);
 
+  // Cambiando lega si ricarica il SUO JSON e si azzera la giornata scelta:
+  // tenere la giornata di un campionato sull'altro mostrerebbe partite
+  // sbagliate (stessi numeri, squadre diverse).
   useEffect(() => {
+    let cancelled = false;
+    const league = LEAGUES.find((l) => l.key === leagueKey) ?? LEAGUES[0];
     (async () => {
+      setData(null);
+      setError(null);
+      setRoundOverride(null);
       try {
-        const res = await fetch("/predictions.json");
+        const res = await fetch(league.json);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        setData(await res.json());
+        const json = await res.json();
+        if (!cancelled) setData(json);
       } catch (e) {
-        setError(e instanceof Error ? e.message : "Errore caricamento dati");
+        if (!cancelled)
+          setError(e instanceof Error ? e.message : "Errore caricamento dati");
       }
     })();
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [leagueKey]);
 
   const roundKeys = useMemo(
     () => (data ? Object.keys(data.giornate).map(Number).sort((a, b) => a - b) : []),
@@ -207,7 +222,22 @@ export default function Home() {
   return (
     <div className="container">
       <header className="header">
-        <h1>⚽ Serie A — Predizioni</h1>
+        <h1>⚽ {meta?.league_name ?? "Serie A"} — Predizioni</h1>
+        {/* Selettore campionato: i JSON sono separati, quindi qui si sceglie
+            quale caricare. Nessun dato dei due campionati si mescola. */}
+        <nav className="league-switch" aria-label="Campionato">
+          {LEAGUES.map((l) => (
+            <button
+              key={l.key}
+              type="button"
+              className={l.key === leagueKey ? "league-btn active" : "league-btn"}
+              onClick={() => setLeagueKey(l.key)}
+              aria-current={l.key === leagueKey}
+            >
+              {l.name}
+            </button>
+          ))}
+        </nav>
         <div className="update-line">
           <span className="pulse" />
           Aggiornato al{" "}
@@ -356,7 +386,8 @@ export default function Home() {
       <footer className="footer">
         Modello: CatBoost + Pi-Rating Dixon-Coles (decay 2 anni)
         <br />
-        Storico di training: Serie A 2010/11 → oggi · Dati: football-data.co.uk
+        Storico di training: {meta?.league_name ?? "Serie A"} 2010/11 → oggi · Dati:{" "}
+        football-data.co.uk · Calendario: {meta?.fonte ?? "n/d"} · Quote: TheOddsAPI
         <br />
         Le percentuali sono stime statistiche, non consigli.
       </footer>

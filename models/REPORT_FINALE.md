@@ -1,7 +1,7 @@
-# 🏆 Report Finale — CatBoost Serie A Match Prediction
+# 🏆 Report Finale — CatBoost Eredivisie Match Prediction
 
-**Data**: 2026-09-28 22:55
-**Modello migliore**: Baseline (Pi-Rating + FE) — Serie A (`v1_baseline`)
+**Data**: 2026-09-28 23:21
+**Modello migliore**: Baseline (Pi-Rating + FE) — Eredivisie (`v1_baseline`)
 
 ---
 
@@ -9,7 +9,7 @@
 
 | Modello | Feature | RPS ↓ | Accuracy |
 |---------|---------|-------|----------|
-| Baseline (Pi-Rating + FE) — Serie A | 17 | 0.1361 | 52.10% ◄ **BEST**|
+| Baseline (Pi-Rating + FE) — Eredivisie | 17 | 0.1340 | 50.41% ◄ **BEST**|
 
 ---
 
@@ -17,11 +17,11 @@
 
 | Metrica | Valore | Note |
 |---------|--------|------|
-| **Accuracy** | 0.5210 | Target > 0.52 |
-| **RPS** | 0.1361 | Più basso = meglio |
-| **Recall Home Win** | 75.88% | |
-| **Recall Draw** | 7.48% | Classe più difficile |
-| **Recall Away Win** | 56.95% | |
+| **Accuracy** | 0.5041 | Target > 0.52 |
+| **RPS** | 0.1340 | Più basso = meglio |
+| **Recall Home Win** | 74.03% | |
+| **Recall Draw** | 9.28% | Classe più difficile |
+| **Recall Away Win** | 53.45% | |
 
 ---
 
@@ -29,9 +29,9 @@
 
 | | RPS ↓ | Accuracy |
 |--|-------|----------|
-| **CatBoost (v1_baseline)** | 0.1361 | 52.10% |
-| **Bet365** | 0.1784 | 37.38% |
-| **Delta** | +0.0423 ✅ | +0.1472 ✅ |
+| **CatBoost (v1_baseline)** | 0.1340 | 50.41% |
+| **Bet365** | 0.1922 | 34.33% |
+| **Delta** | +0.0582 ✅ | +0.1608 ✅ |
 
 ---
 
@@ -42,12 +42,12 @@
 
 | Metrica | Valore |
 |---------|--------|
-| Scommesse piazzate | 428 |
+| Scommesse piazzate | 367 |
 | Bankroll iniziale | €1000 |
-| Bankroll finale | €85039981239896192.00 |
-| Profitto | €+85039981239895200.00 |
-| ROI | +8503998123989520.0% |
-| Stake totale | 5557055328514245.0% del bankroll |
+| Bankroll finale | €4402630418781564829696.00 |
+| Profitto | €+4402630418781564829696.00 |
+| ROI | +440263041878156509184.0% |
+| Stake totale | 1.6883630947968362e+20% del bankroll |
 
 ![Kelly Simulation](kelly_simulation.png)
 
@@ -61,8 +61,8 @@
 
 | Flag | mean |SHAP| | Rank su 17 feature |
 |------|-------------|------|
-| home_promoted | 0.016004 | 16/17 |
-| away_promoted | 0.030456 | 17/17 |
+| home_promoted | 0.021146 | 16/17 |
+| away_promoted | 0.036448 | 17/17 |
 
 ![SHAP Summary](shap_summary.png)
 
@@ -73,13 +73,13 @@
 ```
               precision    recall  f1-score   support
 
-           H     0.5223    0.7588    0.6187       170
-           D     0.2353    0.0748    0.1135       107
-           A     0.5850    0.5695    0.5772       151
+           H     0.5044    0.7403    0.6000       154
+           D     0.5000    0.0928    0.1565        97
+           A     0.5041    0.5345    0.5188       116
 
-    accuracy                         0.5210       428
-   macro avg     0.4475    0.4677    0.4365       428
-weighted avg     0.4727    0.5210    0.4777       428
+    accuracy                         0.5041       367
+   macro avg     0.5028    0.4558    0.4251       367
+weighted avg     0.5031    0.5041    0.4571       367
 
 ```
 

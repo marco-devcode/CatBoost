@@ -159,7 +159,13 @@ SERIE_A = League(
     tsdb_rounds=38,
     teams=20,
     matches_per_round=10,
-    openfootball_key="",         # non usato: TheSportsDB copre gia' le future
+    # openfootball: MISURATO necessario, non ipotizzato. Il commento precedente
+    # diceva "TheSportsDB copre gia' le future" ma era un'assunzione: in CI il
+    # calendario si fermava a 5 giornate (tutte giocate, 0 future) e la pagina
+    # non mostrava nulla da giocare. TheSportsDB nel free tier non dà il
+    # calendario completo della stagione corrente. openfootball dà 380 partite
+    # su 38 giornate da 10, ed e' public domain senza chiave.
+    openfootball_key="it.1",
     odds_sport_key="soccer_italy_serie_a",
     odds_bookmaker="pinnacle",
     json_name="predictions_seriea.json",

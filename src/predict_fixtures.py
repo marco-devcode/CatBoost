@@ -398,16 +398,23 @@ def main(league):
                 m["esito"] = ftr
                 m["ok"] = bool(m["pred"] == ftr)
 
-            # Confronto bookmaker / Kelly solo sulle giocate (serve risultato)
-            if bm_odds is not None and played:
-                assert bm_prob is not None
+            # Assegnazione quote: senza il gate su `played`. Il confronto
+            # bookmaker RPS e il Kelly retrospettivo stanno piu' in basso e
+            # richiedono il risultato reale, ma non devono decidere se la
+            # quota viene mostrata. Altrimenti le partite future, che sono
+            # le uniche con quote prepartita, finivano nell'else con bm=None.
+            if bm_odds is not None:
                 m["bm"] = {"H": round(bm_odds[0], 2), "D": round(bm_odds[1], 2),
                            "A": round(bm_odds[2], 2)}
                 m["bm_prob"] = {LABELS[i]: round(bm_prob[i] * 100, 1) for i in range(3)}
+
+            # Confronto bookmaker / Kelly solo sulle giocate (serve risultato)
+            if bm_odds is not None and played:
+                assert bm_prob is not None
                 y_idx = {'H': 0, 'D': 1, 'A': 2}[ftr]
                 bm_rows.append((y_idx, bm_prob))
                 model_rows.append((y_idx, [m["prob"][l] / 100 for l in LABELS]))
-            else:
+            elif bm_odds is None:
                 m["bm"] = None
                 m["bm_prob"] = None
 
@@ -434,9 +441,16 @@ def main(league):
                         "bm_p": round(bm_prob[LABELS.index(lab)], 4) if bm_prob is not None else 0.0,
                         "kelly": round(kf, 4), "win": win,
                     })
-            # Partita futura: bookmaker + Kelly (prob/features gia' calcolate)
-            if bm_odds is not None and played:
-                assert bm_prob is not None
+            # Partita futura: bookmaker + Kelly.
+            #
+            # La condizione era `bm_odds is not None and played`, e questo
+            # scartava TUTTE le quote prepartita: le uniche partite con quote
+            # sono le future (TheOddsAPI non dà lo storico), quindi played
+            # era False e le 8 quote finivano nel `else` che le azzerava.
+            # `played` serve solo al confronto RPS e al Kelly retrospettivo,
+            # che hanno bisogno del risultato reale: non deve governare
+            # l'assegnazione delle quote.
+            if bm_odds is not None:
                 m["bm"] = {"H": round(bm_odds[0], 2), "D": round(bm_odds[1], 2),
                            "A": round(bm_odds[2], 2)}
                 m["bm_prob"] = {LABELS[i]: round(bm_prob[i] * 100, 1) for i in range(3)}

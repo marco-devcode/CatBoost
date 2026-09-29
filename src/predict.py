@@ -42,6 +42,62 @@ def load_history(league):
     return pd.read_csv(league.ratings_path, parse_dates=['Date'])
 
 
+# ── Ricostruzione di attack/d defence/home_adv dal dataset ──────────────
+# Perche' serve (misurato, non ipotizzato):
+#   nel TRAINING le colonne pi_* sono la FORMULA (ratings.compute_pi_ratings):
+#       pi_home_H = attack[home] - defence[away] + home_adv
+#       pi_away_H = attack[away] - defence[home] - home_adv
+#       pi_home_A = defence[home]
+#       pi_away_A = attack[away]
+#   con attack/defence STIMATI UNA VOLTA SULLO STORICO (fit globale), quindi
+#   costanti per squadra e indipendenti dalla data.
+#
+# L'inferenza faceva qualcosa di DIVERSO: leggeva pi_* dall'ULTIMA riga
+# storica in cui la squadra e' comparsa. Ma pi_home_H/pi_away_H sono
+# valori COPPIA (dipendono anche dall'avversaria di quella riga): riprenderli
+# da un'altra partita significa attribuire a Sassuolo-Milan il rating
+# calcolato per Sassuolo-Juventus. Per la coppia del 11/10 l'errore era
+# +0.14 su pi_home_H e +0.18 su pi_away_H, abbastanza da capovolgere la
+# stima (il modello dava 24.8% al Milan, il suo stesso Pi-Rating 50.6%).
+#   50/50 righe 2627 e 6130/6130 righe storiche erano discordanti.
+#
+# Il fix e' ricostruire attack/defence/home_adv dagli stessi numeri del
+# training e riapplicare la formula: l'inferenza riceve allora esattamente
+# la feature su cui il modello e' stato addestrato.
+def ratings_from_history(df):
+    """Estrae (attack, defence, home_adv) dal dataset con le colonne pi_*.
+
+    Il dataset contiene gia' i termini della formula, quindi si legge al
+    contrario senza dover rifare il fit MLE:
+      defence[t] = pi_home_A  su una riga dove t e' in casa
+      attack[t]  = pi_away_A  su una riga dove t e' e' in trasferta
+      home_adv   = pi_home_H - attack[home] + defence[away]
+    Verificato: ricostruisce il CSV con scarto max 1.2e-4 (arrotondamento
+    del JSON a 4 decimali, non errore di calcolo).
+    """
+    attack, defence, ha_rows = {}, {}, []
+    for row in df.itertuples():
+        h, a = row.HomeTeam, row.AwayTeam
+        if h not in defence:
+            defence[h] = float(row.pi_home_A)
+        if a not in attack:
+            attack[a] = float(row.pi_away_A)
+        if h in attack and a in defence:
+            ha_rows.append(float(row.pi_home_H) - attack[h] + defence[a])
+    home_adv = float(np.mean(ha_rows)) if ha_rows else 0.0
+    return attack, defence, home_adv
+
+
+def pi_features_from_ratings(attack, defence, home_adv, home, away):
+    """Le 4 feature Pi-Rating con la STESSA formula del training."""
+    return {
+        'pi_home_H': attack.get(home, 0.0) - defence.get(away, 0.0) + home_adv,
+        'pi_away_H': attack.get(away, 0.0) - defence.get(home, 0.0) - home_adv,
+        'pi_home_A': defence.get(home, 0.0),
+        'pi_away_A': attack.get(away, 0.0),
+    }
+
+
 def _last_complete_season_teams(history):
     """Insieme delle squadre nell'ULTIMA stagione presente nello storico."""
     if len(history) == 0:
@@ -89,36 +145,25 @@ def compute_features_for_match(df, home, away, match_date, h2h_cache=None,
 
     feats = {}
 
-    # Pi-Rating correnti: usa gli ultimi valori noti per le due squadre.
-    # ATTENZIONE: l'ultima partita di una squadra puo' essere in casa O in
-    # trasferta. I campi pi_*_H / pi_*_A nel CSV sono sempre riferiti alla
-    # squadra DI CASA / squadra IN TRASFERTA di QUELLA riga. Quindi prendiamo
-    # il rating della squadra stessa in base a dove ha giocato l'ultima volta,
-    # altrimenti si leggerebbe il rating dell'avversaria (bug: Roma 1a giornata
-    # 26/27 leggeva pi_home_H spurio da una trasferta -> quotata sotto).
-    for team, role in [(home, 'home'), (away, 'away')]:
-        sub = past[past['HomeTeam'] == team]
-        sub2 = past[past['AwayTeam'] == team]
-        last = pd.concat([sub, sub2]).sort_values('Date').tail(1)
-        if len(last) == 0:
-            feats[f'pi_{role}_H'] = 0.0
-            feats[f'pi_{role}_A'] = 0.0
-        else:
-            lr = last.iloc[0]
-            was_home = (lr['HomeTeam'] == team)
-            if role == 'home':
-                feats['pi_home_H'] = lr['pi_home_H'] if was_home else lr['pi_away_H']
-                feats['pi_home_A'] = lr['pi_home_A'] if was_home else lr['pi_away_A']
-            else:
-                feats['pi_away_H'] = lr['pi_home_H'] if was_home else lr['pi_away_H']
-                feats['pi_away_A'] = lr['pi_home_A'] if was_home else lr['pi_away_A']
+    # Pi-Rating: STESSA formula del training (ratings.compute_pi_ratings).
+    # Vedi la nota lunga su ratings_from_history: leggere pi_* dall'ultima
+    # riga storica della squadra attribuiva alla partita corrente il rating
+    # calcolato per una COPPIA DIVERSA (l'ultima avversaria incontrata).
+    attack, defence, home_adv = ratings_from_history(df)
+    feats.update(pi_features_from_ratings(attack, defence, home_adv, home, away))
 
     # Forma recente (ultimi WINDOW match della squadra, casa o trasferta)
     def team_form(team, is_home):
         tcol, scol, acol = ('HomeTeam', 'FTHG', 'FTAG') if is_home else ('AwayTeam', 'FTAG', 'FTHG')
         sub = past[past[tcol] == team].tail(WINDOW)
         if len(sub) == 0:
-            return 1.0  # prior neutro
+            # NaN, non un prior numerico: features.add_rolling_form usa
+            # shift(1).rolling(5, min_periods=1) sulle partite di CASA della
+            # squadra, quindi alla sua prima presenza in quel ruolo la
+            # feature manca. Qui l'inferenza restituiva 1.0, un valore che il
+            # modello non ha MAI visto in quella posizione: 14 righe su 600
+            # campionate differivano dal training (tutte debut di stagione).
+            return np.nan
         pts = np.where(sub[scol].values > sub[acol].values, 3,
                       np.where(sub[scol].values == sub[acol].values, 1, 0))
         return float(np.mean(pts))
@@ -131,7 +176,7 @@ def compute_features_for_match(df, home, away, match_date, h2h_cache=None,
         tcol, scol, acol = ('HomeTeam', 'FTHG', 'FTAG') if is_home else ('AwayTeam', 'FTAG', 'FTHG')
         sub = past[past[tcol] == team].tail(WINDOW)
         if len(sub) == 0:
-            return 0.0
+            return np.nan   # stessa semantica di team_form: vedi sopra
         return float(np.mean(sub[scol].values - sub[acol].values))
 
     feats['home_goal_diff_5'] = team_goaldiff(home, True)
@@ -180,7 +225,13 @@ def compute_features_for_match(df, home, away, match_date, h2h_cache=None,
     feats['away_goals_scored_5'] = as_
     feats['away_goals_conceded_5'] = ac_
 
-    # H2H: win rate casa negli scontri diretti passati
+    # H2H: win rate CASA negli ultimi WINDOW scontri diretti.
+    # Deve replicare features.add_h2h, che conta le partite CONCLUSE DA 'H'
+    # (vittoria della squadra di casa di QUELLA partita), non le vittorie
+    # della squadra nominata home in questo match. Le due definizioni
+    # divergono: su 37 righe su 50 della 26/27 la versione qui sotto dava
+    # un numero diverso dal training, quindi il modello vedeva una feature
+    # h2h che non aveva mai visto addestrata.
     key = (min(home, away), max(home, away))
     if h2h_cache is not None and key in h2h_cache:
         feats['h2h_home_winrate'] = h2h_cache[key]
@@ -190,10 +241,7 @@ def compute_features_for_match(df, home, away, match_date, h2h_cache=None,
         if len(sub) == 0:
             feats['h2h_home_winrate'] = 0.4
         else:
-            hw = sum(1 for _, r in sub.iterrows()
-                     if (r['HomeTeam'] == home and r['FTR'] == 'H') or
-                        (r['AwayTeam'] == home and r['FTR'] == 'A'))
-            feats['h2h_home_winrate'] = hw / len(sub)
+            feats['h2h_home_winrate'] = float((sub['FTR'] == 'H').mean())
         if h2h_cache is not None:
             h2h_cache[key] = feats['h2h_home_winrate']
 

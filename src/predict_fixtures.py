@@ -227,13 +227,46 @@ def main(league, reset_freeze: bool = False):
     fx['giornata'] = fx['giornata'].astype(int)
     print(f"Fixture: {len(fx)} partite, {fx['giornata'].nunique()} giornate")
 
-    # ── Quote B365 dalle partite GIA GIOCATE (football-data) ─────────
-    # football-data pubblica le quote solo per le partite giocate; per le
-    # future arriva TheOddsAPI. openfootball non ha quote.
-    if fd is not None and 'B365H' in fx.columns:
-        n_b365 = fx['B365H'].notna().sum()
-        if n_b365:
-            print(f"  Quote B365 (partite giocate): {n_b365}")
+    # ── Quote B365 delle partite GIA GIOCATE (football-data) ─────────
+    # La fonte del CALENDARIO e la fonte delle QUOTE sono due ruoli distinti.
+    # openfootball dà il calendario completo (tutte le giornate, con date e
+    # risultati) ma NON ha le colonne B365:football-data dà le quote delle
+    # giocate ma non il calendario futuro. Sostituendo l'una con l'altra si
+    # erano perse le quote: `fd` restava None, il blocco di merge sotto non
+    # girava e tutte le partite giocate uscivano con bm=None, senza edge e
+    # senza Kelly retrospettivo (misurato: 50/50 giocate Serie A e 63/63
+    # Eredivisie senza quote, contro 50/50 con quote nel backup precedente).
+    #
+    # Quindi football-data viene SEMPRE scaricato per le quote, anche quando
+    # il calendario arriva da openfootball, e fuso per (data, casa, fuori).
+    if fd is None:
+        fd_quotes = sources.fetch_football_data(league)
+    else:
+        fd_quotes = fd
+
+    if fd_quotes is not None and len(fd_quotes):
+        qmap = {}
+        for _, r in fd_quotes.iterrows():
+            key = (pd.Timestamp(r['Date']).strftime('%Y-%m-%d'),
+                   str(r['HomeTeam']), str(r['AwayTeam']))
+            try:
+                h, d_, a_ = float(r['B365H']), float(r['B365D']), float(r['B365A'])
+            except (KeyError, TypeError, ValueError):
+                continue
+            if all(math.isfinite(v) for v in (h, d_, a_)):
+                qmap[key] = (h, d_, a_)
+        n_applied = 0
+        for idx, row in fx.iterrows():
+            key = (pd.Timestamp(row['Date']).strftime('%Y-%m-%d'),
+                   str(row['HomeTeam']), str(row['AwayTeam']))
+            q = qmap.get(key)
+            if q is None:
+                continue
+            fx.at[idx, 'B365H'], fx.at[idx, 'B365D'], fx.at[idx, 'B365A'] = q
+            n_applied += 1
+        print(f"  Quote B365 da football-data fuse per chiave: {n_applied}")
+    else:
+        print("  football-data non disponibile: le giocate restano senza quote")
 
     # ── Quote PREPARTITA da TheOddsAPI ──────────────────────────────────
     # Copre solo l'orizzonte vicino (comportamento normale del mercato):
@@ -397,6 +430,13 @@ def main(league, reset_freeze: bool = False):
                             best_info = (lab, pk, m["bm"][lab], kf)
                 if best_info is not None:
                     lab, pk, odd, kf = best_info
+                    # m["kelly"] era impostato SOLO nel ramo future: sul ramo
+                    # snapshot la partita restava senza l'oggetto Kelly anche
+                    # avendo quote ed esito. Il valore e' DERIVATO da prob e
+                    # bm, entrambi congelati, quindi ricalcolarlo qui non
+                    # rompe il freeze (non tocca prob/pred/ok).
+                    m["kelly"] = {"pick": lab, "model_p": round(pk, 3),
+                                  "odd": round(odd, 2), "stake_pct": round(kf * 100, 2)}
                     _bm_p = bm_prob[LABELS.index(lab)] if bm_prob is not None else 0.0
                     kelly_log.append({
                         "home": m["home"], "away": m["away"], "date": m["date"],

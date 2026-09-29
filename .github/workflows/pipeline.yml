@@ -122,7 +122,18 @@ jobs:
             for i in 1 2 3; do
               if git push; then exit 0; fi
               echo "Push rifiutato (concorrenza): rebase e riprovo ($i/3)"
-              git pull --rebase --autostash origin main || true
+              git pull --rebase --autostash origin main
+              if [ $? -ne 0 ]; then
+                # Il rebase e' FALLITO per conflitto: il repo e' ora in stato
+                # unmerged. Senza questo abort, i tentativi successivi muoiono
+                # subito con "Pulling is not possible because you have
+                # unmerged files" e i 3 retry sono sprecati tutti. Il modello
+                # resta comunque su Actions, gia' allenato.
+                git rebase --abort 2>/dev/null || true
+                git reset --hard HEAD 2>/dev/null || true
+                echo "Rebase in conflitto: abort pulito."
+                exit 1
+              fi
             done
             echo "Push fallito dopo 3 tentativi"
             exit 1

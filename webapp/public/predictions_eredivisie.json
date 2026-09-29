@@ -1,6 +1,6 @@
 {
   "meta": {
-    "last_update": "2026-09-29T12:00:03",
+    "last_update": "2026-09-29T12:13:35",
     "league": "eredivisie",
     "league_name": "Eredivisie",
     "stagione": "2627",
@@ -9,7 +9,10 @@
     "prossima_giornata": 8,
     "freeze_until": 8,
     "freeze_regola": "La giornata N si aggiorna solo fino ai risultati della N-1 (no hindsight)",
-    "model_trained_at": "1970-01-01T00:00:01"
+    "model_trained_at": "1970-01-01T00:00:01",
+    "bookmaker_rps": null,
+    "model_rps": 0.1351,
+    "beats_bookmaker_rps": false
   },
   "stats": {
     "corrette": 33,
@@ -27,12 +30,6 @@
           "A": 23.4
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "0-4",
-        "esito": "A",
-        "ok": false,
         "features": {
           "pi_home_H": 0.46,
           "pi_away_H": -0.043,
@@ -51,7 +48,21 @@
           "away_goals_conceded_5": 1.8,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "0-4",
+        "esito": "A",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Nijmegen",
@@ -63,12 +74,6 @@
           "A": 27.0
         },
         "pred": "D",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "1-2",
-        "esito": "A",
-        "ok": false,
         "features": {
           "pi_home_H": 0.68,
           "pi_away_H": 0.115,
@@ -87,7 +92,21 @@
           "away_goals_conceded_5": 2.0,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "1-2",
+        "esito": "A",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Go Ahead Eagles",
@@ -99,12 +118,6 @@
           "A": 25.3
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "4-1",
-        "esito": "H",
-        "ok": true,
         "features": {
           "pi_home_H": 0.056,
           "pi_away_H": -0.23,
@@ -123,7 +136,21 @@
           "away_goals_conceded_5": 1.4,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "4-1",
+        "esito": "H",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "PSV Eindhoven",
@@ -135,12 +162,6 @@
           "A": 6.4
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "2-2",
-        "esito": "D",
-        "ok": false,
         "features": {
           "pi_home_H": 0.918,
           "pi_away_H": -0.172,
@@ -159,7 +180,21 @@
           "away_goals_conceded_5": 1.8,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "2-2",
+        "esito": "D",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "AZ Alkmaar",
@@ -171,12 +206,6 @@
           "A": 6.6
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "2-0",
-        "esito": "H",
-        "ok": true,
         "features": {
           "pi_home_H": 0.814,
           "pi_away_H": -0.515,
@@ -195,7 +224,21 @@
           "away_goals_conceded_5": 2.2,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "2-0",
+        "esito": "H",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Sparta Rotterdam",
@@ -207,12 +250,6 @@
           "A": 60.9
         },
         "pred": "A",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "0-1",
-        "esito": "A",
-        "ok": true,
         "features": {
           "pi_home_H": 0.508,
           "pi_away_H": 0.473,
@@ -231,7 +268,21 @@
           "away_goals_conceded_5": 1.0,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "0-1",
+        "esito": "A",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Groningen",
@@ -243,12 +294,6 @@
           "A": 24.3
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "2-1",
-        "esito": "H",
-        "ok": true,
         "features": {
           "pi_home_H": 0.178,
           "pi_away_H": 0.728,
@@ -267,7 +312,21 @@
           "away_goals_conceded_5": 2.0,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "2-1",
+        "esito": "H",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Zwolle",
@@ -279,12 +338,6 @@
           "A": 67.0
         },
         "pred": "A",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "0-2",
-        "esito": "A",
-        "ok": true,
         "features": {
           "pi_home_H": -0.101,
           "pi_away_H": 0.489,
@@ -303,7 +356,21 @@
           "away_goals_conceded_5": 0.8,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "0-2",
+        "esito": "A",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Heerenveen",
@@ -315,12 +382,6 @@
           "A": 32.4
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "1-0",
-        "esito": "H",
-        "ok": true,
         "features": {
           "pi_home_H": 0.204,
           "pi_away_H": -0.063,
@@ -339,7 +400,21 @@
           "away_goals_conceded_5": 2.0,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "1-0",
+        "esito": "H",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       }
     ],
     "2": [
@@ -353,12 +428,6 @@
           "A": 13.5
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "1-3",
-        "esito": "A",
-        "ok": false,
         "features": {
           "pi_home_H": -0.112,
           "pi_away_H": 0.045,
@@ -377,7 +446,21 @@
           "away_goals_conceded_5": 2.8,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "1-3",
+        "esito": "A",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Willem II",
@@ -389,12 +472,6 @@
           "A": 63.4
         },
         "pred": "A",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "1-4",
-        "esito": "A",
-        "ok": true,
         "features": {
           "pi_home_H": -0.305,
           "pi_away_H": 0.677,
@@ -413,7 +490,21 @@
           "away_goals_conceded_5": 1.2,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "1-4",
+        "esito": "A",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Utrecht",
@@ -425,12 +516,6 @@
           "A": 49.0
         },
         "pred": "A",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "1-4",
-        "esito": "A",
-        "ok": true,
         "features": {
           "pi_home_H": 0.109,
           "pi_away_H": 1.025,
@@ -449,7 +534,21 @@
           "away_goals_conceded_5": 1.6,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "1-4",
+        "esito": "A",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Excelsior",
@@ -461,12 +560,6 @@
           "A": 35.2
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "1-2",
-        "esito": "A",
-        "ok": false,
         "features": {
           "pi_home_H": 0.327,
           "pi_away_H": 1.281,
@@ -485,7 +578,21 @@
           "away_goals_conceded_5": 1.4,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "1-2",
+        "esito": "A",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "For Sittard",
@@ -497,12 +604,6 @@
           "A": 20.9
         },
         "pred": "D",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "3-1",
-        "esito": "H",
-        "ok": false,
         "features": {
           "pi_home_H": -0.384,
           "pi_away_H": 0.409,
@@ -521,7 +622,21 @@
           "away_goals_conceded_5": 3.2,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "3-1",
+        "esito": "H",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Twente",
@@ -533,12 +648,6 @@
           "A": 9.8
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "3-1",
-        "esito": "H",
-        "ok": true,
         "features": {
           "pi_home_H": 0.255,
           "pi_away_H": -0.061,
@@ -557,7 +666,21 @@
           "away_goals_conceded_5": 3.2,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "3-1",
+        "esito": "H",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Ajax",
@@ -569,12 +692,6 @@
           "A": 31.5
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "2-2",
-        "esito": "D",
-        "ok": false,
         "features": {
           "pi_home_H": 0.446,
           "pi_away_H": 0.259,
@@ -593,7 +710,21 @@
           "away_goals_conceded_5": 1.6,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "2-2",
+        "esito": "D",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Den Haag",
@@ -605,12 +736,6 @@
           "A": 54.8
         },
         "pred": "A",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "1-4",
-        "esito": "A",
-        "ok": true,
         "features": {
           "pi_home_H": -0.498,
           "pi_away_H": 0.324,
@@ -629,7 +754,21 @@
           "away_goals_conceded_5": 1.6,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "1-4",
+        "esito": "A",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Feyenoord",
@@ -641,12 +780,6 @@
           "A": 28.4
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "2-2",
-        "esito": "D",
-        "ok": false,
         "features": {
           "pi_home_H": 0.462,
           "pi_away_H": 0.722,
@@ -665,7 +798,21 @@
           "away_goals_conceded_5": 1.2,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "2-2",
+        "esito": "D",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       }
     ],
     "3": [
@@ -679,12 +826,6 @@
           "A": 46.4
         },
         "pred": "A",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "0-2",
-        "esito": "A",
-        "ok": true,
         "features": {
           "pi_home_H": 0.717,
           "pi_away_H": 0.201,
@@ -703,7 +844,21 @@
           "away_goals_conceded_5": 1.4,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "0-2",
+        "esito": "A",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Sparta Rotterdam",
@@ -715,12 +870,6 @@
           "A": 42.2
         },
         "pred": "A",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "3-3",
-        "esito": "D",
-        "ok": false,
         "features": {
           "pi_home_H": -0.082,
           "pi_away_H": 0.382,
@@ -739,7 +888,21 @@
           "away_goals_conceded_5": 2.4,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "3-3",
+        "esito": "D",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Heerenveen",
@@ -751,12 +914,6 @@
           "A": 6.4
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "0-2",
-        "esito": "A",
-        "ok": false,
         "features": {
           "pi_home_H": -0.264,
           "pi_away_H": -0.474,
@@ -775,7 +932,21 @@
           "away_goals_conceded_5": 3.6,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "0-2",
+        "esito": "A",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Go Ahead Eagles",
@@ -787,12 +958,6 @@
           "A": 17.5
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "3-1",
-        "esito": "H",
-        "ok": true,
         "features": {
           "pi_home_H": -0.251,
           "pi_away_H": 0.165,
@@ -811,7 +976,21 @@
           "away_goals_conceded_5": 2.0,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "3-1",
+        "esito": "H",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "PSV Eindhoven",
@@ -823,12 +1002,6 @@
           "A": 35.0
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "5-1",
-        "esito": "H",
-        "ok": true,
         "features": {
           "pi_home_H": 0.817,
           "pi_away_H": 0.212,
@@ -847,7 +1020,21 @@
           "away_goals_conceded_5": 1.2,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "5-1",
+        "esito": "H",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Cambuur",
@@ -859,12 +1046,6 @@
           "A": 42.8
         },
         "pred": "A",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "2-5",
-        "esito": "A",
-        "ok": true,
         "features": {
           "pi_home_H": -0.063,
           "pi_away_H": 0.95,
@@ -883,7 +1064,21 @@
           "away_goals_conceded_5": 0.4,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "2-5",
+        "esito": "A",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Nijmegen",
@@ -895,12 +1090,6 @@
           "A": 49.4
         },
         "pred": "A",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "2-2",
-        "esito": "D",
-        "ok": false,
         "features": {
           "pi_home_H": 0.336,
           "pi_away_H": 0.139,
@@ -919,7 +1108,21 @@
           "away_goals_conceded_5": 1.2,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "2-2",
+        "esito": "D",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Twente",
@@ -931,12 +1134,6 @@
           "A": 27.0
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "1-0",
-        "esito": "H",
-        "ok": true,
         "features": {
           "pi_home_H": 0.184,
           "pi_away_H": 0.742,
@@ -955,7 +1152,21 @@
           "away_goals_conceded_5": 2.0,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "1-0",
+        "esito": "H",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Ajax",
@@ -967,12 +1178,6 @@
           "A": 23.1
         },
         "pred": "D",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "5-1",
-        "esito": "H",
-        "ok": false,
         "features": {
           "pi_home_H": 0.569,
           "pi_away_H": -0.537,
@@ -991,7 +1196,21 @@
           "away_goals_conceded_5": 1.6,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "5-1",
+        "esito": "H",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       }
     ],
     "4": [
@@ -1005,12 +1224,6 @@
           "A": 18.8
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "2-3",
-        "esito": "A",
-        "ok": false,
         "features": {
           "pi_home_H": -0.356,
           "pi_away_H": 0.135,
@@ -1029,7 +1242,21 @@
           "away_goals_conceded_5": 1.8,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "2-3",
+        "esito": "A",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Zwolle",
@@ -1041,12 +1268,6 @@
           "A": 61.1
         },
         "pred": "A",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "1-3",
-        "esito": "A",
-        "ok": true,
         "features": {
           "pi_home_H": -0.191,
           "pi_away_H": 0.373,
@@ -1065,7 +1286,21 @@
           "away_goals_conceded_5": 1.2,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "1-3",
+        "esito": "A",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Excelsior",
@@ -1077,12 +1312,6 @@
           "A": 43.9
         },
         "pred": "A",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "2-1",
-        "esito": "H",
-        "ok": false,
         "features": {
           "pi_home_H": 0.162,
           "pi_away_H": 0.318,
@@ -1101,7 +1330,21 @@
           "away_goals_conceded_5": 2.6,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "2-1",
+        "esito": "H",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "AZ Alkmaar",
@@ -1113,12 +1356,6 @@
           "A": 26.2
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "5-2",
-        "esito": "H",
-        "ok": true,
         "features": {
           "pi_home_H": 0.386,
           "pi_away_H": 0.846,
@@ -1137,7 +1374,21 @@
           "away_goals_conceded_5": 1.6,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "5-2",
+        "esito": "H",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Utrecht",
@@ -1149,12 +1400,6 @@
           "A": 16.6
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "1-6",
-        "esito": "A",
-        "ok": false,
         "features": {
           "pi_home_H": 0.126,
           "pi_away_H": 1.13,
@@ -1173,7 +1418,21 @@
           "away_goals_conceded_5": 1.4,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "1-6",
+        "esito": "A",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Willem II",
@@ -1185,12 +1444,6 @@
           "A": 53.0
         },
         "pred": "A",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "2-2",
-        "esito": "D",
-        "ok": false,
         "features": {
           "pi_home_H": 0.126,
           "pi_away_H": 0.499,
@@ -1209,7 +1462,21 @@
           "away_goals_conceded_5": 1.8,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "2-2",
+        "esito": "D",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Feyenoord",
@@ -1221,12 +1488,6 @@
           "A": 15.4
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "2-2",
-        "esito": "D",
-        "ok": false,
         "features": {
           "pi_home_H": 0.832,
           "pi_away_H": -0.266,
@@ -1245,7 +1506,21 @@
           "away_goals_conceded_5": 1.6,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "2-2",
+        "esito": "D",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Telstar",
@@ -1257,12 +1532,6 @@
           "A": 68.8
         },
         "pred": "A",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "0-4",
-        "esito": "A",
-        "ok": true,
         "features": {
           "pi_home_H": 0.372,
           "pi_away_H": 0.957,
@@ -1281,7 +1550,21 @@
           "away_goals_conceded_5": 0.2,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "0-4",
+        "esito": "A",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Cambuur",
@@ -1293,12 +1576,6 @@
           "A": 63.0
         },
         "pred": "A",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "1-4",
-        "esito": "A",
-        "ok": true,
         "features": {
           "pi_home_H": -0.054,
           "pi_away_H": 0.68,
@@ -1317,7 +1594,21 @@
           "away_goals_conceded_5": 2.0,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "1-4",
+        "esito": "A",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       }
     ],
     "5": [
@@ -1331,12 +1622,6 @@
           "A": 19.8
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "2-2",
-        "esito": "D",
-        "ok": false,
         "features": {
           "pi_home_H": 0.04,
           "pi_away_H": 0.206,
@@ -1355,7 +1640,21 @@
           "away_goals_conceded_5": 3.4,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "2-2",
+        "esito": "D",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Ajax",
@@ -1367,12 +1666,6 @@
           "A": 56.9
         },
         "pred": "A",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "1-3",
-        "esito": "A",
-        "ok": true,
         "features": {
           "pi_home_H": 0.453,
           "pi_away_H": 0.628,
@@ -1391,7 +1684,21 @@
           "away_goals_conceded_5": 1.0,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "1-3",
+        "esito": "A",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Willem II",
@@ -1403,12 +1710,6 @@
           "A": 34.3
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "0-3",
-        "esito": "A",
-        "ok": false,
         "features": {
           "pi_home_H": 0.198,
           "pi_away_H": 0.425,
@@ -1427,7 +1728,21 @@
           "away_goals_conceded_5": 1.4,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "0-3",
+        "esito": "A",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Nijmegen",
@@ -1439,12 +1754,6 @@
           "A": 40.7
         },
         "pred": "A",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "1-3",
-        "esito": "A",
-        "ok": true,
         "features": {
           "pi_home_H": 0.203,
           "pi_away_H": 1.235,
@@ -1463,7 +1772,21 @@
           "away_goals_conceded_5": 0.8,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "1-3",
+        "esito": "A",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Groningen",
@@ -1475,12 +1798,6 @@
           "A": 38.4
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "2-2",
-        "esito": "D",
-        "ok": false,
         "features": {
           "pi_home_H": 0.509,
           "pi_away_H": 0.57,
@@ -1499,7 +1816,21 @@
           "away_goals_conceded_5": 2.0,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "2-2",
+        "esito": "D",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Heerenveen",
@@ -1511,12 +1842,6 @@
           "A": 34.8
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "2-3",
-        "esito": "A",
-        "ok": false,
         "features": {
           "pi_home_H": 0.201,
           "pi_away_H": 0.74,
@@ -1535,7 +1860,21 @@
           "away_goals_conceded_5": 1.0,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "2-3",
+        "esito": "A",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Telstar",
@@ -1547,12 +1886,6 @@
           "A": 32.5
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "2-2",
-        "esito": "D",
-        "ok": false,
         "features": {
           "pi_home_H": 0.088,
           "pi_away_H": 0.042,
@@ -1571,7 +1904,21 @@
           "away_goals_conceded_5": 3.0,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "2-2",
+        "esito": "D",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Den Haag",
@@ -1583,12 +1930,6 @@
           "A": 59.9
         },
         "pred": "A",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "2-3",
-        "esito": "A",
-        "ok": true,
         "features": {
           "pi_home_H": -0.61,
           "pi_away_H": -0.138,
@@ -1607,7 +1948,21 @@
           "away_goals_conceded_5": 2.0,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "2-3",
+        "esito": "A",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Utrecht",
@@ -1619,12 +1974,6 @@
           "A": 34.6
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "3-3",
-        "esito": "D",
-        "ok": false,
         "features": {
           "pi_home_H": 0.331,
           "pi_away_H": -0.139,
@@ -1643,7 +1992,21 @@
           "away_goals_conceded_5": 2.2,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "3-3",
+        "esito": "D",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       }
     ],
     "6": [
@@ -1657,12 +2020,6 @@
           "A": 21.0
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "1-1",
-        "esito": "D",
-        "ok": false,
         "features": {
           "pi_home_H": 0.307,
           "pi_away_H": 0.282,
@@ -1681,7 +2038,21 @@
           "away_goals_conceded_5": 2.0,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "1-1",
+        "esito": "D",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Twente",
@@ -1693,12 +2064,6 @@
           "A": 27.0
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "2-0",
-        "esito": "H",
-        "ok": true,
         "features": {
           "pi_home_H": 0.686,
           "pi_away_H": 0.316,
@@ -1717,7 +2082,21 @@
           "away_goals_conceded_5": 2.0,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "2-0",
+        "esito": "H",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Go Ahead Eagles",
@@ -1729,12 +2108,6 @@
           "A": 17.2
         },
         "pred": "D",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "1-1",
-        "esito": "D",
-        "ok": true,
         "features": {
           "pi_home_H": 0.022,
           "pi_away_H": 0.146,
@@ -1753,7 +2126,21 @@
           "away_goals_conceded_5": 2.0,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "1-1",
+        "esito": "D",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "For Sittard",
@@ -1765,12 +2152,6 @@
           "A": 61.7
         },
         "pred": "A",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "1-5",
-        "esito": "A",
-        "ok": true,
         "features": {
           "pi_home_H": 0.184,
           "pi_away_H": 0.64,
@@ -1789,7 +2170,21 @@
           "away_goals_conceded_5": 0.0,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "1-5",
+        "esito": "A",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Cambuur",
@@ -1801,12 +2196,6 @@
           "A": 48.0
         },
         "pred": "A",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "3-0",
-        "esito": "H",
-        "ok": false,
         "features": {
           "pi_home_H": -0.18,
           "pi_away_H": 0.799,
@@ -1825,7 +2214,21 @@
           "away_goals_conceded_5": 1.0,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "3-0",
+        "esito": "H",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Excelsior",
@@ -1837,12 +2240,6 @@
           "A": 28.1
         },
         "pred": "D",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "1-2",
-        "esito": "A",
-        "ok": false,
         "features": {
           "pi_home_H": -0.059,
           "pi_away_H": 0.614,
@@ -1861,7 +2258,21 @@
           "away_goals_conceded_5": 3.0,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "1-2",
+        "esito": "A",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Heerenveen",
@@ -1873,12 +2284,6 @@
           "A": 38.1
         },
         "pred": "A",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "0-0",
-        "esito": "D",
-        "ok": false,
         "features": {
           "pi_home_H": 0.275,
           "pi_away_H": -0.325,
@@ -1897,7 +2302,21 @@
           "away_goals_conceded_5": 1.6,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "0-0",
+        "esito": "D",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Zwolle",
@@ -1909,12 +2328,6 @@
           "A": 86.0
         },
         "pred": "A",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "0-7",
-        "esito": "A",
-        "ok": true,
         "features": {
           "pi_home_H": -0.246,
           "pi_away_H": 0.445,
@@ -1933,7 +2346,21 @@
           "away_goals_conceded_5": 0.8,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "0-7",
+        "esito": "A",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "PSV Eindhoven",
@@ -1945,12 +2372,6 @@
           "A": 33.5
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "4-1",
-        "esito": "H",
-        "ok": true,
         "features": {
           "pi_home_H": 0.395,
           "pi_away_H": 0.38,
@@ -1969,7 +2390,21 @@
           "away_goals_conceded_5": 2.2,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "4-1",
+        "esito": "H",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       }
     ],
     "7": [
@@ -1983,12 +2418,6 @@
           "A": 11.5
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "3-0",
-        "esito": "H",
-        "ok": true,
         "features": {
           "pi_home_H": -0.073,
           "pi_away_H": -0.101,
@@ -2007,7 +2436,21 @@
           "away_goals_conceded_5": 2.8,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "3-0",
+        "esito": "H",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Den Haag",
@@ -2019,12 +2462,6 @@
           "A": 45.2
         },
         "pred": "A",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "1-1",
-        "esito": "D",
-        "ok": false,
         "features": {
           "pi_home_H": -0.515,
           "pi_away_H": 0.254,
@@ -2043,7 +2480,21 @@
           "away_goals_conceded_5": 2.6,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "1-1",
+        "esito": "D",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Sparta Rotterdam",
@@ -2055,12 +2506,6 @@
           "A": 43.9
         },
         "pred": "A",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "0-4",
-        "esito": "A",
-        "ok": true,
         "features": {
           "pi_home_H": -0.362,
           "pi_away_H": 0.505,
@@ -2079,7 +2524,21 @@
           "away_goals_conceded_5": 1.8,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "0-4",
+        "esito": "A",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Ajax",
@@ -2091,12 +2550,6 @@
           "A": 13.9
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "2-2",
-        "esito": "D",
-        "ok": false,
         "features": {
           "pi_home_H": 1.084,
           "pi_away_H": 0.374,
@@ -2115,7 +2568,21 @@
           "away_goals_conceded_5": 1.2,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "2-2",
+        "esito": "D",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Willem II",
@@ -2127,12 +2594,6 @@
           "A": 45.2
         },
         "pred": "A",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "0-1",
-        "esito": "A",
-        "ok": true,
         "features": {
           "pi_home_H": -0.608,
           "pi_away_H": 0.063,
@@ -2151,7 +2612,21 @@
           "away_goals_conceded_5": 2.0,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "0-1",
+        "esito": "A",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Feyenoord",
@@ -2163,12 +2638,6 @@
           "A": 34.7
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "5-0",
-        "esito": "H",
-        "ok": true,
         "features": {
           "pi_home_H": 0.473,
           "pi_away_H": 0.265,
@@ -2187,7 +2656,21 @@
           "away_goals_conceded_5": 2.4,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "5-0",
+        "esito": "H",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Twente",
@@ -2199,12 +2682,6 @@
           "A": 22.2
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "3-2",
-        "esito": "H",
-        "ok": true,
         "features": {
           "pi_home_H": 0.973,
           "pi_away_H": 1.146,
@@ -2223,7 +2700,21 @@
           "away_goals_conceded_5": 1.2,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "3-2",
+        "esito": "H",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "AZ Alkmaar",
@@ -2235,12 +2726,6 @@
           "A": 24.4
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "1-0",
-        "esito": "H",
-        "ok": true,
         "features": {
           "pi_home_H": 0.901,
           "pi_away_H": -0.041,
@@ -2259,7 +2744,21 @@
           "away_goals_conceded_5": 0.8,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "1-0",
+        "esito": "H",
+        "ok": true,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       },
       {
         "home": "Nijmegen",
@@ -2271,12 +2770,6 @@
           "A": 26.3
         },
         "pred": "H",
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null,
-        "risultato": "1-1",
-        "esito": "D",
-        "ok": false,
         "features": {
           "pi_home_H": 0.562,
           "pi_away_H": 0.524,
@@ -2295,7 +2788,21 @@
           "away_goals_conceded_5": 2.8,
           "home_promoted": 0.0,
           "away_promoted": 0.0
-        }
+        },
+        "risultato": "1-1",
+        "esito": "D",
+        "ok": false,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "kelly": null
       }
     ],
     "8": [
@@ -6177,9 +6684,9 @@
         "away": "Ajax",
         "date": "2027-01-09",
         "prob": {
-          "H": 26.1,
-          "D": 17.3,
-          "A": 56.6
+          "H": 15.8,
+          "D": 22.9,
+          "A": 61.4
         },
         "pred": "A",
         "features": {
@@ -6193,7 +6700,7 @@
           "away_goal_diff_5": 2.4,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.0,
+          "h2h_home_winrate": 1.0,
           "home_goals_scored_5": 0.8,
           "home_goals_conceded_5": 2.4,
           "away_goals_scored_5": 2.6,
@@ -6218,9 +6725,9 @@
         "away": "Heerenveen",
         "date": "2027-01-09",
         "prob": {
-          "H": 49.5,
-          "D": 26.4,
-          "A": 24.1
+          "H": 50.5,
+          "D": 24.6,
+          "A": 25.0
         },
         "pred": "H",
         "features": {
@@ -6234,7 +6741,7 @@
           "away_goal_diff_5": 0.8,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.6,
+          "h2h_home_winrate": 0.4,
           "home_goals_scored_5": 2.4,
           "home_goals_conceded_5": 1.2,
           "away_goals_scored_5": 2.0,
@@ -6259,9 +6766,9 @@
         "away": "Cambuur",
         "date": "2027-01-10",
         "prob": {
-          "H": 53.1,
-          "D": 16.5,
-          "A": 30.4
+          "H": 53.5,
+          "D": 16.2,
+          "A": 30.2
         },
         "pred": "H",
         "features": {
@@ -6275,7 +6782,7 @@
           "away_goal_diff_5": -1.4,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.4,
+          "h2h_home_winrate": 0.2,
           "home_goals_scored_5": 1.4,
           "home_goals_conceded_5": 1.8,
           "away_goals_scored_5": 1.0,
@@ -6382,9 +6889,9 @@
         "away": "Go Ahead Eagles",
         "date": "2027-01-10",
         "prob": {
-          "H": 49.6,
-          "D": 30.8,
-          "A": 19.5
+          "H": 44.8,
+          "D": 24.9,
+          "A": 30.3
         },
         "pred": "H",
         "features": {
@@ -6398,7 +6905,7 @@
           "away_goal_diff_5": -0.8,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.0,
+          "h2h_home_winrate": 0.4,
           "home_goals_scored_5": 2.2,
           "home_goals_conceded_5": 1.4,
           "away_goals_scored_5": 1.8,
@@ -6425,9 +6932,9 @@
         "away": "Sparta Rotterdam",
         "date": "2027-01-15",
         "prob": {
-          "H": 19.6,
-          "D": 42.9,
-          "A": 37.5
+          "H": 26.8,
+          "D": 37.9,
+          "A": 35.3
         },
         "pred": "D",
         "features": {
@@ -6441,7 +6948,7 @@
           "away_goal_diff_5": -1.8,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.8,
+          "h2h_home_winrate": 0.4,
           "home_goals_scored_5": 0.6,
           "home_goals_conceded_5": 1.0,
           "away_goals_scored_5": 1.2,
@@ -6466,9 +6973,9 @@
         "away": "PSV Eindhoven",
         "date": "2027-01-16",
         "prob": {
-          "H": 20.6,
-          "D": 39.9,
-          "A": 39.5
+          "H": 9.6,
+          "D": 58.3,
+          "A": 32.1
         },
         "pred": "D",
         "features": {
@@ -6482,7 +6989,7 @@
           "away_goal_diff_5": 2.0,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.0,
+          "h2h_home_winrate": 0.8,
           "home_goals_scored_5": 1.6,
           "home_goals_conceded_5": 2.4,
           "away_goals_scored_5": 3.4,
@@ -6548,11 +7055,11 @@
         "away": "Nijmegen",
         "date": "2027-01-16",
         "prob": {
-          "H": 30.7,
-          "D": 29.8,
-          "A": 39.5
+          "H": 44.2,
+          "D": 24.1,
+          "A": 31.7
         },
-        "pred": "A",
+        "pred": "H",
         "features": {
           "pi_home_H": -0.308,
           "pi_away_H": 0.68,
@@ -6564,7 +7071,7 @@
           "away_goal_diff_5": 0.2,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.333,
+          "h2h_home_winrate": 0.0,
           "home_goals_scored_5": 2.0,
           "home_goals_conceded_5": 2.0,
           "away_goals_scored_5": 1.8,
@@ -6671,11 +7178,11 @@
         "away": "AZ Alkmaar",
         "date": "2027-01-17",
         "prob": {
-          "H": 51.2,
-          "D": 21.3,
-          "A": 27.5
+          "H": 30.1,
+          "D": 36.3,
+          "A": 33.6
         },
-        "pred": "H",
+        "pred": "D",
         "features": {
           "pi_home_H": 0.056,
           "pi_away_H": 0.737,
@@ -6687,7 +7194,7 @@
           "away_goal_diff_5": 1.2,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.0,
+          "h2h_home_winrate": 0.4,
           "home_goals_scored_5": 1.8,
           "home_goals_conceded_5": 1.4,
           "away_goals_scored_5": 2.0,
@@ -6878,11 +7385,11 @@
         "away": "Heerenveen",
         "date": "2027-01-23",
         "prob": {
-          "H": 33.9,
-          "D": 41.7,
-          "A": 24.4
+          "H": 51.4,
+          "D": 33.0,
+          "A": 15.6
         },
-        "pred": "D",
+        "pred": "H",
         "features": {
           "pi_home_H": 0.405,
           "pi_away_H": 0.019,
@@ -6894,7 +7401,7 @@
           "away_goal_diff_5": 0.8,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.6,
+          "h2h_home_winrate": 0.0,
           "home_goals_scored_5": 2.6,
           "home_goals_conceded_5": 0.6,
           "away_goals_scored_5": 2.0,
@@ -6919,9 +7426,9 @@
         "away": "Zwolle",
         "date": "2027-01-23",
         "prob": {
-          "H": 56.2,
-          "D": 31.4,
-          "A": 12.4
+          "H": 77.3,
+          "D": 17.1,
+          "A": 5.6
         },
         "pred": "H",
         "features": {
@@ -6935,7 +7442,7 @@
           "away_goal_diff_5": -0.8,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 1.0,
+          "h2h_home_winrate": 0.0,
           "home_goals_scored_5": 2.6,
           "home_goals_conceded_5": 1.2,
           "away_goals_scored_5": 1.4,
@@ -6960,9 +7467,9 @@
         "away": "Telstar",
         "date": "2027-01-23",
         "prob": {
-          "H": 69.5,
-          "D": 18.8,
-          "A": 11.7
+          "H": 77.6,
+          "D": 18.7,
+          "A": 3.7
         },
         "pred": "H",
         "features": {
@@ -6976,7 +7483,7 @@
           "away_goal_diff_5": 0.0,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 1.0,
+          "h2h_home_winrate": 0.0,
           "home_goals_scored_5": 2.2,
           "home_goals_conceded_5": 2.0,
           "away_goals_scored_5": 0.8,
@@ -7042,9 +7549,9 @@
         "away": "Willem II",
         "date": "2027-01-24",
         "prob": {
-          "H": 41.0,
-          "D": 24.8,
-          "A": 34.2
+          "H": 40.6,
+          "D": 27.3,
+          "A": 32.1
         },
         "pred": "H",
         "features": {
@@ -7058,7 +7565,7 @@
           "away_goal_diff_5": -1.4,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.4,
+          "h2h_home_winrate": 0.2,
           "home_goals_scored_5": 1.4,
           "home_goals_conceded_5": 1.8,
           "away_goals_scored_5": 1.0,
@@ -7167,11 +7674,11 @@
         "away": "Excelsior",
         "date": "2027-01-29",
         "prob": {
-          "H": 36.3,
-          "D": 37.8,
-          "A": 25.9
+          "H": 46.5,
+          "D": 33.6,
+          "A": 19.9
         },
-        "pred": "D",
+        "pred": "H",
         "features": {
           "pi_home_H": -0.198,
           "pi_away_H": -0.326,
@@ -7183,7 +7690,7 @@
           "away_goal_diff_5": 1.6,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.4,
+          "h2h_home_winrate": 0.2,
           "home_goals_scored_5": 1.8,
           "home_goals_conceded_5": 2.6,
           "away_goals_scored_5": 2.8,
@@ -7290,9 +7797,9 @@
         "away": "Telstar",
         "date": "2027-01-30",
         "prob": {
-          "H": 23.2,
-          "D": 19.9,
-          "A": 56.9
+          "H": 24.2,
+          "D": 23.6,
+          "A": 52.2
         },
         "pred": "A",
         "features": {
@@ -7306,7 +7813,7 @@
           "away_goal_diff_5": 0.0,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.667,
+          "h2h_home_winrate": 0.5,
           "home_goals_scored_5": 1.4,
           "home_goals_conceded_5": 2.6,
           "away_goals_scored_5": 0.8,
@@ -7331,9 +7838,9 @@
         "away": "Go Ahead Eagles",
         "date": "2027-01-30",
         "prob": {
-          "H": 47.9,
-          "D": 25.2,
-          "A": 26.9
+          "H": 56.7,
+          "D": 22.5,
+          "A": 20.8
         },
         "pred": "H",
         "features": {
@@ -7347,7 +7854,7 @@
           "away_goal_diff_5": -0.8,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.2,
+          "h2h_home_winrate": 0.4,
           "home_goals_scored_5": 1.6,
           "home_goals_conceded_5": 2.8,
           "away_goals_scored_5": 1.8,
@@ -7372,11 +7879,11 @@
         "away": "Ajax",
         "date": "2027-01-31",
         "prob": {
-          "H": 15.6,
-          "D": 28.9,
-          "A": 55.5
+          "H": 11.2,
+          "D": 45.9,
+          "A": 42.9
         },
-        "pred": "A",
+        "pred": "D",
         "features": {
           "pi_home_H": 0.019,
           "pi_away_H": 1.042,
@@ -7388,7 +7895,7 @@
           "away_goal_diff_5": 2.4,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.0,
+          "h2h_home_winrate": 0.4,
           "home_goals_scored_5": 0.6,
           "home_goals_conceded_5": 1.0,
           "away_goals_scored_5": 2.6,
@@ -7413,9 +7920,9 @@
         "away": "Cambuur",
         "date": "2027-01-31",
         "prob": {
-          "H": 44.6,
+          "H": 58.8,
           "D": 23.9,
-          "A": 31.5
+          "A": 17.3
         },
         "pred": "H",
         "features": {
@@ -7429,7 +7936,7 @@
           "away_goal_diff_5": -1.4,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.8,
+          "h2h_home_winrate": 0.2,
           "home_goals_scored_5": 2.6,
           "home_goals_conceded_5": 0.6,
           "away_goals_scored_5": 1.0,
@@ -7702,9 +8209,9 @@
         "away": "Den Haag",
         "date": "2027-02-13",
         "prob": {
-          "H": 24.0,
-          "D": 49.6,
-          "A": 26.4
+          "H": 30.1,
+          "D": 44.5,
+          "A": 25.4
         },
         "pred": "D",
         "features": {
@@ -7718,7 +8225,7 @@
           "away_goal_diff_5": -1.4,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.8,
+          "h2h_home_winrate": 0.2,
           "home_goals_scored_5": 1.6,
           "home_goals_conceded_5": 2.4,
           "away_goals_scored_5": 1.0,
@@ -7784,9 +8291,9 @@
         "away": "Heerenveen",
         "date": "2027-02-13",
         "prob": {
-          "H": 60.8,
-          "D": 24.6,
-          "A": 14.6
+          "H": 42.8,
+          "D": 34.9,
+          "A": 22.3
         },
         "pred": "H",
         "features": {
@@ -7800,7 +8307,7 @@
           "away_goal_diff_5": 0.8,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.0,
+          "h2h_home_winrate": 1.0,
           "home_goals_scored_5": 2.0,
           "home_goals_conceded_5": 2.0,
           "away_goals_scored_5": 2.0,
@@ -7825,9 +8332,9 @@
         "away": "Twente",
         "date": "2027-02-13",
         "prob": {
-          "H": 54.3,
-          "D": 11.0,
-          "A": 34.7
+          "H": 63.4,
+          "D": 17.7,
+          "A": 18.8
         },
         "pred": "H",
         "features": {
@@ -7841,7 +8348,7 @@
           "away_goal_diff_5": -0.4,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.8,
+          "h2h_home_winrate": 0.0,
           "home_goals_scored_5": 4.4,
           "home_goals_conceded_5": 1.2,
           "away_goals_scored_5": 1.8,
@@ -8032,9 +8539,9 @@
         "away": "For Sittard",
         "date": "2027-02-20",
         "prob": {
-          "H": 43.9,
-          "D": 26.2,
-          "A": 29.9
+          "H": 44.0,
+          "D": 25.7,
+          "A": 30.2
         },
         "pred": "H",
         "features": {
@@ -8048,7 +8555,7 @@
           "away_goal_diff_5": 0.2,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.6,
+          "h2h_home_winrate": 0.4,
           "home_goals_scored_5": 2.4,
           "home_goals_conceded_5": 1.2,
           "away_goals_scored_5": 1.8,
@@ -8073,9 +8580,9 @@
         "away": "Groningen",
         "date": "2027-02-20",
         "prob": {
-          "H": 33.4,
-          "D": 21.1,
-          "A": 45.5
+          "H": 38.6,
+          "D": 16.9,
+          "A": 44.6
         },
         "pred": "A",
         "features": {
@@ -8089,7 +8596,7 @@
           "away_goal_diff_5": -0.4,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.2,
+          "h2h_home_winrate": 0.0,
           "home_goals_scored_5": 0.4,
           "home_goals_conceded_5": 2.8,
           "away_goals_scored_5": 1.8,
@@ -8237,9 +8744,9 @@
         "away": "Willem II",
         "date": "2027-02-20",
         "prob": {
-          "H": 24.9,
-          "D": 41.4,
-          "A": 33.7
+          "H": 36.6,
+          "D": 42.3,
+          "A": 21.2
         },
         "pred": "D",
         "features": {
@@ -8253,7 +8760,7 @@
           "away_goal_diff_5": -1.4,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.6,
+          "h2h_home_winrate": 0.2,
           "home_goals_scored_5": 0.6,
           "home_goals_conceded_5": 1.0,
           "away_goals_scored_5": 1.0,
@@ -8444,11 +8951,11 @@
         "away": "Twente",
         "date": "2027-02-27",
         "prob": {
-          "H": 34.6,
-          "D": 27.8,
-          "A": 37.6
+          "H": 45.1,
+          "D": 24.1,
+          "A": 30.8
         },
-        "pred": "A",
+        "pred": "H",
         "features": {
           "pi_home_H": 0.552,
           "pi_away_H": 0.405,
@@ -8460,7 +8967,7 @@
           "away_goal_diff_5": -0.4,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.2,
+          "h2h_home_winrate": 0.4,
           "home_goals_scored_5": 1.6,
           "home_goals_conceded_5": 2.8,
           "away_goals_scored_5": 1.8,
@@ -8567,9 +9074,9 @@
         "away": "PSV Eindhoven",
         "date": "2027-02-27",
         "prob": {
-          "H": 17.0,
-          "D": 17.3,
-          "A": 65.8
+          "H": 16.4,
+          "D": 16.0,
+          "A": 67.6
         },
         "pred": "A",
         "features": {
@@ -8583,7 +9090,7 @@
           "away_goal_diff_5": 2.0,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.0,
+          "h2h_home_winrate": 1.0,
           "home_goals_scored_5": 1.4,
           "home_goals_conceded_5": 2.6,
           "away_goals_scored_5": 3.4,
@@ -8979,9 +9486,9 @@
         "away": "Utrecht",
         "date": "2027-03-06",
         "prob": {
-          "H": 63.4,
-          "D": 19.1,
-          "A": 17.5
+          "H": 67.6,
+          "D": 22.7,
+          "A": 9.6
         },
         "pred": "H",
         "features": {
@@ -8995,7 +9502,7 @@
           "away_goal_diff_5": -0.8,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.8,
+          "h2h_home_winrate": 0.0,
           "home_goals_scored_5": 4.4,
           "home_goals_conceded_5": 1.2,
           "away_goals_scored_5": 1.6,
@@ -9104,11 +9611,11 @@
         "away": "Groningen",
         "date": "2027-03-13",
         "prob": {
-          "H": 27.3,
-          "D": 39.3,
-          "A": 33.5
+          "H": 37.7,
+          "D": 37.7,
+          "A": 24.6
         },
-        "pred": "D",
+        "pred": "H",
         "features": {
           "pi_home_H": -0.198,
           "pi_away_H": 0.386,
@@ -9120,7 +9627,7 @@
           "away_goal_diff_5": -0.4,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.6,
+          "h2h_home_winrate": 0.2,
           "home_goals_scored_5": 1.8,
           "home_goals_conceded_5": 2.6,
           "away_goals_scored_5": 1.8,
@@ -9227,9 +9734,9 @@
         "away": "Feyenoord",
         "date": "2027-03-13",
         "prob": {
-          "H": 24.5,
-          "D": 39.2,
-          "A": 36.2
+          "H": 11.4,
+          "D": 50.1,
+          "A": 38.5
         },
         "pred": "D",
         "features": {
@@ -9243,7 +9750,7 @@
           "away_goal_diff_5": 3.0,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.2,
+          "h2h_home_winrate": 0.8,
           "home_goals_scored_5": 1.8,
           "home_goals_conceded_5": 1.4,
           "away_goals_scored_5": 3.6,
@@ -9268,11 +9775,11 @@
         "away": "Nijmegen",
         "date": "2027-03-13",
         "prob": {
-          "H": 41.8,
-          "D": 32.9,
-          "A": 25.4
+          "H": 37.5,
+          "D": 37.5,
+          "A": 25.0
         },
-        "pred": "H",
+        "pred": "D",
         "features": {
           "pi_home_H": -0.326,
           "pi_away_H": 0.68,
@@ -9284,7 +9791,7 @@
           "away_goal_diff_5": 0.2,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.2,
+          "h2h_home_winrate": 0.8,
           "home_goals_scored_5": 2.0,
           "home_goals_conceded_5": 1.2,
           "away_goals_scored_5": 1.8,
@@ -9309,9 +9816,9 @@
         "away": "Den Haag",
         "date": "2027-03-13",
         "prob": {
-          "H": 27.6,
-          "D": 45.4,
-          "A": 27.0
+          "H": 23.3,
+          "D": 42.6,
+          "A": 34.1
         },
         "pred": "D",
         "features": {
@@ -9325,7 +9832,7 @@
           "away_goal_diff_5": -1.4,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.2,
+          "h2h_home_winrate": 0.4,
           "home_goals_scored_5": 2.0,
           "home_goals_conceded_5": 2.6,
           "away_goals_scored_5": 1.0,
@@ -9350,9 +9857,9 @@
         "away": "Zwolle",
         "date": "2027-03-13",
         "prob": {
-          "H": 77.4,
-          "D": 17.6,
-          "A": 5.0
+          "H": 84.7,
+          "D": 11.0,
+          "A": 4.3
         },
         "pred": "H",
         "features": {
@@ -9366,7 +9873,7 @@
           "away_goal_diff_5": -0.8,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.8,
+          "h2h_home_winrate": 0.0,
           "home_goals_scored_5": 2.2,
           "home_goals_conceded_5": 2.0,
           "away_goals_scored_5": 1.4,
@@ -9475,11 +9982,11 @@
         "away": "PSV Eindhoven",
         "date": "2027-03-20",
         "prob": {
-          "H": 43.5,
-          "D": 15.9,
-          "A": 40.7
+          "H": 22.2,
+          "D": 20.3,
+          "A": 57.5
         },
-        "pred": "H",
+        "pred": "A",
         "features": {
           "pi_home_H": 0.386,
           "pi_away_H": 0.45,
@@ -9491,7 +9998,7 @@
           "away_goal_diff_5": 2.0,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.0,
+          "h2h_home_winrate": 1.0,
           "home_goals_scored_5": 2.2,
           "home_goals_conceded_5": 1.4,
           "away_goals_scored_5": 3.4,
@@ -9680,11 +10187,11 @@
         "away": "Cambuur",
         "date": "2027-03-20",
         "prob": {
-          "H": 34.8,
-          "D": 49.9,
-          "A": 15.3
+          "H": 67.5,
+          "D": 24.3,
+          "A": 8.2
         },
-        "pred": "D",
+        "pred": "H",
         "features": {
           "pi_home_H": 0.879,
           "pi_away_H": 0.108,
@@ -9696,7 +10203,7 @@
           "away_goal_diff_5": -1.4,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 1.0,
+          "h2h_home_winrate": 0.0,
           "home_goals_scored_5": 2.6,
           "home_goals_conceded_5": 1.2,
           "away_goals_scored_5": 1.0,
@@ -9721,11 +10228,11 @@
         "away": "Sparta Rotterdam",
         "date": "2027-03-20",
         "prob": {
-          "H": 45.6,
-          "D": 38.4,
-          "A": 16.0
+          "H": 32.2,
+          "D": 41.6,
+          "A": 26.2
         },
-        "pred": "H",
+        "pred": "D",
         "features": {
           "pi_home_H": -0.198,
           "pi_away_H": 0.423,
@@ -9737,7 +10244,7 @@
           "away_goal_diff_5": -1.8,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.2,
+          "h2h_home_winrate": 0.6,
           "home_goals_scored_5": 1.8,
           "home_goals_conceded_5": 2.6,
           "away_goals_scored_5": 1.2,
@@ -9805,11 +10312,11 @@
         "away": "Nijmegen",
         "date": "2027-04-03",
         "prob": {
-          "H": 34.9,
-          "D": 39.7,
-          "A": 25.4
+          "H": 49.1,
+          "D": 30.7,
+          "A": 20.3
         },
-        "pred": "D",
+        "pred": "H",
         "features": {
           "pi_home_H": 0.056,
           "pi_away_H": 0.68,
@@ -9821,7 +10328,7 @@
           "away_goal_diff_5": 0.2,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.4,
+          "h2h_home_winrate": 0.2,
           "home_goals_scored_5": 1.8,
           "home_goals_conceded_5": 1.4,
           "away_goals_scored_5": 1.8,
@@ -9928,9 +10435,9 @@
         "away": "Telstar",
         "date": "2027-04-03",
         "prob": {
-          "H": 35.0,
-          "D": 40.2,
-          "A": 24.8
+          "H": 22.6,
+          "D": 47.3,
+          "A": 30.1
         },
         "pred": "D",
         "features": {
@@ -9944,7 +10451,7 @@
           "away_goal_diff_5": 0.0,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.0,
+          "h2h_home_winrate": 0.4,
           "home_goals_scored_5": 2.0,
           "home_goals_conceded_5": 2.6,
           "away_goals_scored_5": 0.8,
@@ -10299,9 +10806,9 @@
         "away": "AZ Alkmaar",
         "date": "2027-04-10",
         "prob": {
-          "H": 25.6,
-          "D": 23.9,
-          "A": 50.5
+          "H": 21.0,
+          "D": 21.0,
+          "A": 58.0
         },
         "pred": "A",
         "features": {
@@ -10315,7 +10822,7 @@
           "away_goal_diff_5": 1.2,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.2,
+          "h2h_home_winrate": 0.6,
           "home_goals_scored_5": 0.8,
           "home_goals_conceded_5": 2.4,
           "away_goals_scored_5": 2.0,
@@ -10422,9 +10929,9 @@
         "away": "For Sittard",
         "date": "2027-04-10",
         "prob": {
-          "H": 18.3,
-          "D": 47.7,
-          "A": 34.0
+          "H": 17.7,
+          "D": 47.3,
+          "A": 35.0
         },
         "pred": "D",
         "features": {
@@ -10438,7 +10945,7 @@
           "away_goal_diff_5": 0.2,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.4,
+          "h2h_home_winrate": 0.5,
           "home_goals_scored_5": 2.0,
           "home_goals_conceded_5": 2.6,
           "away_goals_scored_5": 1.8,
@@ -10506,8 +11013,8 @@
         "away": "Ajax",
         "date": "2027-04-24",
         "prob": {
-          "H": 30.2,
-          "D": 15.3,
+          "H": 23.5,
+          "D": 21.9,
           "A": 54.6
         },
         "pred": "A",
@@ -10522,7 +11029,7 @@
           "away_goal_diff_5": 2.4,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.2,
+          "h2h_home_winrate": 0.4,
           "home_goals_scored_5": 4.4,
           "home_goals_conceded_5": 1.2,
           "away_goals_scored_5": 2.6,
@@ -10547,9 +11054,9 @@
         "away": "Sparta Rotterdam",
         "date": "2027-04-24",
         "prob": {
-          "H": 48.0,
-          "D": 33.2,
-          "A": 18.9
+          "H": 61.5,
+          "D": 24.4,
+          "A": 14.1
         },
         "pred": "H",
         "features": {
@@ -10563,7 +11070,7 @@
           "away_goal_diff_5": -1.8,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.6,
+          "h2h_home_winrate": 0.2,
           "home_goals_scored_5": 2.6,
           "home_goals_conceded_5": 1.2,
           "away_goals_scored_5": 1.2,
@@ -10670,9 +11177,9 @@
         "away": "Groningen",
         "date": "2027-04-24",
         "prob": {
-          "H": 21.3,
-          "D": 45.7,
-          "A": 32.9
+          "H": 22.3,
+          "D": 48.6,
+          "A": 29.1
         },
         "pred": "D",
         "features": {
@@ -10686,7 +11193,7 @@
           "away_goal_diff_5": -0.4,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.6,
+          "h2h_home_winrate": 0.4,
           "home_goals_scored_5": 1.6,
           "home_goals_conceded_5": 2.4,
           "away_goals_scored_5": 1.8,
@@ -10711,9 +11218,9 @@
         "away": "Willem II",
         "date": "2027-04-24",
         "prob": {
-          "H": 50.5,
-          "D": 21.8,
-          "A": 27.7
+          "H": 66.1,
+          "D": 18.1,
+          "A": 15.8
         },
         "pred": "H",
         "features": {
@@ -10727,7 +11234,7 @@
           "away_goal_diff_5": -1.4,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.6,
+          "h2h_home_winrate": 0.2,
           "home_goals_scored_5": 2.0,
           "home_goals_conceded_5": 1.2,
           "away_goals_scored_5": 1.0,
@@ -10752,9 +11259,9 @@
         "away": "Utrecht",
         "date": "2027-04-24",
         "prob": {
-          "H": 70.7,
-          "D": 21.4,
-          "A": 7.9
+          "H": 58.0,
+          "D": 26.9,
+          "A": 15.1
         },
         "pred": "H",
         "features": {
@@ -10768,7 +11275,7 @@
           "away_goal_diff_5": -0.8,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.0,
+          "h2h_home_winrate": 0.4,
           "home_goals_scored_5": 1.8,
           "home_goals_conceded_5": 1.4,
           "away_goals_scored_5": 1.6,
@@ -10918,9 +11425,9 @@
         "away": "AZ Alkmaar",
         "date": "2027-05-01",
         "prob": {
-          "H": 32.7,
-          "D": 21.9,
-          "A": 45.3
+          "H": 26.1,
+          "D": 24.9,
+          "A": 49.0
         },
         "pred": "A",
         "features": {
@@ -10934,7 +11441,7 @@
           "away_goal_diff_5": 1.2,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.0,
+          "h2h_home_winrate": 1.0,
           "home_goals_scored_5": 2.0,
           "home_goals_conceded_5": 2.0,
           "away_goals_scored_5": 2.0,
@@ -10959,9 +11466,9 @@
         "away": "Cambuur",
         "date": "2027-05-01",
         "prob": {
-          "H": 49.2,
-          "D": 26.5,
-          "A": 24.3
+          "H": 65.9,
+          "D": 20.9,
+          "A": 13.2
         },
         "pred": "H",
         "features": {
@@ -10975,7 +11482,7 @@
           "away_goal_diff_5": -1.4,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.8,
+          "h2h_home_winrate": 0.2,
           "home_goals_scored_5": 2.0,
           "home_goals_conceded_5": 1.2,
           "away_goals_scored_5": 1.0,
@@ -11000,9 +11507,9 @@
         "away": "For Sittard",
         "date": "2027-05-01",
         "prob": {
-          "H": 61.9,
-          "D": 14.2,
-          "A": 23.8
+          "H": 75.4,
+          "D": 11.3,
+          "A": 13.3
         },
         "pred": "H",
         "features": {
@@ -11016,7 +11523,7 @@
           "away_goal_diff_5": 0.2,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 1.0,
+          "h2h_home_winrate": 0.0,
           "home_goals_scored_5": 2.2,
           "home_goals_conceded_5": 2.0,
           "away_goals_scored_5": 1.8,
@@ -11041,9 +11548,9 @@
         "away": "Zwolle",
         "date": "2027-05-01",
         "prob": {
-          "H": 61.9,
-          "D": 15.0,
-          "A": 23.1
+          "H": 52.0,
+          "D": 16.0,
+          "A": 32.0
         },
         "pred": "H",
         "features": {
@@ -11057,7 +11564,7 @@
           "away_goal_diff_5": -0.8,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.8,
+          "h2h_home_winrate": 0.0,
           "home_goals_scored_5": 1.4,
           "home_goals_conceded_5": 1.8,
           "away_goals_scored_5": 1.4,
@@ -11082,11 +11589,11 @@
         "away": "Den Haag",
         "date": "2027-05-01",
         "prob": {
-          "H": 36.1,
-          "D": 16.8,
-          "A": 47.2
+          "H": 45.2,
+          "D": 19.4,
+          "A": 35.4
         },
-        "pred": "A",
+        "pred": "H",
         "features": {
           "pi_home_H": 0.386,
           "pi_away_H": 0.552,
@@ -11098,7 +11605,7 @@
           "away_goal_diff_5": -1.4,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.8,
+          "h2h_home_winrate": 0.2,
           "home_goals_scored_5": 2.2,
           "home_goals_conceded_5": 1.4,
           "away_goals_scored_5": 1.0,
@@ -11453,11 +11960,11 @@
         "away": "Groningen",
         "date": "2027-05-08",
         "prob": {
-          "H": 33.5,
-          "D": 26.5,
-          "A": 40.0
+          "H": 42.5,
+          "D": 27.9,
+          "A": 29.6
         },
-        "pred": "A",
+        "pred": "H",
         "features": {
           "pi_home_H": 0.405,
           "pi_away_H": 0.386,
@@ -11469,7 +11976,7 @@
           "away_goal_diff_5": -0.4,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.4,
+          "h2h_home_winrate": 0.0,
           "home_goals_scored_5": 2.6,
           "home_goals_conceded_5": 0.6,
           "away_goals_scored_5": 1.8,
@@ -11494,9 +12001,9 @@
         "away": "Feyenoord",
         "date": "2027-05-08",
         "prob": {
-          "H": 10.8,
-          "D": 57.5,
-          "A": 31.7
+          "H": 7.1,
+          "D": 59.7,
+          "A": 33.2
         },
         "pred": "D",
         "features": {
@@ -11510,7 +12017,7 @@
           "away_goal_diff_5": 3.0,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.2,
+          "h2h_home_winrate": 0.8,
           "home_goals_scored_5": 1.8,
           "home_goals_conceded_5": 2.6,
           "away_goals_scored_5": 3.6,
@@ -11535,9 +12042,9 @@
         "away": "Excelsior",
         "date": "2027-05-08",
         "prob": {
-          "H": 72.5,
-          "D": 14.7,
-          "A": 12.9
+          "H": 88.1,
+          "D": 7.3,
+          "A": 4.6
         },
         "pred": "H",
         "features": {
@@ -11551,7 +12058,7 @@
           "away_goal_diff_5": 1.6,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 1.0,
+          "h2h_home_winrate": 0.0,
           "home_goals_scored_5": 4.4,
           "home_goals_conceded_5": 1.2,
           "away_goals_scored_5": 2.8,
@@ -11576,9 +12083,9 @@
         "away": "Sparta Rotterdam",
         "date": "2027-05-08",
         "prob": {
-          "H": 39.6,
-          "D": 30.6,
-          "A": 29.8
+          "H": 52.0,
+          "D": 21.0,
+          "A": 27.1
         },
         "pred": "H",
         "features": {
@@ -11592,7 +12099,7 @@
           "away_goal_diff_5": -1.8,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.4,
+          "h2h_home_winrate": 0.0,
           "home_goals_scored_5": 0.4,
           "home_goals_conceded_5": 2.8,
           "away_goals_scored_5": 1.2,
@@ -11783,9 +12290,9 @@
         "away": "Willem II",
         "date": "2027-05-16",
         "prob": {
-          "H": 27.3,
-          "D": 39.9,
-          "A": 32.9
+          "H": 32.7,
+          "D": 42.9,
+          "A": 24.4
         },
         "pred": "D",
         "features": {
@@ -11799,7 +12306,7 @@
           "away_goal_diff_5": -1.4,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.6,
+          "h2h_home_winrate": 0.2,
           "home_goals_scored_5": 1.6,
           "home_goals_conceded_5": 2.4,
           "away_goals_scored_5": 1.0,
@@ -12277,9 +12784,9 @@
         "away": "AZ Alkmaar",
         "date": "2027-05-23",
         "prob": {
-          "H": 13.1,
-          "D": 16.2,
-          "A": 70.7
+          "H": 17.6,
+          "D": 23.1,
+          "A": 59.3
         },
         "pred": "A",
         "features": {
@@ -12293,7 +12800,7 @@
           "away_goal_diff_5": 1.2,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.0,
+          "h2h_home_winrate": 0.6,
           "home_goals_scored_5": 1.6,
           "home_goals_conceded_5": 2.8,
           "away_goals_scored_5": 2.0,
@@ -12318,11 +12825,11 @@
         "away": "Go Ahead Eagles",
         "date": "2027-05-23",
         "prob": {
-          "H": 37.5,
-          "D": 30.5,
-          "A": 32.0
+          "H": 36.9,
+          "D": 20.2,
+          "A": 42.8
         },
-        "pred": "H",
+        "pred": "A",
         "features": {
           "pi_home_H": 0.277,
           "pi_away_H": 0.056,
@@ -12334,7 +12841,7 @@
           "away_goal_diff_5": -0.8,
           "home_rest_days": 7.0,
           "away_rest_days": 7.0,
-          "h2h_home_winrate": 0.2,
+          "h2h_home_winrate": 0.6,
           "home_goals_scored_5": 0.8,
           "home_goals_conceded_5": 2.4,
           "away_goals_scored_5": 1.8,

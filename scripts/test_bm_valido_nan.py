@@ -16,14 +16,14 @@ SRC = Path(__file__).resolve().parent.parent / "src" / "predict_fixtures.py"
 tree = ast.parse(SRC.read_text(encoding="utf-8"))
 
 fn = next((n for n in ast.walk(tree)
-           if isinstance(n, ast.FunctionDef) and n.name == "_bm_valido"), None)
+           if isinstance(n, ast.FunctionDef) and n.name == "_bm_valid"), None)
 if fn is None:
     print("FAIL: _bm_valido non trovata in predict_fixtures.py")
     raise SystemExit(1)
 
 ns = {"math": math, "LABELS": ["H", "D", "A"]}
 exec(compile(ast.Module(body=[fn], type_ignores=[]), "<sorgente>", "exec"), ns)
-valido = ns["_bm_valido"]
+valido = ns["_bm_valid"]
 print(f"_bm_valido estratta dal sorgente: {valido}")
 
 fail = 0

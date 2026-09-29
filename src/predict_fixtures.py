@@ -64,6 +64,28 @@ def assign_giornate(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def _bm_valid(d) -> bool:
+    """Un dict di quote/probabilita' e' utilizzabile solo con numeri FINITI.
+
+    Non basta `x is not None` e non basta isinstance(x, float):
+    NaN e' un float, quindi isinstance(nan, (int, float)) -> True. Con NaN il
+    dict verrebbe costruito, `round(nan, 2)` restituirebbe nan, _json_safe lo
+    convertirebbe in null, e il frontend farebbe toFixed(0) su None: pagina
+    bianca. isfinite scarta insieme None, nan e inf.
+
+    Vive a livello di modulo perche' serve a DUE rami (snapshot e future):
+    definirlo dentro il ramo snapshot lo lasciava "possibly unbound" nel ramo
+    future, ed e' esattamente li' che i dict-vuoto sono ricomparsi (310
+    partite future della Serie A, che non hanno colonne B365 in openfootball).
+    """
+    if not isinstance(d, dict):
+        return False
+    return all(
+        isinstance(d.get(l), (int, float)) and math.isfinite(d.get(l))
+        for l in ("H", "D", "A")
+    )
+
+
 def _match_key(home: str, away: str, date: str) -> str:
     return f"{date}|{home}|{away}"
 
@@ -349,15 +371,7 @@ def main(league, reset_freeze: bool = False):
             # pipeline muore dopo aver allenato il modello. Percio' qui si
             # controlla che i valori siano NUMERICI, non che il dict esista.
             def _bm_valido(d):
-                # NON isinstance(x, float): NaN e' un float, quindi
-                # isinstance(nan, (int, float)) -> True e il guard accettava
-                # NaN come buono. round(nan, 2) restituisce nan, _json_safe lo
-                # converte in null, e il dict-vuoto tornava in circolo a ogni
-                # run (per questo il fix precedente non le eliminava mai).
-                # isfinite scarta insieme None, nan e inf.
-                return (isinstance(d, dict)
-                        and all(isinstance(d.get(l), (int, float))
-                                and math.isfinite(d.get(l)) for l in LABELS))
+                return _bm_valid(d)
 
             if not _bm_valido(m.get("bm")) and bm_odds is not None:
                 m["bm"] = {"H": round(bm_odds[0], 2), "D": round(bm_odds[1], 2),
@@ -414,7 +428,14 @@ def main(league, reset_freeze: bool = False):
             # richiedono il risultato reale, ma non devono decidere se la
             # quota viene mostrata. Altrimenti le partite future, che sono
             # le uniche con quote prepartita, finivano nell'else con bm=None.
-            if bm_odds is not None:
+            #
+            # `_bm_valido` e' indispensabile: openfootball non ha le colonne
+            # B365, quindi per le partite senza quote arriva
+            # bm_odds = [nan, nan, nan]. Il dict e' costruito, i valori sono
+            # NaN, e _json_safe li converte in null: si riproduce esattamente
+            # il dict-vuoto che crashava il frontend, stavolta sulle 330
+            # partite future. `is not None` non basta, perche' NaN non e' None.
+            if _bm_valido({"H": bm_odds[0], "D": bm_odds[1], "A": bm_odds[2]}) if bm_odds else False:
                 m["bm"] = {"H": round(bm_odds[0], 2), "D": round(bm_odds[1], 2),
                            "A": round(bm_odds[2], 2)}
                 m["bm_prob"] = {LABELS[i]: round(bm_prob[i] * 100, 1) for i in range(3)}

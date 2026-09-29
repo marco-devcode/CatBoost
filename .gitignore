@@ -4,6 +4,12 @@ __pycache__/
 venv/
 env/
 *.cbm
+# Grafici generati dalla pipeline: binari, quindi NON mergeabili. Con due
+# leghe in matrice finivano in conflitto add/add a ogni rebase, uccidendo
+# la pipeline DOPO il training. Non tracciarli: restano su disco e vengono
+# serviti, ma non sono versionati. NOTA: .gitignore NON basta da solo, perche'
+# non tocca i file gia' tracciati — vanno rimossi con git rm --cached.
+*.png
 webapp/node_modules/
 webapp/.next/
 webapp/tsconfig.tsbuildinfo

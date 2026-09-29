@@ -479,7 +479,14 @@ def main(league, reset_freeze: bool = False):
             # `played` serve solo al confronto RPS e al Kelly retrospettivo,
             # che hanno bisogno del risultato reale: non deve governare
             # l'assegnazione delle quote.
-            if bm_odds is not None:
+            # Secondo gate sulle quote (suggerimento Kelly sulle future). Aveva
+            # ancora `bm_odds is not None`, quindi ricostruiva il dict anche
+            # per openfootball, dove bm_odds = [nan, nan, nan]: NaN non e'
+            # None, il gate passa, e i 310 dict-vuoto tornavano QUI dopo che
+            # il gate di sopra li aveva correttamente rifiutati.
+            # Per questo i due gate vanno controllati insieme: correggere
+            # solo il primo non serve a nulla.
+            if _bm_valid({"H": bm_odds[0], "D": bm_odds[1], "A": bm_odds[2]}) if bm_odds else False:
                 m["bm"] = {"H": round(bm_odds[0], 2), "D": round(bm_odds[1], 2),
                            "A": round(bm_odds[2], 2)}
                 m["bm_prob"] = {LABELS[i]: round(bm_prob[i] * 100, 1) for i in range(3)}

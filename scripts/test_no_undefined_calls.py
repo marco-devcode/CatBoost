@@ -16,6 +16,7 @@ differisce di 1 char da una def di modulo (errore di battitura), e verifica
 che ogni def di modulo chiamata esista.
 """
 import ast
+import re
 import sys
 from pathlib import Path
 
@@ -47,6 +48,42 @@ for ld in sorted(local_defs):
 fail = 0
 print(f"def di modulo: {len(module_defs)}")
 print(f"def annidate : {len(local_defs)} ({sorted(local_defs)})")
+
+# 3. NESSUN gate che assegna m["bm"] puo' usare `bm_odds is not None`:
+#    openfootball dà bm_odds = [nan, nan, nan], e NaN non e' None, quindi il
+#    gate passa e ricostruisce il dict-vuoto. Tutti i gate devono passare da
+#    _bm_valid. Il bug ricorrente era correggerne uno alla volta lasciandone
+#    altri col controllo vecchio: qui si contano tutti.
+import ast as _ast
+n_gates = n_sbagliati = 0
+for node in _ast.walk(tree):
+    if not isinstance(node, _ast.If):
+        continue
+    # ast.unparse normalizza le virgolette: m["bm"] puo' tornare come m['bm'].
+    # Per questo cerco il nome su entrambe le forme.
+    body = "\n".join(_ast.unparse(s) for s in node.body)
+    if not re.search(r"""m\s*\[\s*['"]bm['"]\s*\]\s*=""", body):
+        continue
+    t = _ast.unparse(node.test)
+    if "bm_odds" not in t:
+        continue
+    n_gates += 1
+    # `elif bm_odds is None:` e' pulizia (assegna None), non un gate che
+    # ricostruisce il dict: non e' la fonte del dict-vuoto. Lo escludo,
+    # altrimenti il check segnalerebbe anche il codice corretto.
+    if re.search(r"""\bm\s*\[\s*['"]bm['"]\s*\]\s*=\s*None""", body) \
+            and "bm_odds is None" in t:
+        print(f"  info riga {node.lineno}: pulizia (bm = None), non un gate")
+        n_gates -= 1
+        continue
+    if "_bm_valid" not in t and "bm_prob" not in t and "prev_estimates" not in t:
+        n_sbagliati += 1
+        print(f"  FAIL gate riga {node.lineno} usa il vecchio controllo: if {t}")
+if n_sbagliati:
+    fail += 1
+    print(f"  {n_sbagliati}/{n_gates} gate sbagliati")
+else:
+    print(f"  OK   tutti i {n_gates} gate su bm_odds passano da _bm_valid")
 
 if undefined_helpers:
     fail += 1

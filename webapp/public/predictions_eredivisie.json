@@ -1,6 +1,6 @@
 {
   "meta": {
-    "last_update": "2026-09-29T02:53:14",
+    "last_update": "2026-09-29T11:47:51",
     "league": "eredivisie",
     "league_name": "Eredivisie",
     "stagione": "2627",
@@ -2328,9 +2328,22 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 1.24,
+          "D": 7.38,
+          "A": 8.68
+        },
+        "bm_prob": {
+          "H": 76.3,
+          "D": 12.8,
+          "A": 10.9
+        },
+        "kelly": {
+          "pick": "A",
+          "model_p": 0.27,
+          "odd": 8.68,
+          "stake_pct": 4.37
+        }
       },
       {
         "home": "Go Ahead Eagles",
@@ -2361,9 +2374,22 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 1.76,
+          "D": 3.92,
+          "A": 4.37
+        },
+        "bm_prob": {
+          "H": 54.0,
+          "D": 24.2,
+          "A": 21.7
+        },
+        "kelly": {
+          "pick": "D",
+          "model_p": 0.337,
+          "odd": 3.92,
+          "stake_pct": 2.75
+        }
       },
       {
         "home": "Feyenoord",
@@ -2394,9 +2420,22 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 1.83,
+          "D": 3.71,
+          "A": 4.25
+        },
+        "bm_prob": {
+          "H": 52.0,
+          "D": 25.6,
+          "A": 22.4
+        },
+        "kelly": {
+          "pick": "A",
+          "model_p": 0.386,
+          "odd": 4.25,
+          "stake_pct": 4.93
+        }
       },
       {
         "home": "For Sittard",
@@ -2427,8 +2466,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -2460,9 +2507,22 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 1.32,
+          "D": 6.05,
+          "A": 7.47
+        },
+        "bm_prob": {
+          "H": 71.7,
+          "D": 15.6,
+          "A": 12.7
+        },
+        "kelly": {
+          "pick": "A",
+          "model_p": 0.246,
+          "odd": 7.47,
+          "stake_pct": 3.24
+        }
       },
       {
         "home": "Utrecht",
@@ -2493,9 +2553,22 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 1.49,
+          "D": 4.67,
+          "A": 5.89
+        },
+        "bm_prob": {
+          "H": 63.6,
+          "D": 20.3,
+          "A": 16.1
+        },
+        "kelly": {
+          "pick": "D",
+          "model_p": 0.391,
+          "odd": 4.67,
+          "stake_pct": 5.63
+        }
       },
       {
         "home": "Zwolle",
@@ -2526,9 +2599,22 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 1.86,
+          "D": 4.04,
+          "A": 3.72
+        },
+        "bm_prob": {
+          "H": 51.0,
+          "D": 23.5,
+          "A": 25.5
+        },
+        "kelly": {
+          "pick": "A",
+          "model_p": 0.314,
+          "odd": 3.72,
+          "stake_pct": 1.54
+        }
       },
       {
         "home": "Telstar",
@@ -2559,9 +2645,22 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 1.98,
+          "D": 3.73,
+          "A": 3.58
+        },
+        "bm_prob": {
+          "H": 48.0,
+          "D": 25.5,
+          "A": 26.5
+        },
+        "kelly": {
+          "pick": "D",
+          "model_p": 0.347,
+          "odd": 3.73,
+          "stake_pct": 2.7
+        }
       },
       {
         "home": "Excelsior",
@@ -2592,9 +2691,22 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 2.62,
+          "D": 3.62,
+          "A": 2.56
+        },
+        "bm_prob": {
+          "H": 36.4,
+          "D": 26.3,
+          "A": 37.3
+        },
+        "kelly": {
+          "pick": "D",
+          "model_p": 0.306,
+          "odd": 3.62,
+          "stake_pct": 1.03
+        }
       }
     ],
     "9": [
@@ -2627,8 +2739,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -2660,8 +2780,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -2693,8 +2821,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -2726,8 +2862,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -2759,8 +2903,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -2792,8 +2944,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -2825,8 +2985,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -2858,8 +3026,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -2891,8 +3067,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       }
     ],
@@ -2926,8 +3110,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -2959,8 +3151,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -2992,8 +3192,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -3025,8 +3233,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -3058,8 +3274,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -3091,8 +3315,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -3124,8 +3356,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -3157,8 +3397,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -3190,8 +3438,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       }
     ],
@@ -3225,8 +3481,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -3258,8 +3522,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -3291,8 +3563,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -3324,8 +3604,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -3357,8 +3645,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -3390,8 +3686,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -3423,8 +3727,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -3456,8 +3768,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -3489,8 +3809,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       }
     ],
@@ -3524,8 +3852,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -3557,8 +3893,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -3590,8 +3934,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -3623,8 +3975,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -3656,8 +4016,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -3689,8 +4057,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -3722,8 +4098,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -3755,8 +4139,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -3788,8 +4180,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       }
     ],
@@ -3823,8 +4223,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -3856,8 +4264,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -3889,8 +4305,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -3922,8 +4346,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -3955,8 +4387,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -3988,8 +4428,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -4021,8 +4469,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -4054,8 +4510,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -4087,8 +4551,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       }
     ],
@@ -4122,8 +4594,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -4155,8 +4635,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -4188,8 +4676,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -4221,8 +4717,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -4254,8 +4758,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -4287,8 +4799,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -4320,8 +4840,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -4353,8 +4881,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -4386,8 +4922,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       }
     ],
@@ -4421,8 +4965,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -4454,8 +5006,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -4487,8 +5047,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -4520,8 +5088,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -4553,8 +5129,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -4586,8 +5170,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -4619,8 +5211,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -4652,8 +5252,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -4685,8 +5293,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       }
     ],
@@ -4720,8 +5336,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -4753,8 +5377,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -4786,8 +5418,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -4819,8 +5459,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -4852,8 +5500,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -4885,8 +5541,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -4918,8 +5582,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -4951,8 +5623,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -4984,8 +5664,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       }
     ],
@@ -5019,8 +5707,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -5052,8 +5748,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -5085,8 +5789,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -5118,8 +5830,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -5151,8 +5871,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -5184,8 +5912,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -5217,8 +5953,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -5250,8 +5994,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -5283,8 +6035,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       }
     ],
@@ -5318,8 +6078,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -5351,8 +6119,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -5384,8 +6160,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -5417,8 +6201,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -5450,8 +6242,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -5483,8 +6283,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -5516,8 +6324,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -5549,8 +6365,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -5582,8 +6406,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       }
     ],
@@ -5617,8 +6449,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -5650,8 +6490,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -5683,8 +6531,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -5716,8 +6572,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -5749,8 +6613,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -5782,8 +6654,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -5815,8 +6695,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -5848,8 +6736,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -5881,8 +6777,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       }
     ],
@@ -5916,8 +6820,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -5949,8 +6861,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -5982,8 +6902,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -6015,8 +6943,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -6048,8 +6984,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -6081,8 +7025,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -6114,8 +7066,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -6147,8 +7107,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -6180,8 +7148,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       }
     ],
@@ -6215,8 +7191,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -6248,8 +7232,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -6281,8 +7273,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -6314,8 +7314,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -6347,8 +7355,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -6380,8 +7396,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -6413,8 +7437,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -6446,8 +7478,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -6479,8 +7519,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       }
     ],
@@ -6514,8 +7562,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -6547,8 +7603,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -6580,8 +7644,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -6613,8 +7685,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -6646,8 +7726,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -6679,8 +7767,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -6712,8 +7808,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -6745,8 +7849,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -6778,8 +7890,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       }
     ],
@@ -6813,8 +7933,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -6846,8 +7974,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -6879,8 +8015,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -6912,8 +8056,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -6945,8 +8097,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -6978,8 +8138,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -7011,8 +8179,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -7044,8 +8220,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -7077,8 +8261,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       }
     ],
@@ -7112,8 +8304,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -7145,8 +8345,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -7178,8 +8386,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -7211,8 +8427,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -7244,8 +8468,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -7277,8 +8509,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -7310,8 +8550,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -7343,8 +8591,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -7376,8 +8632,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       }
     ],
@@ -7411,8 +8675,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -7444,8 +8716,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -7477,8 +8757,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -7510,8 +8798,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -7543,8 +8839,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -7576,8 +8880,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -7609,8 +8921,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -7642,8 +8962,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -7675,8 +9003,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       }
     ],
@@ -7710,8 +9046,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -7743,8 +9087,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -7776,8 +9128,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -7809,8 +9169,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -7842,8 +9210,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -7875,8 +9251,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -7908,8 +9292,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -7941,8 +9333,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -7974,8 +9374,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       }
     ],
@@ -8009,8 +9417,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -8042,8 +9458,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -8075,8 +9499,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -8108,8 +9540,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -8141,8 +9581,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -8174,8 +9622,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -8207,8 +9663,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -8240,8 +9704,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -8273,8 +9745,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       }
     ],
@@ -8308,8 +9788,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -8341,8 +9829,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -8374,8 +9870,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -8407,8 +9911,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -8440,8 +9952,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -8473,8 +9993,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -8506,8 +10034,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -8539,8 +10075,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -8572,8 +10116,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       }
     ],
@@ -8607,8 +10159,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -8640,8 +10200,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -8673,8 +10241,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -8706,8 +10282,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -8739,8 +10323,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -8772,8 +10364,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -8805,8 +10405,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -8838,8 +10446,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -8871,8 +10487,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       }
     ],
@@ -8906,8 +10530,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -8939,8 +10571,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -8972,8 +10612,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -9005,8 +10653,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -9038,8 +10694,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -9071,8 +10735,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -9104,8 +10776,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -9137,8 +10817,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -9170,8 +10858,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       }
     ],
@@ -9205,8 +10901,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -9238,8 +10942,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -9271,8 +10983,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -9304,8 +11024,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -9337,8 +11065,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -9370,8 +11106,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -9403,8 +11147,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -9436,8 +11188,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -9469,8 +11229,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       }
     ],
@@ -9504,8 +11272,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -9537,8 +11313,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -9570,8 +11354,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -9603,8 +11395,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -9636,8 +11436,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -9669,8 +11477,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -9702,8 +11518,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -9735,8 +11559,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -9768,8 +11600,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       }
     ],
@@ -9803,8 +11643,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -9836,8 +11684,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -9869,8 +11725,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -9902,8 +11766,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -9935,8 +11807,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -9968,8 +11848,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -10001,8 +11889,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -10034,8 +11930,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -10067,8 +11971,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       }
     ],
@@ -10102,8 +12014,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -10135,8 +12055,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -10168,8 +12096,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -10201,8 +12137,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -10234,8 +12178,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -10267,8 +12219,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -10300,8 +12260,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -10333,8 +12301,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       },
       {
@@ -10366,8 +12342,16 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
+        "bm": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
+        "bm_prob": {
+          "H": null,
+          "D": null,
+          "A": null
+        },
         "kelly": null
       }
     ]

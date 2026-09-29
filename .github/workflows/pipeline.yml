@@ -25,6 +25,11 @@ on:
         description: "Campionato (vuoto = tutte)"
         required: false
         default: ""
+      reset_freeze:
+        description: "Ricalcola ANCHE le partite gia' giocate, scartando gli snapshot. Modifica i numeri gia' pubblicati: usalo solo se cambia la definizione di una feature."
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: write
@@ -101,10 +106,20 @@ jobs:
       # predict_fixtures.py e' lo step che chiama davvero TheOddsAPI: senza
       # la env QUI la chiave non arriva e le quote future restano null,
       # anche se il secret e' impostato (e' successo al primo run).
+      # --reset-freeze solo quando lo chiedi esplicitamente nel dispatch:
+      # di default il freeze resta attivo e le previsioni gia' pubblicate non
+      # cambiano mai da sole.
       - name: Predizioni fixtures (dashboard)
         env:
           THEODDSAPI_KEY: ${{ secrets.THEODDSAPI_KEY }}
-        run: python src/predict_fixtures.py --league ${{ matrix.league }}
+          RESET_FREEZE: ${{ inputs.reset_freeze }}
+        run: |
+          if [ "$RESET_FREEZE" = "true" ]; then
+            echo "RESET FREEZE richiesto: ricalcolo anche le giocate"
+            python src/predict_fixtures.py --league ${{ matrix.league }} --reset-freeze
+          else
+            python src/predict_fixtures.py --league ${{ matrix.league }}
+          fi
 
       # Ogni lega committa solo i propri artefatti: due job paralleli che
       # committano tutto si pesterebbero a vicenda sullo stesso index.

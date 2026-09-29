@@ -104,7 +104,7 @@ def ranked_probability_score(y_true, y_proba):
     return rps / max(len(y_true), 1)
 
 
-def main(league):
+def main(league, reset_freeze: bool = False):
     print("=" * 55)
     print(f"PREDIZIONI FIXTURE {league.name} "
           f"{league.season_fd[:2]}/{league.season_fd[2:]}")
@@ -269,7 +269,7 @@ def main(league):
     prev_estimates = {}
     prev_model_trained_at = None
     model_changed = False
-    if OUT_JSON.exists():
+    if OUT_JSON.exists() and not reset_freeze:
         try:
             with open(OUT_JSON) as f:
                 old = json.load(f)
@@ -284,6 +284,17 @@ def main(league):
                      if model_changed else ""))
         except Exception as e:
             print(f"  [warn] predictions.json precedente illeggibile: {e}")
+    elif reset_freeze:
+        # Reset ESPLICITO del freeze, deciso dall'utente: le partite giocate
+        # vengono ricalcolate da zero invece di essere riprese dallo
+        # snapshot. Serve quando cambia la definizione di una feature (es.
+        # REST_CAP) e gli snapshot contengono valori ormai superati.
+        #
+        # NON e' un ricalcolo disonesto: lo split di training e' temporale con
+        # cutoff 2025-08-01, quindi le partite del 2026 non sono mai state nel
+        # training del modello. Ricalcolarle non introduce lookahead.
+        print("  RESET FREEZE: le partite giocate verranno ricalcolate "
+              "(lo split di training e' temporale, nessun lookahead)")
 
     # ── Predizioni + bookmaker + kelly ────────────────────────────────
     LABELS = ['H', 'D', 'A']
@@ -602,4 +613,10 @@ if __name__ == "__main__":
     import argparse
     ap = argparse.ArgumentParser(description="Genera le previsioni dal calendario")
     ap.add_argument("--league", default=None, help="chiave lega (default: seriea)")
-    main(get_league(ap.parse_args().league))
+    ap.add_argument("--reset-freeze", action="store_true",
+                    help="ricalcola anche le partite gia' giocate, scartando "
+                         "gli snapshot precedenti. Usalo solo se cambia la "
+                         "definizione di una feature: modifica i numeri "
+                         "gia' pubblicati sul sito.")
+    args = ap.parse_args()
+    main(get_league(args.league), reset_freeze=args.reset_freeze)

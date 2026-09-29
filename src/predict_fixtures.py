@@ -317,6 +317,13 @@ def main(league):
             m["pred"] = old.get("pred")
             m["bm"] = old.get("bm")
             m["bm_prob"] = old.get("bm_prob")
+            # Lo snapshot puo' contenere bm = {"H": None, "D": None, "A": None}:
+            # un dict PRESENTE ma vuoto (NaN serializzato in null). Copiato
+            # cosi' com'e' arrivava al frontend, dove `m.bm && m.bm_prob` e'
+            # truthy e .toFixed(0) faceva TypeError — pagina bianca su 63
+            # partite. La normalizzazione sotto valida i VALORI, quindi qui si
+            # azzera subito quello che non e' numerico: niente dict-vuoto in
+            # giro.
             m["kelly"] = old.get("kelly")
             m["risultato"] = old.get("risultato")
             m["esito"] = old.get("esito")

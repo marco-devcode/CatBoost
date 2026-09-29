@@ -91,7 +91,13 @@ function MatchFeatures({ m }: { m: MatchPrediction }) {
 function MatchCard({ m }: { m: MatchPrediction }) {
   const played = m.ok !== undefined;
   const maxKey = (["H", "D", "A"] as const).reduce((a, b) => (m.prob[a] >= m.prob[b] ? a : b));
-  const hasBm = m.bm && m.bm_prob;
+  // Truthiness NON basta: `bm = {"H": null, "D": null, "A": null}` e' truthy
+  // (un dict esiste) ma i valori sono null, e `bm_prob[k].toFixed(0)` fa
+  // TypeError. E' successo davvero: 63 partite Eredivisie hanno
+  // bm/bm_prob pieni di null, perche' lo snapshot riporta il dict vuoto
+  // invece di assente. Qui si richiedono numeri veri su tutti e tre gli esiti.
+  const hasBm =
+    !!m.bm && !!m.bm_prob && (["H", "D", "A"] as const).every((k) => Number.isFinite(m.bm![k]) && Number.isFinite(m.bm_prob![k]));
   return (
     <div className="match-card">
       <div className="match-teams">
@@ -202,7 +208,12 @@ export default function Home() {
   const matches = current && data?.giornate[String(current)] ? data.giornate[String(current)] : [];
 
   const meta = data?.meta;
-  const hasBmData = meta?.bookmaker_rps !== undefined && meta?.model_rps !== undefined;
+  // `!== undefined` NON basta: in JS `null !== undefined` e' vero, quindi
+  // una lega senza quote storiche (bookmaker_rps = null, come l'Eredivisie)
+  // passava il guard e poi .toFixed(4) faceva TypeError su null, con la
+  // pagina interamente bianca. Number.isFinite accetta solo numeri veri:
+  // scarta sia undefined sia null sia NaN.
+  const hasBmData = Number.isFinite(meta?.bookmaker_rps) && Number.isFinite(meta?.model_rps);
   const kelly = meta?.kelly;
 
   if (error)

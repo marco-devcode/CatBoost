@@ -171,7 +171,15 @@ SERIE_A = League(
     json_name="predictions_seriea.json",
     # Serie A: alias TheSportsDB -> storico football-data (invariato dal preesistente)
     aliases={
+        # openfootball (fonte del CALENDARIO, 380 partite su 38 giornate) usa
+        # nomi diversi da football-data (fonte dello STORICO). Senza questi
+        # alias la chiave del freeze non combacia: la stessa partita viene
+        # trattata come nuova, ricalcolata, e il conteggio "corrette" cambia
+        # da run a run. Misurato: Inter->"Internazionale Milano",
+        # Parma->"Parma 1913" rompevano 10 partite su 50 (24/50 -> 21/50).
+        "internazionale milano": "Inter", "fc internazionale milano": "Inter",
         "internazionale": "Inter", "inter milan": "Inter", "fc internazionale": "Inter",
+        "parma 1913": "Parma", "parma calcio 1913": "Parma", "ac parma": "Parma",
         "ac milan": "Milan", "milan fc": "Milan",
         "ssc napoli": "Napoli", "napoli fc": "Napoli",
         "ss lazio": "Lazio", "lazio fc": "Lazio",

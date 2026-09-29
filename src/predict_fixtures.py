@@ -25,6 +25,7 @@ non "sgonfia" le probabilita' gia' pubblicate.
 import sys
 import io
 import json
+import math
 import time
 import unicodedata
 import urllib.request
@@ -337,8 +338,15 @@ def main(league):
             # pipeline muore dopo aver allenato il modello. Percio' qui si
             # controlla che i valori siano NUMERICI, non che il dict esista.
             def _bm_valido(d):
+                # NON isinstance(x, float): NaN e' un float, quindi
+                # isinstance(nan, (int, float)) -> True e il guard accettava
+                # NaN come buono. round(nan, 2) restituisce nan, _json_safe lo
+                # converte in null, e il dict-vuoto tornava in circolo a ogni
+                # run (per questo il fix precedente non le eliminava mai).
+                # isfinite scarta insieme None, nan e inf.
                 return (isinstance(d, dict)
-                        and all(isinstance(d.get(l), (int, float)) for l in LABELS))
+                        and all(isinstance(d.get(l), (int, float))
+                                and math.isfinite(d.get(l)) for l in LABELS))
 
             if not _bm_valido(m.get("bm")) and bm_odds is not None:
                 m["bm"] = {"H": round(bm_odds[0], 2), "D": round(bm_odds[1], 2),

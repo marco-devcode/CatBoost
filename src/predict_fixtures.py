@@ -370,17 +370,14 @@ def main(league, reset_freeze: bool = False):
             # `bm is not None` lascia passare e poi fa None/100.0 -> la
             # pipeline muore dopo aver allenato il modello. Percio' qui si
             # controlla che i valori siano NUMERICI, non che il dict esista.
-            def _bm_valido(d):
-                return _bm_valid(d)
-
-            if not _bm_valido(m.get("bm")) and bm_odds is not None:
+            if not _bm_valid(m.get("bm")) and bm_odds is not None:
                 m["bm"] = {"H": round(bm_odds[0], 2), "D": round(bm_odds[1], 2),
                            "A": round(bm_odds[2], 2)}
-            if not _bm_valido(m.get("bm_prob")) and bm_prob is not None:
+            if not _bm_valid(m.get("bm_prob")) and bm_prob is not None:
                 m["bm_prob"] = {LABELS[i]: round(bm_prob[i] * 100, 1) for i in range(3)}
             # Quote senza probabilita' non sono confrontabili: si azzerano
             # insieme, altrimenti la UI mostrerebbe una quota senza edge.
-            if not _bm_valido(m.get("bm")) or not _bm_valido(m.get("bm_prob")):
+            if not _bm_valid(m.get("bm")) or not _bm_valid(m.get("bm_prob")):
                 m["bm"] = None
                 m["bm_prob"] = None
             if (m["bm"] is not None and m["ok"] is not None and m["esito"] is not None
@@ -435,7 +432,7 @@ def main(league, reset_freeze: bool = False):
             # NaN, e _json_safe li converte in null: si riproduce esattamente
             # il dict-vuoto che crashava il frontend, stavolta sulle 330
             # partite future. `is not None` non basta, perche' NaN non e' None.
-            if _bm_valido({"H": bm_odds[0], "D": bm_odds[1], "A": bm_odds[2]}) if bm_odds else False:
+            if _bm_valid({"H": bm_odds[0], "D": bm_odds[1], "A": bm_odds[2]}) if bm_odds else False:
                 m["bm"] = {"H": round(bm_odds[0], 2), "D": round(bm_odds[1], 2),
                            "A": round(bm_odds[2], 2)}
                 m["bm_prob"] = {LABELS[i]: round(bm_prob[i] * 100, 1) for i in range(3)}

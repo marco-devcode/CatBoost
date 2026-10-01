@@ -1,6 +1,6 @@
 {
   "meta": {
-    "last_update": "2026-09-30T21:08:11",
+    "last_update": "2026-10-01T12:37:05",
     "league": "eredivisie",
     "league_name": "Eredivisie",
     "stagione": "2627",
@@ -4361,20 +4361,20 @@
           "away_promoted": 0.0
         },
         "bm": {
-          "H": 1.24,
-          "D": 7.38,
-          "A": 8.68
+          "H": 1.23,
+          "D": 7.5,
+          "A": 8.83
         },
         "bm_prob": {
-          "H": 76.3,
-          "D": 12.8,
-          "A": 10.9
+          "H": 76.7,
+          "D": 12.6,
+          "A": 10.7
         },
         "kelly": {
           "pick": "D",
           "model_p": 0.146,
-          "odd": 7.38,
-          "stake_pct": 0.3
+          "odd": 7.5,
+          "stake_pct": 0.37
         }
       },
       {

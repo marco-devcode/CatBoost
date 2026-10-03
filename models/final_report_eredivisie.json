@@ -49,12 +49,29 @@
   "beats_bookmaker_rps": true,
   "kelly": {
     "bankroll_iniziale": 1000.0,
-    "bankroll_finale": 5.003525964071091e+21,
-    "profitto": 5.003525964071091e+21,
-    "roi_pct": 5.003525964071091e+20,
+    "bankroll_finale": 229719925.99,
+    "profitto": 229718925.99,
+    "roi_pct": 22971892.6,
     "scommesse": 367,
-    "stake_totale_pct": 2.2116813981609066e+20,
-    "fraction": 0.25
+    "stake_totale_pct": 21595295.0,
+    "mode": "dinamico",
+    "odds_thresholds": [
+      1.8,
+      3.0,
+      5.0
+    ],
+    "c_dynamic": [
+      0.5,
+      0.35,
+      0.2,
+      0.1
+    ],
+    "cap_odds_threshold": 3.0,
+    "max_caps_pct": [
+      5.0,
+      2.5
+    ],
+    "n_troncate_al_cap": 273
   },
   "shap_neopromossa": {
     "home_promoted": {

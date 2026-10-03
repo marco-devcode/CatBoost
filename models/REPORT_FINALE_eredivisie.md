@@ -1,6 +1,6 @@
 # 🏆 Report Finale — CatBoost Eredivisie Match Prediction
 
-**Data**: 2026-10-01 12:36
+**Data**: 2026-10-03 16:27
 **Modello migliore**: Baseline (Pi-Rating + FE) — Eredivisie (`v1_baseline`)
 
 ---
@@ -38,16 +38,19 @@
 ## 4. Kelly Betting Simulation (didattica, test set)
 
 > ⚠️ Simulazione retrospettiva su dati storici: i risultati reali futuri saranno
-> quasi sempre più conservativi. Kelly ridotto al 25%.
+> quasi sempre più conservativi. Kelly dinamico: la quota decide quanto
+> Kelly pieno si prende (c_dynamic da 50% a
+> 10%), con hard cap del
+> 5% / 2%.
 
 | Metrica | Valore |
 |---------|--------|
 | Scommesse piazzate | 367 |
 | Bankroll iniziale | €1000 |
-| Bankroll finale | €5003525964071091306496.00 |
-| Profitto | €+5003525964071091306496.00 |
-| ROI | +500352596407109091328.0% |
-| Stake totale | 2.2116813981609066e+20% del bankroll |
+| Bankroll finale | €229719925.99 |
+| Profitto | €+229718925.99 |
+| ROI | +22971892.6% |
+| Stake totale | 21595295.0% del bankroll |
 
 ![Kelly Simulation](kelly_simulation.png)
 

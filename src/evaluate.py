@@ -21,6 +21,11 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from leagues import get_league  # noqa: E402
+from kelly_dynamic import (  # noqa: E402
+    KELLY_DYNAMIC_CONFIG,
+    calculate_dynamic_kelly_stake,
+    dynamic_kelly_breakdown,
+)
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
@@ -56,7 +61,9 @@ def odds_to_prob(bh, bd, ba):
     except Exception:
         return [0.45, 0.25, 0.30]
 
-KELLY_FRACTION = 0.25  # Kelly ridotto al 25% per gestione del rischio
+# ── Kelly Dinamico ────────────────────────────────────────────────────────
+# Sizing unico della pipeline: src/kelly_dynamic.py. Nessuna frazione fissa.
+KELLY_MODE = "dinamico"
 
 print("╔" + "═" * 58 + "╗")
 print(f"║  VALUTAZIONE FINALE — CatBoost {LEAGUE.name}"
@@ -199,6 +206,7 @@ if b365_present and df_test_b365 is not None and len(bm_probs_list) > 0:
     history_bank = [1000.0]
     n_bets = 0
     stakes_total = 0.0
+    capped_flags = []
     bm_probs_valid = np.array(bm_probs_list)
     y_valid = y_best.values[valid_idx]
     for i, vi in enumerate(valid_idx):
@@ -215,14 +223,15 @@ if b365_present and df_test_b365 is not None and len(bm_probs_list) > 0:
         best_pick = None
         for c in range(3):
             if pm[c] > pb[c]:
-                b = odds[c] - 1.0
-                q = 1.0 - pm[c]
-                k = (b * pm[c] - q) / b
-                k = max(0.0, k * KELLY_FRACTION)
+                # c_dynamic per scaglioni di quota + hard cap: la quota decide
+                # quanto Kelly pieno si prende, non una frazione unica.
+                k = calculate_dynamic_kelly_stake(pm[c], odds[c])
                 if k > best_k:
                     best_k = k
                     best_pick = c
         if best_pick is not None:
+            capped_flags.append(dynamic_kelly_breakdown(
+                pm[best_pick], odds[best_pick])["capped"])
             stake = bankroll * best_k
             stakes_total += stake
             outcome = y_valid[vi]
@@ -240,10 +249,15 @@ if b365_present and df_test_b365 is not None and len(bm_probs_list) > 0:
         "roi_pct": round(float(roi), 2),
         "scommesse": n_bets,
         "stake_totale_pct": round(float(stakes_total / 1000.0) * 100, 1),
-        "fraction": KELLY_FRACTION,
+        "mode": KELLY_MODE,
+        "odds_thresholds": list(KELLY_DYNAMIC_CONFIG["odds_thresholds"]),
+        "c_dynamic": list(KELLY_DYNAMIC_CONFIG["c_dynamic"]),
+        "cap_odds_threshold": KELLY_DYNAMIC_CONFIG["cap_odds_threshold"],
+        "max_caps_pct": [round(c * 100, 2) for c in KELLY_DYNAMIC_CONFIG["max_caps"]],
+        "n_troncate_al_cap": sum(1 for x in capped_flags if x),
     }
     print(f"\n{'═'*55}")
-    print(f"  KELLY SIMULATION (fraction={KELLY_FRACTION}, bankroll €1000)")
+    print(f"  KELLY SIMULATION (dinamico, bankroll €1000)")
     print(f"{'═'*55}")
     print(f"  Scommesse          : {n_bets}")
     print(f"  Bankroll finale    : €{bankroll:.2f}")
@@ -252,7 +266,7 @@ if b365_present and df_test_b365 is not None and len(bm_probs_list) > 0:
         fig, ax = plt.subplots(figsize=(8, 4))
         ax.plot(range(len(history_bank)), history_bank, color='#22c55e', lw=2)
         ax.axhline(1000.0, color='#9aa3af', ls='--', lw=1, label='Bankroll iniziale')
-        ax.set_title(f'Kelly Simulation (25%) — Bankroll €1000 → €{bankroll:.0f}')
+        ax.set_title(f'Kelly dinamico — Bankroll €1000 → €{bankroll:.0f}')
         ax.set_xlabel('Scommesse piazzate')
         ax.set_ylabel('Bankroll (€)')
         ax.legend()
@@ -483,7 +497,10 @@ if kelly_metrics is not None:
 ## 4. Kelly Betting Simulation (didattica, test set)
 
 > ⚠️ Simulazione retrospettiva su dati storici: i risultati reali futuri saranno
-> quasi sempre più conservativi. Kelly ridotto al {int(KELLY_FRACTION*100)}%.
+> quasi sempre più conservativi. Kelly dinamico: la quota decide quanto
+> Kelly pieno si prende (c_dynamic da {int(KELLY_DYNAMIC_CONFIG['c_dynamic'][0]*100)}% a
+> {int(KELLY_DYNAMIC_CONFIG['c_dynamic'][-1]*100)}%), con hard cap del
+> {int(KELLY_DYNAMIC_CONFIG['max_caps'][0]*100)}% / {int(KELLY_DYNAMIC_CONFIG['max_caps'][1]*100)}%.
 
 | Metrica | Valore |
 |---------|--------|

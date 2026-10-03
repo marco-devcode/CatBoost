@@ -40,6 +40,7 @@ WINDOW = 5
 # Stessa soglia di saturazione usata in training e in predict.py.
 sys.path.insert(0, str(ROOT / "src"))
 from features import REST_CAP  # noqa: E402
+from kelly_dynamic import calculate_dynamic_kelly_stake  # noqa: E402
 
 FEATURE_ORDER = [
     "pi_home_H", "pi_away_H", "pi_home_A", "pi_away_A",
@@ -52,7 +53,7 @@ FEATURE_ORDER = [
     "home_promoted", "away_promoted",
 ]
 LABELS = ["H", "D", "A"]
-KELLY_FRACTION = 0.25
+KELLY_MODE = "dinamico"
 
 # Le 20 partite da ricalcolare (GG4 + GG5), identificate come "prob scritta
 # durante l'era modello-22" tracciando i commit.
@@ -82,13 +83,6 @@ TARGET_KEYS = {
 
 def key(m):
     return f"{m['date']}|{m['home']}|{m['away']}"
-
-
-def kelly_fraction(p, odds, fraction=KELLY_FRACTION):
-    b = odds - 1.0
-    if b <= 0:
-        return 0.0
-    return max(0.0, ((b * p) - (1 - p)) / b * fraction)
 
 
 def compute_features(hist, home, away, match_date, h2h_cache, current_season_teams):
@@ -255,7 +249,7 @@ def main():
             bm = m.get("bm")
             if bm:
                 p = m["prob"][m["pred"]] / 100.0
-                kf = kelly_fraction(p, bm.get(m["pred"]))
+                kf = calculate_dynamic_kelly_stake(p, bm.get(m["pred"]))
                 m["kelly"] = ({"pick": m["pred"], "model_p": round(p, 3),
                                "odd": bm.get(m["pred"]),
                                "stake_pct": round(kf * 100, 2)} if kf > 0 else None)

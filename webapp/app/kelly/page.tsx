@@ -5,6 +5,12 @@ import Link from "next/link";
 import { KellyBet, PredictionsData } from "@/lib/types";
 import { LEAGUES } from "@/lib/leagues";
 
+/** c_dynamic come percentuale con la virgola italiana, es. "50%". */
+function cPctLabel(c: number | null | undefined): string {
+  if (c == null) return "—";
+  return `${(c * 100).toFixed(0).replace(".", ",")}%`;
+}
+
 function fmtDate(iso: string): string {
   return new Date(iso).toLocaleDateString("it-IT", {
     day: "numeric",
@@ -118,6 +124,8 @@ export default function KellyPage() {
     );
 
   const kelly = data.meta.kelly;
+  // cPct legge dal JSON: la pagina non ripete i numeri della regola a mano.
+  const cPct = (i: number) => cPctLabel(kelly?.c_dynamic?.[i]);
   const bets = kelly?.scommesse_dettaglio ?? [];
   const winRate = kelly && kelly.scommesse > 0
     ? ((kelly.vinte ?? bets.filter((b) => b.win).length) / kelly.scommesse) * 100
@@ -202,8 +210,8 @@ export default function KellyPage() {
 
       <div className="kelly-bar">
         <div className="kelly-title">
-          Bankroll iniziale €{kelly.bankroll_iniziale.toFixed(0)} · frazione Kelly{" "}
-          {(kelly.fraction * 100).toFixed(0)}%
+          Bankroll iniziale €{kelly.bankroll_iniziale.toFixed(0)} · Kelly
+          dinamico {cPct(0)}–{cPct(3)}
         </div>
         <div className="kelly-grid">
           <div className="kelly-cell">
@@ -231,9 +239,12 @@ export default function KellyPage() {
         </div>
         <div className="kelly-note">
           Simulazione retrospettiva su partite già giocate dove il modello
-          aveva probabilità maggiore del bookmaker. Ogni puntata è pari al{" "}
-          {kelly.fraction * 100}% della frazione di Kelly piena calcolata su
-          quella quota. Non è un consiglio di scommessa.
+          aveva probabilità maggiore del bookmaker. Ogni puntata è un{" "}
+          <b>{cPct(0)}–{cPct(3)}</b> della frazione di Kelly piena — la quota
+          decide quale, perché una quota alta moltiplica la varianza del
+          ritorno — con un tetto massimo del {kelly.max_caps_pct[0]}% fino a
+          quota {kelly.cap_odds_threshold.toFixed(2)} e del{" "}
+          {kelly.max_caps_pct[1]}% oltre. Non è un consiglio di scommessa.
         </div>
       </div>
 
@@ -257,20 +268,41 @@ export default function KellyPage() {
         </p>
 
         <p>
-          <b>Perché il 25% e non la frazione piena.</b> Kelly pieno è corretto
-          solo se la probabilità <i>p</i> è esatta. In realtà <i>p</i> è una
-          stima di un modello, quindi sbaglia. Il Kelly pieno cresce
+          <b>Perché una frazione, e perché variabile.</b> Kelly pieno è
+          corretto solo se la probabilità <i>p</i> è esatta. In realtà <i>p</i> è
+          una stima di un modello, quindi sbaglia. Il Kelly pieno cresce
           esponenzialmente con l&apos;errore: se <i>p</i> è sovrastimata, la
           frazione ottima calcolata è troppo grande e il bankroll crolla molto
           prima che tu possa accorgertene. Su questa stagione (
           {kelly.vinte ?? 0} vinte su {kelly.scommesse}, ROI{" "}
           {kelly.roi_pct >= 0 ? "+" : ""}
           {kelly.roi_pct.toFixed(1)}%) la differenza non è teorica: è il
-          risultato reale. Praticando il <b>Kelly frazionato</b> (in letteratura{" "}
-          <i>Fractional Kelly</i>), usando un quarto della frazione piena, si
-          sacrifica circa metà del rendimento atteso a lungo periodo in cambio di
-          una volatilità molto più contenuta: un&apos;underperformance porta a
-          perdite piccole invece che al fallimento del bankroll.
+          risultato reale.
+          <br />
+          <br />
+          Praticando il <b>Kelly frazionato</b> (in letteratura{" "}
+          <i>Fractional Kelly</i>) si sacrifica una parte del rendimento atteso
+          in cambio di una volatilità contenuta. La parte non è fissa, perché
+          il rischio di una scommessa non è uguale a tutte: il payoff di una
+          giocata a quota alta è più grande, quindi lo stesso errore di{" "}
+          <i>p</i> fa oscillare il bankroll molto di più. Per questo il
+          moltiplicatore <i>c_dynamic</i>{" "}
+          <b>scende con la quota</b>: {cPct(0)} fino a quota{" "}
+          {kelly.odds_thresholds[0].toFixed(2)}, {cPct(1)} fino a{" "}
+          {kelly.odds_thresholds[1].toFixed(2)}, {cPct(2)} fino a{" "}
+          {kelly.odds_thresholds[2].toFixed(2)}, {cPct(3)} oltre. Sopra ci mette
+          un <b>hard cap</b> del {kelly.max_caps_pct[0]}% (fino a quota{" "}
+          {kelly.cap_odds_threshold.toFixed(2)}) e del{" "}
+          {kelly.max_caps_pct[1]}% oltre, che taglia le code in cui la stima di{" "}
+          <i>p</i> è ottimista. In questa simulazione{" "}
+          {(kelly.capped ?? kelly.n_troncate_al_cap ?? 0) > 0 ? (
+            <>
+              {kelly.capped ?? kelly.n_troncate_al_cap} puntate su{" "}
+              {kelly.scommesse} sono state troncate dal tetto.
+            </>
+          ) : (
+            <>nessuna puntata ha raggiunto il tetto.</>
+          )}
         </p>
 
         <p>
@@ -278,11 +310,13 @@ export default function KellyPage() {
           <i>già giocate</i> e su ognuna sceglie l&apos;esito su cui il modello ha
           probabilità maggiore di quella del bookmaker (edge = p_modello −
           p_bookmaker, entrambe private dell&apos;overround). Su quella scommessa
-          calcola la frazione di Kelly piena e ne prende il {kelly.fraction * 100}
-          %. La puntata in euro è quella frazione applicata al bankroll{" "}
-          <i>di quel momento</i>, quindi le scommesse successive sono più grandi o
-          più piccole a seconda di come sta andando il bankroll — è il
-          compounding.
+          calcola la frazione di Kelly piena, la moltiplica per il{" "}
+          <i>c_dynamic</i> di quella quota e la tronca al MAX_CAP. La puntata in
+          euro è quella frazione applicata al bankroll <i>di quel momento</i>,
+          quindi le scommesse successive sono più grandi o più piccole a
+          seconda di come sta andando il bankroll — è il compounding. Ogni
+          passaggio è ricalcolato a ogni singola puntata, non una volta per
+          simulazione.
         </p>
 
         <p>
@@ -297,8 +331,19 @@ export default function KellyPage() {
               {(example.model_p - example.bm_p).toFixed(1).replace(".", ",")} punti).
               Con p = {(example.model_p / 100).toFixed(3).replace(".", ",")} e
               o = {example.odd.toFixed(2).replace(".", ",")} la frazione piena è{" "}
-              {fullKellyPct.toFixed(2).replace(".", ",")}%; il{" "}
-              {(kelly.fraction * 100).toFixed(0)}% di quella è{" "}
+              {fullKellyPct.toFixed(2).replace(".", ",")}%. Su quella quota il
+              moltiplicatore è {cPctLabel(example.c_dynamic)}
+              {example.capped ? (
+                <>
+                  , quindi {fullKellyPct.toFixed(2).replace(".", ",")}% ×{" "}
+                  {cPctLabel(example.c_dynamic)} supererebbe il tetto del{" "}
+                  {example.max_cap_pct?.toFixed(2).replace(".", ",")}% e viene
+                  troncato: la puntata effettiva è{" "}
+                </>
+              ) : (
+                <>, quindi {fullKellyPct.toFixed(2).replace(".", ",")}% ×{" "}
+                  {cPctLabel(example.c_dynamic)} dà </>
+              )}
               <b>{example.kelly_pct.toFixed(2).replace(".", ",")}%</b>, cioè €
               {example.stake.toFixed(2).replace(".", ",")} su un bankroll di €
               {betBankrollBefore.toFixed(2).replace(".", ",")}. La scommessa{" "}

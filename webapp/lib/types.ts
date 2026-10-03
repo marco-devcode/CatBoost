@@ -36,6 +36,11 @@ export interface KellyBet {
   odd: number;
   model_p: number;
   bm_p: number;
+  // Passaggi del sizing dinamico (src/kelly_dynamic.py), esposti per puntata.
+  full_kelly_pct: number | null;
+  c_dynamic: number | null;
+  max_cap_pct: number | null;
+  capped: boolean;
   kelly_pct: number;
   stake: number;
   esito?: "H" | "D" | "A";
@@ -54,7 +59,18 @@ export interface KellySummary {
   vinte?: number;
   perse?: number;
   stake_totale_pct: number;
-  fraction: number;
+  // Kelly dinamico: non esiste una frazione unica, la quota decide quanto
+  // Kelly pieno si prende (c_dynamic) entro un hard cap. `fraction` e' stata
+  // sostituita da questi parametri.
+  mode: "dinamico";
+  odds_thresholds: [number, number, number];
+  c_dynamic: [number, number, number, number];
+  cap_odds_threshold: number;
+  max_caps_pct: [number, number];
+  /** Puntate troncate dal MAX_CAP (in predict_fixtures) */
+  capped?: number;
+  /** Puntate troncate dal MAX_CAP (in evaluate.py) */
+  n_troncate_al_cap?: number;
   // Dettaglio di ogni puntata effettivamente simulata
   scommesse_dettaglio?: KellyBet[];
 }

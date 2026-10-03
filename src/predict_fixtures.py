@@ -41,13 +41,22 @@ sys.stdout.reconfigure(encoding='utf-8')
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from leagues import get_league, WEBAPP_PUBLIC  # noqa: E402
 import sources  # noqa: E402
+from kelly_dynamic import (  # noqa: E402
+    KELLY_DYNAMIC_CONFIG,
+    calculate_dynamic_kelly_stake,
+    dynamic_kelly_breakdown,
+)
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
 MODELS_DIR = ROOT / "models"
 WEBAPP_PUBLIC = WEBAPP_PUBLIC
 
-KELLY_FRACTION = 0.25      # Kelly ridotto al 25% per gestione del rischio
+# ── Kelly Dinamico ────────────────────────────────────────────────────────
+# Non esiste piu' una KELLY_FRACTION fissa: il sizing lo decide
+# `calculate_dynamic_kelly_stake(p, odds)` (src/kelly_dynamic.py), che
+# attenuа il Kelly pieno per scaglioni di quota e applica un hard cap.
+KELLY_MODE = "dinamico"
 
 def assign_giornate(df: pd.DataFrame) -> pd.DataFrame:
     """Clustering cronologico in giornate (solo se la fonte non ha il round)."""
@@ -103,16 +112,6 @@ def bookmaker_prob(home_odd, draw_odd, away_odd):
         return [x / tot for x in raw]  # [pH, pD, pA]
     except (TypeError, ValueError):
         return None
-
-
-def kelly_fraction(p_model, odds, fraction=KELLY_FRACTION):
-    """Kelly ridotto: frazione di bankroll da puntare. <=0 se non conviene."""
-    b = odds - 1.0
-    q = 1.0 - p_model
-    if b <= 0:
-        return 0.0
-    k = (b * p_model - q) / b
-    return max(0.0, k * fraction)
 
 
 def ranked_probability_score(y_true, y_proba):
@@ -424,7 +423,7 @@ def main(league, reset_freeze: bool = False):
                 for i, lab in enumerate(LABELS):
                     pk = m["prob"][lab] / 100.0
                     if pk > pb[i]:
-                        kf = kelly_fraction(pk, m["bm"][lab])
+                        kf = calculate_dynamic_kelly_stake(pk, m["bm"][lab])
                         if kf > 0 and kf > best_k:
                             best_k = kf
                             best_info = (lab, pk, m["bm"][lab], kf)
@@ -496,7 +495,7 @@ def main(league, reset_freeze: bool = False):
                     pk = m["prob"][lab] / 100.0
                     pb = bm_prob[i]
                     if pk > pb:
-                        kf = kelly_fraction(pk, bm_odds[i])
+                        kf = calculate_dynamic_kelly_stake(pk, bm_odds[i])
                         if kf > 0 and kf > best_k:
                             best_k = kf
                             best_info = (lab, pk, bm_odds[i], kf)
@@ -537,7 +536,7 @@ def main(league, reset_freeze: bool = False):
                     pk = m["prob"][lab] / 100.0
                     pb = bm_prob[i]
                     if pk > pb:
-                        kf = kelly_fraction(pk, bm_odds[i])
+                        kf = calculate_dynamic_kelly_stake(pk, bm_odds[i])
                         if kf > 0 and kf > best_k:
                             best_k = kf
                             best_info = (lab, pk, bm_odds[i], kf)
@@ -594,6 +593,11 @@ def main(league, reset_freeze: bool = False):
             stake = bb * bet["kelly"]
             won = bet["win"]
             delta = stake * (bet["odd"] - 1) if won else -stake
+            # La puntata e' gia' stata calcolata da calculate_dynamic_kelly_stake
+            # sul bankroll di QUESTO step (c_dynamic + hard cap applicati li').
+            # Qui si espongono i passaggi, cosi' la pagina puo' mostrare
+            # l'aritmetica di ogni puntata invece di un "25%" unico.
+            bd = dynamic_kelly_breakdown(bet["model_p"], bet["odd"])
             bets.append({
                 "n": i,
                 "giornata": bet.get("giornata"),
@@ -605,6 +609,10 @@ def main(league, reset_freeze: bool = False):
                 "odd": bet["odd"],
                 "model_p": round(bet["model_p"] * 100, 1),
                 "bm_p": round(bet.get("bm_p", 0) * 100, 1),
+                "full_kelly_pct": round(bd["f_full"] * 100, 2) if bd["f_full"] is not None else None,
+                "c_dynamic": bd["c_dynamic"],
+                "max_cap_pct": round(bd["max_cap"] * 100, 2) if bd["max_cap"] is not None else None,
+                "capped": bd["capped"],
                 "kelly_pct": round(bet["kelly"] * 100, 2),
                 "stake": round(stake, 2),
                 "esito": bet.get("esito"),
@@ -623,11 +631,21 @@ def main(league, reset_freeze: bool = False):
             "vinte": sum(1 for b in bets if b["win"]),
             "perse": sum(1 for b in bets if not b["win"]),
             "stake_totale_pct": round(float(stakes_total / 1000.0) * 100, 1),
-            "fraction": KELLY_FRACTION,
+            # Non c'e' piu' una "fraction" unica: il JSON porta i parametri del
+            # sizing dinamico, cosi' la UI puo' spiegare la regola senza
+            # ripeterla a mano nel testo della pagina.
+            "mode": KELLY_MODE,
+            "odds_thresholds": list(KELLY_DYNAMIC_CONFIG["odds_thresholds"]),
+            "c_dynamic": list(KELLY_DYNAMIC_CONFIG["c_dynamic"]),
+            "cap_odds_threshold": KELLY_DYNAMIC_CONFIG["cap_odds_threshold"],
+            "max_caps_pct": [round(c * 100, 2) for c in KELLY_DYNAMIC_CONFIG["max_caps"]],
+            "capped": sum(1 for b in bets if b["capped"]),
             "scommesse_dettaglio": bets,
         }
-        print(f"  Kelly (fraction={KELLY_FRACTION}): {len(kelly_log)} scommesse, "
-              f"bankroll finale €{bankroll:.2f} (ROI {roi:.1f}%)")
+        _c = KELLY_DYNAMIC_CONFIG["c_dynamic"]
+        print(f"  Kelly dinamico (c_dynamic {_c[0]}/{_c[1]}/{_c[2]}/{_c[3]}): "
+              f"{len(kelly_log)} scommesse, bankroll finale €{bankroll:.2f} "
+              f"(ROI {roi:.1f}%)")
 
     # ── JSON-safe: NaN/Infinity NON sono JSON valido. Python li serializza
     # come NaN/Infinity e Safari/WebKit (JSON.parse) rifiuta l'intero file con

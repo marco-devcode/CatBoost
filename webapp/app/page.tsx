@@ -301,7 +301,10 @@ export default function Home() {
       {kelly && (
         <div className="kelly-bar">
           <Link href="/kelly" className="kelly-title kelly-title-link">
-            💰 Kelly Simulation {kelly.fraction * 100}% · bankroll €1000 (test set)
+            💰 Kelly dinamico{" "}
+            {(kelly.c_dynamic[0] * 100).toFixed(0).replace(".", ",")}–
+            {(kelly.c_dynamic[3] * 100).toFixed(0).replace(".", ",")}% · bankroll
+            €1000 (test set)
             <span className="kelly-cta">Vedi le puntate →</span>
           </Link>
           <div className="kelly-grid">

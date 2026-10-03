@@ -27,6 +27,7 @@ RATINGS = ROOT / "data" / "serie_a_ratings.csv"
 # Stessa soglia di saturazione dei giorni di riposo usata in training.
 sys.path.insert(0, str(ROOT / "src"))
 from features import REST_CAP  # noqa: E402
+from kelly_dynamic import calculate_dynamic_kelly_stake  # noqa: E402
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # CALENDARIO: le date vengono dalla fonte autorevole (football-data.co.uk) o
@@ -51,14 +52,10 @@ def bm_prob(h, d, a):
     except (TypeError, ValueError, ZeroDivisionError):
         return None
 
-def kelly_stake(pk, odd, frac=0.25):
-    try:
-        o = float(odd); p = float(pk); b = o - 1.0
-        if p <= 0 or o <= 0 or b <= 0: return None
-        f = (p*b - (1-p)) / b * frac
-        return round(f*100, 2) if f > 0 else None
-    except (TypeError, ValueError):
-        return None
+def kelly_stake(pk, odd):
+    """Stake in percentuale, dal sizing dinamico (src/kelly_dynamic.py)."""
+    f = calculate_dynamic_kelly_stake(pk, odd)
+    return round(f * 100, 2) if f > 0 else None
 
 def esito(ftr: str) -> str:
     return {"H": "H", "D": "D", "A": "A"}.get(str(ftr).strip().upper(), "")

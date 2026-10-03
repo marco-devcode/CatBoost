@@ -1,6 +1,6 @@
 # 🏆 Report Finale — CatBoost Serie A Match Prediction
 
-**Data**: 2026-10-01 12:30
+**Data**: 2026-10-03 16:21
 **Modello migliore**: Baseline (Pi-Rating + FE) — Serie A (`v1_baseline`)
 
 ---
@@ -38,16 +38,19 @@
 ## 4. Kelly Betting Simulation (didattica, test set)
 
 > ⚠️ Simulazione retrospettiva su dati storici: i risultati reali futuri saranno
-> quasi sempre più conservativi. Kelly ridotto al 25%.
+> quasi sempre più conservativi. Kelly dinamico: la quota decide quanto
+> Kelly pieno si prende (c_dynamic da 50% a
+> 10%), con hard cap del
+> 5% / 2%.
 
 | Metrica | Valore |
 |---------|--------|
 | Scommesse piazzate | 428 |
 | Bankroll iniziale | €1000 |
-| Bankroll finale | €85039981239896192.00 |
-| Profitto | €+85039981239895200.00 |
-| ROI | +8503998123989520.0% |
-| Stake totale | 5557055328514245.0% del bankroll |
+| Bankroll finale | €9313471.19 |
+| Profitto | €+9312471.19 |
+| ROI | +931247.1% |
+| Stake totale | 1361583.3% del bankroll |
 
 ![Kelly Simulation](kelly_simulation.png)
 

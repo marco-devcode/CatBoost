@@ -1,6 +1,6 @@
 {
   "meta": {
-    "last_update": "2026-10-01T12:31:05",
+    "last_update": "2026-10-03T16:22:04",
     "league": "seriea",
     "league_name": "Serie A",
     "stagione": "2627",
@@ -15,14 +15,31 @@
     "beats_bookmaker_rps": false,
     "kelly": {
       "bankroll_iniziale": 1000.0,
-      "bankroll_finale": 363.1,
-      "profitto": -636.9,
-      "roi_pct": -63.69,
+      "bankroll_finale": 518.68,
+      "profitto": -481.32,
+      "roi_pct": -48.13,
       "scommesse": 48,
-      "vinte": 6,
-      "perse": 42,
-      "stake_totale_pct": 102.2,
-      "fraction": 0.25,
+      "vinte": 5,
+      "perse": 43,
+      "stake_totale_pct": 77.3,
+      "mode": "dinamico",
+      "odds_thresholds": [
+        1.8,
+        3.0,
+        5.0
+      ],
+      "c_dynamic": [
+        0.5,
+        0.35,
+        0.2,
+        0.1
+      ],
+      "cap_odds_threshold": 3.0,
+      "max_caps_pct": [
+        5.0,
+        2.5
+      ],
+      "capped": 17,
       "scommesse_dettaglio": [
         {
           "n": 1,
@@ -35,13 +52,17 @@
           "odd": 1.83,
           "model_p": 68.0,
           "bm_p": 52.2,
-          "kelly_pct": 7.36,
-          "stake": 73.6,
+          "full_kelly_pct": 29.45,
+          "c_dynamic": 0.35,
+          "max_cap_pct": 5.0,
+          "capped": true,
+          "kelly_pct": 5.0,
+          "stake": 50.0,
           "esito": "D",
           "win": false,
           "payout": 0.0,
-          "delta": -73.6,
-          "bankroll_dopo": 926.4
+          "delta": -50.0,
+          "bankroll_dopo": 950.0
         },
         {
           "n": 2,
@@ -54,13 +75,17 @@
           "odd": 13.0,
           "model_p": 14.5,
           "bm_p": 7.3,
-          "kelly_pct": 1.84,
-          "stake": 17.05,
+          "full_kelly_pct": 7.38,
+          "c_dynamic": 0.1,
+          "max_cap_pct": 2.5,
+          "capped": false,
+          "kelly_pct": 0.74,
+          "stake": 7.03,
           "esito": "H",
           "win": false,
           "payout": 0.0,
-          "delta": -17.05,
-          "bankroll_dopo": 909.35
+          "delta": -7.03,
+          "bankroll_dopo": 942.97
         },
         {
           "n": 3,
@@ -73,13 +98,17 @@
           "odd": 1.9,
           "model_p": 67.8,
           "bm_p": 50.5,
-          "kelly_pct": 8.01,
-          "stake": 72.84,
+          "full_kelly_pct": 32.02,
+          "c_dynamic": 0.35,
+          "max_cap_pct": 5.0,
+          "capped": true,
+          "kelly_pct": 5.0,
+          "stake": 47.15,
           "esito": "A",
           "win": true,
-          "payout": 138.39,
-          "delta": 65.56,
-          "bankroll_dopo": 974.91
+          "payout": 89.58,
+          "delta": 42.43,
+          "bankroll_dopo": 985.4
         },
         {
           "n": 4,
@@ -92,13 +121,17 @@
           "odd": 2.5,
           "model_p": 45.1,
           "bm_p": 37.9,
-          "kelly_pct": 2.13,
-          "stake": 20.77,
+          "full_kelly_pct": 8.5,
+          "c_dynamic": 0.35,
+          "max_cap_pct": 5.0,
+          "capped": false,
+          "kelly_pct": 2.98,
+          "stake": 29.37,
           "esito": "A",
           "win": false,
           "payout": 0.0,
-          "delta": -20.77,
-          "bankroll_dopo": 954.14
+          "delta": -29.37,
+          "bankroll_dopo": 956.04
         },
         {
           "n": 5,
@@ -111,13 +144,17 @@
           "odd": 8.0,
           "model_p": 33.5,
           "bm_p": 11.9,
-          "kelly_pct": 6.0,
-          "stake": 57.25,
+          "full_kelly_pct": 24.0,
+          "c_dynamic": 0.1,
+          "max_cap_pct": 2.5,
+          "capped": false,
+          "kelly_pct": 2.4,
+          "stake": 22.94,
           "esito": "A",
           "win": false,
           "payout": 0.0,
-          "delta": -57.25,
-          "bankroll_dopo": 896.9
+          "delta": -22.94,
+          "bankroll_dopo": 933.09
         },
         {
           "n": 6,
@@ -130,13 +167,17 @@
           "odd": 3.1,
           "model_p": 40.9,
           "bm_p": 30.9,
-          "kelly_pct": 3.19,
-          "stake": 28.61,
+          "full_kelly_pct": 12.76,
+          "c_dynamic": 0.2,
+          "max_cap_pct": 2.5,
+          "capped": true,
+          "kelly_pct": 2.5,
+          "stake": 23.33,
           "esito": "A",
           "win": false,
           "payout": 0.0,
-          "delta": -28.61,
-          "bankroll_dopo": 868.28
+          "delta": -23.33,
+          "bankroll_dopo": 909.77
         },
         {
           "n": 7,
@@ -149,13 +190,17 @@
           "odd": 4.1,
           "model_p": 26.0,
           "bm_p": 23.2,
-          "kelly_pct": 0.53,
-          "stake": 4.6,
+          "full_kelly_pct": 2.13,
+          "c_dynamic": 0.2,
+          "max_cap_pct": 2.5,
+          "capped": false,
+          "kelly_pct": 0.43,
+          "stake": 3.91,
           "esito": "H",
           "win": false,
           "payout": 0.0,
-          "delta": -4.6,
-          "bankroll_dopo": 863.68
+          "delta": -3.91,
+          "bankroll_dopo": 905.85
         },
         {
           "n": 8,
@@ -168,13 +213,17 @@
           "odd": 4.75,
           "model_p": 46.1,
           "bm_p": 19.9,
-          "kelly_pct": 7.93,
-          "stake": 68.49,
+          "full_kelly_pct": 31.73,
+          "c_dynamic": 0.2,
+          "max_cap_pct": 2.5,
+          "capped": true,
+          "kelly_pct": 2.5,
+          "stake": 22.65,
           "esito": "A",
           "win": false,
           "payout": 0.0,
-          "delta": -68.49,
-          "bankroll_dopo": 795.19
+          "delta": -22.65,
+          "bankroll_dopo": 883.21
         },
         {
           "n": 9,
@@ -187,13 +236,17 @@
           "odd": 3.5,
           "model_p": 41.3,
           "bm_p": 27.1,
-          "kelly_pct": 4.45,
-          "stake": 35.39,
+          "full_kelly_pct": 17.82,
+          "c_dynamic": 0.2,
+          "max_cap_pct": 2.5,
+          "capped": true,
+          "kelly_pct": 2.5,
+          "stake": 22.08,
           "esito": "A",
           "win": true,
-          "payout": 123.85,
-          "delta": 88.47,
-          "bankroll_dopo": 883.66
+          "payout": 77.28,
+          "delta": 55.2,
+          "bankroll_dopo": 938.41
         },
         {
           "n": 10,
@@ -206,13 +259,17 @@
           "odd": 4.1,
           "model_p": 28.9,
           "bm_p": 23.1,
-          "kelly_pct": 1.49,
-          "stake": 13.17,
+          "full_kelly_pct": 5.96,
+          "c_dynamic": 0.2,
+          "max_cap_pct": 2.5,
+          "capped": false,
+          "kelly_pct": 1.19,
+          "stake": 11.17,
           "esito": "H",
           "win": false,
           "payout": 0.0,
-          "delta": -13.17,
-          "bankroll_dopo": 870.49
+          "delta": -11.17,
+          "bankroll_dopo": 927.24
         },
         {
           "n": 11,
@@ -225,13 +282,17 @@
           "odd": 7.0,
           "model_p": 24.9,
           "bm_p": 13.5,
-          "kelly_pct": 3.1,
-          "stake": 26.99,
+          "full_kelly_pct": 12.38,
+          "c_dynamic": 0.1,
+          "max_cap_pct": 2.5,
+          "capped": false,
+          "kelly_pct": 1.24,
+          "stake": 11.5,
           "esito": "H",
           "win": false,
           "payout": 0.0,
-          "delta": -26.99,
-          "bankroll_dopo": 843.51
+          "delta": -11.5,
+          "bankroll_dopo": 915.74
         },
         {
           "n": 12,
@@ -244,13 +305,17 @@
           "odd": 3.3,
           "model_p": 38.8,
           "bm_p": 28.7,
-          "kelly_pct": 3.05,
-          "stake": 25.73,
+          "full_kelly_pct": 12.19,
+          "c_dynamic": 0.2,
+          "max_cap_pct": 2.5,
+          "capped": false,
+          "kelly_pct": 2.44,
+          "stake": 22.34,
           "esito": "H",
           "win": false,
           "payout": 0.0,
-          "delta": -25.73,
-          "bankroll_dopo": 817.78
+          "delta": -22.34,
+          "bankroll_dopo": 893.4
         },
         {
           "n": 13,
@@ -263,13 +328,17 @@
           "odd": 3.2,
           "model_p": 37.5,
           "bm_p": 29.7,
-          "kelly_pct": 2.27,
-          "stake": 18.56,
+          "full_kelly_pct": 9.09,
+          "c_dynamic": 0.2,
+          "max_cap_pct": 2.5,
+          "capped": false,
+          "kelly_pct": 1.82,
+          "stake": 16.26,
           "esito": "A",
           "win": false,
           "payout": 0.0,
-          "delta": -18.56,
-          "bankroll_dopo": 799.22
+          "delta": -16.26,
+          "bankroll_dopo": 877.14
         },
         {
           "n": 14,
@@ -282,13 +351,17 @@
           "odd": 4.1,
           "model_p": 39.0,
           "bm_p": 23.2,
-          "kelly_pct": 4.83,
-          "stake": 38.6,
+          "full_kelly_pct": 19.32,
+          "c_dynamic": 0.2,
+          "max_cap_pct": 2.5,
+          "capped": true,
+          "kelly_pct": 2.5,
+          "stake": 21.93,
           "esito": "A",
           "win": false,
           "payout": 0.0,
-          "delta": -38.6,
-          "bankroll_dopo": 760.61
+          "delta": -21.93,
+          "bankroll_dopo": 855.21
         },
         {
           "n": 15,
@@ -301,13 +374,17 @@
           "odd": 11.0,
           "model_p": 21.5,
           "bm_p": 8.5,
-          "kelly_pct": 3.41,
-          "stake": 25.94,
+          "full_kelly_pct": 13.65,
+          "c_dynamic": 0.1,
+          "max_cap_pct": 2.5,
+          "capped": false,
+          "kelly_pct": 1.36,
+          "stake": 11.63,
           "esito": "H",
           "win": false,
           "payout": 0.0,
-          "delta": -25.94,
-          "bankroll_dopo": 734.68
+          "delta": -11.63,
+          "bankroll_dopo": 843.58
         },
         {
           "n": 16,
@@ -320,13 +397,17 @@
           "odd": 3.0,
           "model_p": 36.5,
           "bm_p": 31.6,
-          "kelly_pct": 1.19,
-          "stake": 8.74,
+          "full_kelly_pct": 4.75,
+          "c_dynamic": 0.35,
+          "max_cap_pct": 5.0,
+          "capped": false,
+          "kelly_pct": 1.66,
+          "stake": 14.0,
           "esito": "A",
           "win": false,
           "payout": 0.0,
-          "delta": -8.74,
-          "bankroll_dopo": 725.93
+          "delta": -14.0,
+          "bankroll_dopo": 829.58
         },
         {
           "n": 17,
@@ -339,13 +420,17 @@
           "odd": 4.33,
           "model_p": 27.8,
           "bm_p": 21.9,
-          "kelly_pct": 1.53,
-          "stake": 11.11,
+          "full_kelly_pct": 6.12,
+          "c_dynamic": 0.2,
+          "max_cap_pct": 2.5,
+          "capped": false,
+          "kelly_pct": 1.22,
+          "stake": 10.12,
           "esito": "H",
           "win": false,
           "payout": 0.0,
-          "delta": -11.11,
-          "bankroll_dopo": 714.83
+          "delta": -10.12,
+          "bankroll_dopo": 819.46
         },
         {
           "n": 18,
@@ -358,13 +443,17 @@
           "odd": 7.0,
           "model_p": 24.6,
           "bm_p": 13.5,
-          "kelly_pct": 3.01,
-          "stake": 21.52,
+          "full_kelly_pct": 12.03,
+          "c_dynamic": 0.1,
+          "max_cap_pct": 2.5,
+          "capped": false,
+          "kelly_pct": 1.2,
+          "stake": 9.83,
           "esito": "A",
           "win": false,
           "payout": 0.0,
-          "delta": -21.52,
-          "bankroll_dopo": 693.31
+          "delta": -9.83,
+          "bankroll_dopo": 809.62
         },
         {
           "n": 19,
@@ -377,13 +466,17 @@
           "odd": 8.0,
           "model_p": 19.0,
           "bm_p": 11.9,
-          "kelly_pct": 1.86,
-          "stake": 12.9,
+          "full_kelly_pct": 7.43,
+          "c_dynamic": 0.1,
+          "max_cap_pct": 2.5,
+          "capped": false,
+          "kelly_pct": 0.74,
+          "stake": 5.99,
           "esito": "A",
           "win": false,
           "payout": 0.0,
-          "delta": -12.9,
-          "bankroll_dopo": 680.42
+          "delta": -5.99,
+          "bankroll_dopo": 803.63
         },
         {
           "n": 20,
@@ -396,13 +489,17 @@
           "odd": 1.85,
           "model_p": 62.0,
           "bm_p": 51.1,
-          "kelly_pct": 4.32,
-          "stake": 29.39,
+          "full_kelly_pct": 17.29,
+          "c_dynamic": 0.35,
+          "max_cap_pct": 5.0,
+          "capped": true,
+          "kelly_pct": 5.0,
+          "stake": 40.18,
           "esito": "H",
           "win": true,
-          "payout": 54.38,
-          "delta": 24.98,
-          "bankroll_dopo": 705.4
+          "payout": 74.34,
+          "delta": 34.15,
+          "bankroll_dopo": 837.79
         },
         {
           "n": 21,
@@ -415,13 +512,17 @@
           "odd": 5.25,
           "model_p": 27.0,
           "bm_p": 18.0,
-          "kelly_pct": 2.46,
-          "stake": 17.35,
+          "full_kelly_pct": 9.82,
+          "c_dynamic": 0.1,
+          "max_cap_pct": 2.5,
+          "capped": false,
+          "kelly_pct": 0.98,
+          "stake": 8.21,
           "esito": "A",
           "win": false,
           "payout": 0.0,
-          "delta": -17.35,
-          "bankroll_dopo": 688.05
+          "delta": -8.21,
+          "bankroll_dopo": 829.58
         },
         {
           "n": 22,
@@ -434,13 +535,17 @@
           "odd": 5.5,
           "model_p": 29.4,
           "bm_p": 17.2,
-          "kelly_pct": 3.43,
-          "stake": 23.6,
+          "full_kelly_pct": 13.71,
+          "c_dynamic": 0.1,
+          "max_cap_pct": 2.5,
+          "capped": false,
+          "kelly_pct": 1.37,
+          "stake": 11.37,
           "esito": "H",
           "win": false,
           "payout": 0.0,
-          "delta": -23.6,
-          "bankroll_dopo": 664.45
+          "delta": -11.37,
+          "bankroll_dopo": 818.21
         },
         {
           "n": 23,
@@ -453,13 +558,17 @@
           "odd": 3.6,
           "model_p": 30.7,
           "bm_p": 26.3,
-          "kelly_pct": 1.01,
-          "stake": 6.71,
+          "full_kelly_pct": 4.05,
+          "c_dynamic": 0.2,
+          "max_cap_pct": 2.5,
+          "capped": false,
+          "kelly_pct": 0.81,
+          "stake": 6.63,
           "esito": "H",
           "win": false,
           "payout": 0.0,
-          "delta": -6.71,
-          "bankroll_dopo": 657.74
+          "delta": -6.63,
+          "bankroll_dopo": 811.58
         },
         {
           "n": 24,
@@ -472,13 +581,17 @@
           "odd": 3.3,
           "model_p": 30.7,
           "bm_p": 28.8,
-          "kelly_pct": 0.14,
-          "stake": 0.92,
+          "full_kelly_pct": 0.57,
+          "c_dynamic": 0.2,
+          "max_cap_pct": 2.5,
+          "capped": false,
+          "kelly_pct": 0.11,
+          "stake": 0.89,
           "esito": "A",
           "win": false,
           "payout": 0.0,
-          "delta": -0.92,
-          "bankroll_dopo": 656.82
+          "delta": -0.89,
+          "bankroll_dopo": 810.69
         },
         {
           "n": 25,
@@ -491,13 +604,17 @@
           "odd": 2.9,
           "model_p": 38.1,
           "bm_p": 32.8,
-          "kelly_pct": 1.38,
-          "stake": 9.06,
+          "full_kelly_pct": 5.52,
+          "c_dynamic": 0.35,
+          "max_cap_pct": 5.0,
+          "capped": false,
+          "kelly_pct": 1.93,
+          "stake": 15.65,
           "esito": "D",
           "win": false,
           "payout": 0.0,
-          "delta": -9.06,
-          "bankroll_dopo": 647.75
+          "delta": -15.65,
+          "bankroll_dopo": 795.04
         },
         {
           "n": 26,
@@ -510,13 +627,17 @@
           "odd": 3.3,
           "model_p": 38.5,
           "bm_p": 28.6,
-          "kelly_pct": 2.94,
-          "stake": 19.04,
+          "full_kelly_pct": 11.76,
+          "c_dynamic": 0.2,
+          "max_cap_pct": 2.5,
+          "capped": false,
+          "kelly_pct": 2.35,
+          "stake": 18.68,
           "esito": "H",
           "win": false,
           "payout": 0.0,
-          "delta": -19.04,
-          "bankroll_dopo": 628.71
+          "delta": -18.68,
+          "bankroll_dopo": 776.36
         },
         {
           "n": 27,
@@ -529,13 +650,17 @@
           "odd": 3.9,
           "model_p": 33.6,
           "bm_p": 24.4,
-          "kelly_pct": 2.68,
-          "stake": 16.85,
+          "full_kelly_pct": 10.7,
+          "c_dynamic": 0.2,
+          "max_cap_pct": 2.5,
+          "capped": false,
+          "kelly_pct": 2.14,
+          "stake": 16.61,
           "esito": "D",
           "win": false,
           "payout": 0.0,
-          "delta": -16.85,
-          "bankroll_dopo": 611.86
+          "delta": -16.61,
+          "bankroll_dopo": 759.75
         },
         {
           "n": 28,
@@ -548,13 +673,17 @@
           "odd": 2.1,
           "model_p": 56.5,
           "bm_p": 45.2,
-          "kelly_pct": 4.24,
-          "stake": 25.94,
+          "full_kelly_pct": 16.95,
+          "c_dynamic": 0.35,
+          "max_cap_pct": 5.0,
+          "capped": true,
+          "kelly_pct": 5.0,
+          "stake": 37.99,
           "esito": "D",
           "win": false,
           "payout": 0.0,
-          "delta": -25.94,
-          "bankroll_dopo": 585.92
+          "delta": -37.99,
+          "bankroll_dopo": 721.76
         },
         {
           "n": 29,
@@ -567,13 +696,17 @@
           "odd": 3.1,
           "model_p": 41.9,
           "bm_p": 30.6,
-          "kelly_pct": 3.56,
-          "stake": 20.86,
+          "full_kelly_pct": 14.23,
+          "c_dynamic": 0.2,
+          "max_cap_pct": 2.5,
+          "capped": true,
+          "kelly_pct": 2.5,
+          "stake": 18.04,
           "esito": "H",
           "win": false,
           "payout": 0.0,
-          "delta": -20.86,
-          "bankroll_dopo": 565.06
+          "delta": -18.04,
+          "bankroll_dopo": 703.71
         },
         {
           "n": 30,
@@ -586,13 +719,17 @@
           "odd": 2.9,
           "model_p": 51.1,
           "bm_p": 32.5,
-          "kelly_pct": 6.34,
-          "stake": 35.82,
+          "full_kelly_pct": 25.36,
+          "c_dynamic": 0.35,
+          "max_cap_pct": 5.0,
+          "capped": true,
+          "kelly_pct": 5.0,
+          "stake": 35.19,
           "esito": "A",
           "win": false,
           "payout": 0.0,
-          "delta": -35.82,
-          "bankroll_dopo": 529.23
+          "delta": -35.19,
+          "bankroll_dopo": 668.53
         },
         {
           "n": 31,
@@ -605,13 +742,17 @@
           "odd": 4.0,
           "model_p": 30.4,
           "bm_p": 23.7,
-          "kelly_pct": 1.8,
-          "stake": 9.53,
+          "full_kelly_pct": 7.2,
+          "c_dynamic": 0.2,
+          "max_cap_pct": 2.5,
+          "capped": false,
+          "kelly_pct": 1.44,
+          "stake": 9.63,
           "esito": "A",
           "win": false,
           "payout": 0.0,
-          "delta": -9.53,
-          "bankroll_dopo": 519.71
+          "delta": -9.63,
+          "bankroll_dopo": 658.9
         },
         {
           "n": 32,
@@ -624,13 +765,17 @@
           "odd": 3.6,
           "model_p": 45.3,
           "bm_p": 26.3,
-          "kelly_pct": 6.07,
-          "stake": 31.55,
+          "full_kelly_pct": 24.26,
+          "c_dynamic": 0.2,
+          "max_cap_pct": 2.5,
+          "capped": true,
+          "kelly_pct": 2.5,
+          "stake": 16.47,
           "esito": "D",
           "win": false,
           "payout": 0.0,
-          "delta": -31.55,
-          "bankroll_dopo": 488.16
+          "delta": -16.47,
+          "bankroll_dopo": 642.43
         },
         {
           "n": 33,
@@ -643,13 +788,17 @@
           "odd": 3.4,
           "model_p": 41.9,
           "bm_p": 28.0,
-          "kelly_pct": 4.42,
-          "stake": 21.58,
+          "full_kelly_pct": 17.69,
+          "c_dynamic": 0.2,
+          "max_cap_pct": 2.5,
+          "capped": true,
+          "kelly_pct": 2.5,
+          "stake": 16.06,
           "esito": "D",
           "win": false,
           "payout": 0.0,
-          "delta": -21.58,
-          "bankroll_dopo": 466.58
+          "delta": -16.06,
+          "bankroll_dopo": 626.37
         },
         {
           "n": 34,
@@ -657,18 +806,22 @@
           "home": "Sassuolo",
           "away": "Juventus",
           "date": "2026-09-13",
-          "pick": "H",
-          "pick_label": "Casa",
-          "odd": 5.25,
-          "model_p": 23.2,
-          "bm_p": 18.0,
-          "kelly_pct": 1.28,
-          "stake": 5.97,
+          "pick": "D",
+          "pick_label": "Pareggio",
+          "odd": 4.0,
+          "model_p": 28.3,
+          "bm_p": 23.6,
+          "full_kelly_pct": 4.4,
+          "c_dynamic": 0.2,
+          "max_cap_pct": 2.5,
+          "capped": false,
+          "kelly_pct": 0.88,
+          "stake": 5.51,
           "esito": "H",
-          "win": true,
-          "payout": 31.35,
-          "delta": 25.38,
-          "bankroll_dopo": 491.97
+          "win": false,
+          "payout": 0.0,
+          "delta": -5.51,
+          "bankroll_dopo": 620.86
         },
         {
           "n": 35,
@@ -681,13 +834,17 @@
           "odd": 3.1,
           "model_p": 41.1,
           "bm_p": 30.7,
-          "kelly_pct": 3.26,
-          "stake": 16.04,
+          "full_kelly_pct": 13.05,
+          "c_dynamic": 0.2,
+          "max_cap_pct": 2.5,
+          "capped": true,
+          "kelly_pct": 2.5,
+          "stake": 15.52,
           "esito": "H",
           "win": false,
           "payout": 0.0,
-          "delta": -16.04,
-          "bankroll_dopo": 475.93
+          "delta": -15.52,
+          "bankroll_dopo": 605.34
         },
         {
           "n": 36,
@@ -700,13 +857,17 @@
           "odd": 4.75,
           "model_p": 32.6,
           "bm_p": 20.2,
-          "kelly_pct": 3.66,
-          "stake": 17.42,
+          "full_kelly_pct": 14.63,
+          "c_dynamic": 0.2,
+          "max_cap_pct": 2.5,
+          "capped": true,
+          "kelly_pct": 2.5,
+          "stake": 15.13,
           "esito": "H",
           "win": false,
           "payout": 0.0,
-          "delta": -17.42,
-          "bankroll_dopo": 458.51
+          "delta": -15.13,
+          "bankroll_dopo": 590.2
         },
         {
           "n": 37,
@@ -719,13 +880,17 @@
           "odd": 5.5,
           "model_p": 30.1,
           "bm_p": 17.0,
-          "kelly_pct": 3.64,
-          "stake": 16.69,
+          "full_kelly_pct": 14.57,
+          "c_dynamic": 0.1,
+          "max_cap_pct": 2.5,
+          "capped": false,
+          "kelly_pct": 1.46,
+          "stake": 8.62,
           "esito": "H",
           "win": false,
           "payout": 0.0,
-          "delta": -16.69,
-          "bankroll_dopo": 441.82
+          "delta": -8.62,
+          "bankroll_dopo": 581.59
         },
         {
           "n": 38,
@@ -738,13 +903,17 @@
           "odd": 12.0,
           "model_p": 26.6,
           "bm_p": 8.0,
-          "kelly_pct": 4.98,
-          "stake": 22.0,
+          "full_kelly_pct": 19.93,
+          "c_dynamic": 0.1,
+          "max_cap_pct": 2.5,
+          "capped": false,
+          "kelly_pct": 1.99,
+          "stake": 11.57,
           "esito": "H",
           "win": false,
           "payout": 0.0,
-          "delta": -22.0,
-          "bankroll_dopo": 419.82
+          "delta": -11.57,
+          "bankroll_dopo": 570.01
         },
         {
           "n": 39,
@@ -757,13 +926,17 @@
           "odd": 3.4,
           "model_p": 39.4,
           "bm_p": 27.8,
-          "kelly_pct": 3.54,
-          "stake": 14.86,
+          "full_kelly_pct": 14.15,
+          "c_dynamic": 0.2,
+          "max_cap_pct": 2.5,
+          "capped": true,
+          "kelly_pct": 2.5,
+          "stake": 14.25,
           "esito": "H",
           "win": false,
           "payout": 0.0,
-          "delta": -14.86,
-          "bankroll_dopo": 404.95
+          "delta": -14.25,
+          "bankroll_dopo": 555.76
         },
         {
           "n": 40,
@@ -776,13 +949,17 @@
           "odd": 3.4,
           "model_p": 34.8,
           "bm_p": 27.8,
-          "kelly_pct": 1.91,
-          "stake": 7.73,
+          "full_kelly_pct": 7.63,
+          "c_dynamic": 0.2,
+          "max_cap_pct": 2.5,
+          "capped": false,
+          "kelly_pct": 1.53,
+          "stake": 8.5,
           "esito": "D",
           "win": true,
-          "payout": 26.3,
-          "delta": 18.56,
-          "bankroll_dopo": 423.52
+          "payout": 28.91,
+          "delta": 20.41,
+          "bankroll_dopo": 576.17
         },
         {
           "n": 41,
@@ -795,13 +972,17 @@
           "odd": 4.0,
           "model_p": 30.3,
           "bm_p": 23.6,
-          "kelly_pct": 1.77,
-          "stake": 7.5,
+          "full_kelly_pct": 7.07,
+          "c_dynamic": 0.2,
+          "max_cap_pct": 2.5,
+          "capped": false,
+          "kelly_pct": 1.41,
+          "stake": 8.12,
           "esito": "D",
           "win": false,
           "payout": 0.0,
-          "delta": -7.5,
-          "bankroll_dopo": 416.02
+          "delta": -8.12,
+          "bankroll_dopo": 568.04
         },
         {
           "n": 42,
@@ -814,13 +995,17 @@
           "odd": 3.3,
           "model_p": 36.1,
           "bm_p": 28.8,
-          "kelly_pct": 2.08,
-          "stake": 8.65,
+          "full_kelly_pct": 8.32,
+          "c_dynamic": 0.2,
+          "max_cap_pct": 2.5,
+          "capped": false,
+          "kelly_pct": 1.66,
+          "stake": 9.43,
           "esito": "A",
           "win": false,
           "payout": 0.0,
-          "delta": -8.65,
-          "bankroll_dopo": 407.37
+          "delta": -9.43,
+          "bankroll_dopo": 558.62
         },
         {
           "n": 43,
@@ -833,13 +1018,17 @@
           "odd": 1.91,
           "model_p": 55.1,
           "bm_p": 49.1,
-          "kelly_pct": 1.44,
-          "stake": 5.87,
+          "full_kelly_pct": 5.76,
+          "c_dynamic": 0.35,
+          "max_cap_pct": 5.0,
+          "capped": false,
+          "kelly_pct": 2.02,
+          "stake": 11.28,
           "esito": "A",
           "win": true,
-          "payout": 11.2,
-          "delta": 5.34,
-          "bankroll_dopo": 412.71
+          "payout": 21.55,
+          "delta": 10.27,
+          "bankroll_dopo": 568.88
         },
         {
           "n": 44,
@@ -852,13 +1041,17 @@
           "odd": 11.0,
           "model_p": 24.2,
           "bm_p": 8.6,
-          "kelly_pct": 4.15,
-          "stake": 17.13,
+          "full_kelly_pct": 16.62,
+          "c_dynamic": 0.1,
+          "max_cap_pct": 2.5,
+          "capped": false,
+          "kelly_pct": 1.66,
+          "stake": 9.44,
           "esito": "H",
           "win": false,
           "payout": 0.0,
-          "delta": -17.13,
-          "bankroll_dopo": 395.58
+          "delta": -9.44,
+          "bankroll_dopo": 559.44
         },
         {
           "n": 45,
@@ -871,13 +1064,17 @@
           "odd": 4.75,
           "model_p": 31.4,
           "bm_p": 20.0,
-          "kelly_pct": 3.28,
-          "stake": 12.97,
+          "full_kelly_pct": 13.11,
+          "c_dynamic": 0.2,
+          "max_cap_pct": 2.5,
+          "capped": true,
+          "kelly_pct": 2.5,
+          "stake": 13.99,
           "esito": "H",
           "win": false,
           "payout": 0.0,
-          "delta": -12.97,
-          "bankroll_dopo": 382.6
+          "delta": -13.99,
+          "bankroll_dopo": 545.45
         },
         {
           "n": 46,
@@ -885,18 +1082,22 @@
           "home": "Fiorentina",
           "away": "Napoli",
           "date": "2026-09-20",
-          "pick": "H",
-          "pick_label": "Casa",
-          "odd": 3.3,
-          "model_p": 32.1,
-          "bm_p": 28.8,
-          "kelly_pct": 0.64,
-          "stake": 2.45,
+          "pick": "A",
+          "pick_label": "Trasferta",
+          "odd": 2.2,
+          "model_p": 46.3,
+          "bm_p": 43.2,
+          "full_kelly_pct": 1.55,
+          "c_dynamic": 0.35,
+          "max_cap_pct": 5.0,
+          "capped": false,
+          "kelly_pct": 0.54,
+          "stake": 2.95,
           "esito": "D",
           "win": false,
           "payout": 0.0,
-          "delta": -2.45,
-          "bankroll_dopo": 380.16
+          "delta": -2.95,
+          "bankroll_dopo": 542.51
         },
         {
           "n": 47,
@@ -909,13 +1110,17 @@
           "odd": 4.5,
           "model_p": 32.0,
           "bm_p": 21.1,
-          "kelly_pct": 3.14,
-          "stake": 11.94,
+          "full_kelly_pct": 12.57,
+          "c_dynamic": 0.2,
+          "max_cap_pct": 2.5,
+          "capped": true,
+          "kelly_pct": 2.5,
+          "stake": 13.56,
           "esito": "H",
           "win": false,
           "payout": 0.0,
-          "delta": -11.94,
-          "bankroll_dopo": 368.22
+          "delta": -13.56,
+          "bankroll_dopo": 528.95
         },
         {
           "n": 48,
@@ -928,13 +1133,17 @@
           "odd": 2.45,
           "model_p": 44.1,
           "bm_p": 38.8,
-          "kelly_pct": 1.39,
-          "stake": 5.12,
+          "full_kelly_pct": 5.55,
+          "c_dynamic": 0.35,
+          "max_cap_pct": 5.0,
+          "capped": false,
+          "kelly_pct": 1.94,
+          "stake": 10.26,
           "esito": "H",
           "win": false,
           "payout": 0.0,
-          "delta": -5.12,
-          "bankroll_dopo": 363.1
+          "delta": -10.26,
+          "bankroll_dopo": 518.68
         }
       ]
     }
@@ -969,7 +1178,7 @@
           "pick": "A",
           "model_p": 0.68,
           "odd": 1.83,
-          "stake_pct": 7.36
+          "stake_pct": 5.0
         },
         "risultato": "1-1",
         "esito": "D",
@@ -1018,7 +1227,7 @@
           "pick": "A",
           "model_p": 0.145,
           "odd": 13.0,
-          "stake_pct": 1.84
+          "stake_pct": 0.74
         },
         "risultato": "4-1",
         "esito": "H",
@@ -1067,7 +1276,7 @@
           "pick": "A",
           "model_p": 0.678,
           "odd": 1.9,
-          "stake_pct": 8.01
+          "stake_pct": 5.0
         },
         "risultato": "0-2",
         "esito": "A",
@@ -1116,7 +1325,7 @@
           "pick": "H",
           "model_p": 0.451,
           "odd": 2.5,
-          "stake_pct": 2.13
+          "stake_pct": 2.98
         },
         "risultato": "0-1",
         "esito": "A",
@@ -1165,7 +1374,7 @@
           "pick": "H",
           "model_p": 0.335,
           "odd": 8.0,
-          "stake_pct": 6.0
+          "stake_pct": 2.4
         },
         "risultato": "0-1",
         "esito": "A",
@@ -1214,7 +1423,7 @@
           "pick": "D",
           "model_p": 0.409,
           "odd": 3.1,
-          "stake_pct": 3.19
+          "stake_pct": 2.5
         },
         "risultato": "0-2",
         "esito": "A",
@@ -1263,7 +1472,7 @@
           "pick": "D",
           "model_p": 0.26,
           "odd": 4.1,
-          "stake_pct": 0.53
+          "stake_pct": 0.43
         },
         "risultato": "2-1",
         "esito": "H",
@@ -1312,7 +1521,7 @@
           "pick": "H",
           "model_p": 0.461,
           "odd": 4.75,
-          "stake_pct": 7.93
+          "stake_pct": 2.5
         },
         "risultato": "1-2",
         "esito": "A",
@@ -1361,7 +1570,7 @@
           "pick": "A",
           "model_p": 0.413,
           "odd": 3.5,
-          "stake_pct": 4.46
+          "stake_pct": 2.5
         },
         "risultato": "0-1",
         "esito": "A",
@@ -1410,7 +1619,7 @@
           "pick": "D",
           "model_p": 0.289,
           "odd": 4.1,
-          "stake_pct": 1.49
+          "stake_pct": 1.19
         },
         "risultato": "4-0",
         "esito": "H",
@@ -1461,7 +1670,7 @@
           "pick": "A",
           "model_p": 0.249,
           "odd": 7.0,
-          "stake_pct": 3.1
+          "stake_pct": 1.24
         },
         "risultato": "2-0",
         "esito": "H",
@@ -1510,7 +1719,7 @@
           "pick": "A",
           "model_p": 0.388,
           "odd": 3.3,
-          "stake_pct": 3.05
+          "stake_pct": 2.44
         },
         "risultato": "2-1",
         "esito": "H",
@@ -1559,7 +1768,7 @@
           "pick": "D",
           "model_p": 0.375,
           "odd": 3.2,
-          "stake_pct": 2.27
+          "stake_pct": 1.82
         },
         "risultato": "2-3",
         "esito": "A",
@@ -1608,7 +1817,7 @@
           "pick": "D",
           "model_p": 0.39,
           "odd": 4.1,
-          "stake_pct": 4.83
+          "stake_pct": 2.5
         },
         "risultato": "0-3",
         "esito": "A",
@@ -1657,7 +1866,7 @@
           "pick": "A",
           "model_p": 0.215,
           "odd": 11.0,
-          "stake_pct": 3.41
+          "stake_pct": 1.36
         },
         "risultato": "2-0",
         "esito": "H",
@@ -1706,7 +1915,7 @@
           "pick": "D",
           "model_p": 0.365,
           "odd": 3.0,
-          "stake_pct": 1.19
+          "stake_pct": 1.66
         },
         "risultato": "1-2",
         "esito": "A",
@@ -1755,7 +1964,7 @@
           "pick": "A",
           "model_p": 0.278,
           "odd": 4.33,
-          "stake_pct": 1.53
+          "stake_pct": 1.22
         },
         "risultato": "1-0",
         "esito": "H",
@@ -1804,7 +2013,7 @@
           "pick": "H",
           "model_p": 0.246,
           "odd": 7.0,
-          "stake_pct": 3.01
+          "stake_pct": 1.2
         },
         "risultato": "0-1",
         "esito": "A",
@@ -1853,7 +2062,7 @@
           "pick": "H",
           "model_p": 0.19,
           "odd": 8.0,
-          "stake_pct": 1.86
+          "stake_pct": 0.74
         },
         "risultato": "0-4",
         "esito": "A",
@@ -1902,7 +2111,7 @@
           "pick": "H",
           "model_p": 0.62,
           "odd": 1.85,
-          "stake_pct": 4.32
+          "stake_pct": 5.0
         },
         "risultato": "1-0",
         "esito": "H",
@@ -1953,7 +2162,7 @@
           "pick": "H",
           "model_p": 0.27,
           "odd": 5.25,
-          "stake_pct": 2.46
+          "stake_pct": 0.98
         },
         "risultato": "1-4",
         "esito": "A",
@@ -2002,7 +2211,7 @@
           "pick": "A",
           "model_p": 0.294,
           "odd": 5.5,
-          "stake_pct": 3.43
+          "stake_pct": 1.37
         },
         "risultato": "3-2",
         "esito": "H",
@@ -2051,7 +2260,7 @@
           "pick": "D",
           "model_p": 0.307,
           "odd": 3.6,
-          "stake_pct": 1.01
+          "stake_pct": 0.81
         },
         "risultato": "2-1",
         "esito": "H",
@@ -2100,7 +2309,7 @@
           "pick": "D",
           "model_p": 0.307,
           "odd": 3.3,
-          "stake_pct": 0.14
+          "stake_pct": 0.11
         },
         "risultato": "1-2",
         "esito": "A",
@@ -2149,7 +2358,7 @@
           "pick": "A",
           "model_p": 0.381,
           "odd": 2.9,
-          "stake_pct": 1.38
+          "stake_pct": 1.93
         },
         "risultato": "1-1",
         "esito": "D",
@@ -2198,7 +2407,7 @@
           "pick": "D",
           "model_p": 0.385,
           "odd": 3.3,
-          "stake_pct": 2.94
+          "stake_pct": 2.35
         },
         "risultato": "3-2",
         "esito": "H",
@@ -2247,7 +2456,7 @@
           "pick": "A",
           "model_p": 0.336,
           "odd": 3.9,
-          "stake_pct": 2.68
+          "stake_pct": 2.14
         },
         "risultato": "2-2",
         "esito": "D",
@@ -2296,7 +2505,7 @@
           "pick": "H",
           "model_p": 0.565,
           "odd": 2.1,
-          "stake_pct": 4.24
+          "stake_pct": 5.0
         },
         "risultato": "1-1",
         "esito": "D",
@@ -2345,7 +2554,7 @@
           "pick": "D",
           "model_p": 0.419,
           "odd": 3.1,
-          "stake_pct": 3.56
+          "stake_pct": 2.5
         },
         "risultato": "1-0",
         "esito": "H",
@@ -2394,7 +2603,7 @@
           "pick": "H",
           "model_p": 0.511,
           "odd": 2.9,
-          "stake_pct": 6.34
+          "stake_pct": 5.0
         },
         "risultato": "1-2",
         "esito": "A",
@@ -2489,7 +2698,7 @@
           "pick": "D",
           "model_p": 0.304,
           "odd": 4.0,
-          "stake_pct": 1.8
+          "stake_pct": 1.44
         },
         "risultato": "1-2",
         "esito": "A",
@@ -2538,7 +2747,7 @@
           "pick": "A",
           "model_p": 0.453,
           "odd": 3.6,
-          "stake_pct": 6.07
+          "stake_pct": 2.5
         },
         "risultato": "1-1",
         "esito": "D",
@@ -2587,7 +2796,7 @@
           "pick": "H",
           "model_p": 0.419,
           "odd": 3.4,
-          "stake_pct": 4.42
+          "stake_pct": 2.5
         },
         "risultato": "2-2",
         "esito": "D",
@@ -2633,10 +2842,10 @@
           "A": 58.4
         },
         "kelly": {
-          "pick": "H",
-          "model_p": 0.232,
-          "odd": 5.25,
-          "stake_pct": 1.28
+          "pick": "D",
+          "model_p": 0.283,
+          "odd": 4.0,
+          "stake_pct": 0.88
         },
         "risultato": "3-2",
         "esito": "H",
@@ -2685,7 +2894,7 @@
           "pick": "D",
           "model_p": 0.411,
           "odd": 3.1,
-          "stake_pct": 3.26
+          "stake_pct": 2.5
         },
         "risultato": "3-2",
         "esito": "H",
@@ -2734,7 +2943,7 @@
           "pick": "A",
           "model_p": 0.326,
           "odd": 4.75,
-          "stake_pct": 3.66
+          "stake_pct": 2.5
         },
         "risultato": "1-0",
         "esito": "H",
@@ -2783,7 +2992,7 @@
           "pick": "D",
           "model_p": 0.301,
           "odd": 5.5,
-          "stake_pct": 3.64
+          "stake_pct": 1.46
         },
         "risultato": "2-1",
         "esito": "H",
@@ -2876,7 +3085,7 @@
           "pick": "A",
           "model_p": 0.266,
           "odd": 12.0,
-          "stake_pct": 4.98
+          "stake_pct": 1.99
         },
         "risultato": "5-3",
         "esito": "H",
@@ -2927,7 +3136,7 @@
           "pick": "D",
           "model_p": 0.394,
           "odd": 3.4,
-          "stake_pct": 3.54
+          "stake_pct": 2.5
         },
         "risultato": "2-1",
         "esito": "H",
@@ -2976,7 +3185,7 @@
           "pick": "D",
           "model_p": 0.348,
           "odd": 3.4,
-          "stake_pct": 1.91
+          "stake_pct": 1.53
         },
         "risultato": "2-2",
         "esito": "D",
@@ -3025,7 +3234,7 @@
           "pick": "A",
           "model_p": 0.303,
           "odd": 4.0,
-          "stake_pct": 1.77
+          "stake_pct": 1.41
         },
         "risultato": "1-1",
         "esito": "D",
@@ -3074,7 +3283,7 @@
           "pick": "D",
           "model_p": 0.361,
           "odd": 3.3,
-          "stake_pct": 2.08
+          "stake_pct": 1.66
         },
         "risultato": "0-1",
         "esito": "A",
@@ -3123,7 +3332,7 @@
           "pick": "A",
           "model_p": 0.551,
           "odd": 1.91,
-          "stake_pct": 1.44
+          "stake_pct": 2.02
         },
         "risultato": "0-2",
         "esito": "A",
@@ -3172,7 +3381,7 @@
           "pick": "A",
           "model_p": 0.242,
           "odd": 11.0,
-          "stake_pct": 4.15
+          "stake_pct": 1.66
         },
         "risultato": "3-0",
         "esito": "H",
@@ -3221,7 +3430,7 @@
           "pick": "A",
           "model_p": 0.314,
           "odd": 4.75,
-          "stake_pct": 3.28
+          "stake_pct": 2.5
         },
         "risultato": "2-0",
         "esito": "H",
@@ -3267,10 +3476,10 @@
           "A": 43.2
         },
         "kelly": {
-          "pick": "H",
-          "model_p": 0.321,
-          "odd": 3.3,
-          "stake_pct": 0.64
+          "pick": "A",
+          "model_p": 0.463,
+          "odd": 2.2,
+          "stake_pct": 0.54
         },
         "risultato": "1-1",
         "esito": "D",
@@ -3319,7 +3528,7 @@
           "pick": "D",
           "model_p": 0.32,
           "odd": 4.5,
-          "stake_pct": 3.14
+          "stake_pct": 2.5
         },
         "risultato": "2-0",
         "esito": "H",
@@ -3368,7 +3577,7 @@
           "pick": "A",
           "model_p": 0.441,
           "odd": 2.45,
-          "stake_pct": 1.39
+          "stake_pct": 1.94
         },
         "risultato": "2-1",
         "esito": "H",
@@ -3425,20 +3634,20 @@
           "away_promoted": 0.0
         },
         "bm": {
-          "H": 3.14,
-          "D": 3.33,
-          "A": 2.32
+          "H": 3.17,
+          "D": 3.37,
+          "A": 2.34
         },
         "bm_prob": {
           "H": 30.3,
-          "D": 28.6,
+          "D": 28.5,
           "A": 41.1
         },
         "kelly": {
           "pick": "H",
           "model_p": 0.376,
-          "odd": 3.14,
-          "stake_pct": 2.11
+          "odd": 3.17,
+          "stake_pct": 1.77
         }
       },
       {
@@ -3472,19 +3681,19 @@
         },
         "bm": {
           "H": 1.14,
-          "D": 9.0,
-          "A": 15.02
+          "D": 9.31,
+          "A": 15.88
         },
         "bm_prob": {
-          "H": 83.2,
-          "D": 10.5,
-          "A": 6.3
+          "H": 83.7,
+          "D": 10.3,
+          "A": 6.0
         },
         "kelly": {
           "pick": "D",
           "model_p": 0.169,
-          "odd": 9.0,
-          "stake_pct": 1.63
+          "odd": 9.31,
+          "stake_pct": 0.69
         }
       },
       {
@@ -3517,20 +3726,20 @@
           "away_promoted": 0.0
         },
         "bm": {
-          "H": 1.44,
-          "D": 4.93,
-          "A": 6.25
+          "H": 1.45,
+          "D": 5.03,
+          "A": 6.39
         },
         "bm_prob": {
-          "H": 65.7,
-          "D": 19.2,
-          "A": 15.1
+          "H": 66.0,
+          "D": 19.0,
+          "A": 15.0
         },
         "kelly": {
           "pick": "D",
           "model_p": 0.211,
-          "odd": 4.93,
-          "stake_pct": 0.26
+          "odd": 5.03,
+          "stake_pct": 0.15
         }
       },
       {
@@ -3563,20 +3772,20 @@
           "away_promoted": 0.0
         },
         "bm": {
-          "H": 4.32,
-          "D": 3.77,
-          "A": 1.79
+          "H": 4.48,
+          "D": 3.89,
+          "A": 1.78
         },
         "bm_prob": {
-          "H": 21.9,
-          "D": 25.1,
-          "A": 52.9
+          "H": 21.4,
+          "D": 24.7,
+          "A": 53.9
         },
         "kelly": {
           "pick": "H",
           "model_p": 0.337,
-          "odd": 4.32,
-          "stake_pct": 3.43
+          "odd": 4.48,
+          "stake_pct": 2.5
         }
       },
       {
@@ -3609,14 +3818,14 @@
           "away_promoted": 0.0
         },
         "bm": {
-          "H": 1.57,
-          "D": 4.05,
-          "A": 5.74
+          "H": 1.55,
+          "D": 4.21,
+          "A": 6.15
         },
         "bm_prob": {
-          "H": 60.2,
-          "D": 23.3,
-          "A": 16.5
+          "H": 61.7,
+          "D": 22.7,
+          "A": 15.6
         },
         "kelly": null
       },
@@ -3650,20 +3859,20 @@
           "away_promoted": 0.0
         },
         "bm": {
-          "H": 6.23,
-          "D": 4.02,
+          "H": 6.41,
+          "D": 4.1,
           "A": 1.55
         },
         "bm_prob": {
-          "H": 15.2,
-          "D": 23.6,
-          "A": 61.2
+          "H": 14.9,
+          "D": 23.3,
+          "A": 61.7
         },
         "kelly": {
           "pick": "H",
           "model_p": 0.196,
-          "odd": 6.23,
-          "stake_pct": 1.06
+          "odd": 6.41,
+          "stake_pct": 0.47
         }
       },
       {
@@ -3696,9 +3905,9 @@
           "away_promoted": 0.0
         },
         "bm": {
-          "H": 2.6,
-          "D": 3.62,
-          "A": 2.57
+          "H": 2.63,
+          "D": 3.66,
+          "A": 2.6
         },
         "bm_prob": {
           "H": 36.6,
@@ -3708,8 +3917,8 @@
         "kelly": {
           "pick": "A",
           "model_p": 0.572,
-          "odd": 2.57,
-          "stake_pct": 7.48
+          "odd": 2.6,
+          "stake_pct": 5.0
         }
       },
       {
@@ -3742,20 +3951,20 @@
           "away_promoted": 0.0
         },
         "bm": {
-          "H": 4.4,
-          "D": 3.29,
-          "A": 1.92
+          "H": 4.58,
+          "D": 3.39,
+          "A": 1.89
         },
         "bm_prob": {
-          "H": 21.6,
-          "D": 28.9,
-          "A": 49.5
+          "H": 20.9,
+          "D": 28.3,
+          "A": 50.8
         },
         "kelly": {
           "pick": "H",
           "model_p": 0.326,
-          "odd": 4.4,
-          "stake_pct": 3.19
+          "odd": 4.58,
+          "stake_pct": 2.5
         }
       },
       {
@@ -3789,19 +3998,19 @@
         },
         "bm": {
           "H": 1.58,
-          "D": 3.98,
-          "A": 5.76
+          "D": 4.1,
+          "A": 5.99
         },
         "bm_prob": {
-          "H": 59.8,
-          "D": 23.8,
-          "A": 16.4
+          "H": 60.6,
+          "D": 23.4,
+          "A": 16.0
         },
         "kelly": {
           "pick": "H",
           "model_p": 0.72,
           "odd": 1.58,
-          "stake_pct": 5.93
+          "stake_pct": 5.0
         }
       },
       {
@@ -3834,20 +4043,20 @@
           "away_promoted": 0.0
         },
         "bm": {
-          "H": 2.35,
-          "D": 3.33,
-          "A": 3.08
+          "H": 2.37,
+          "D": 3.37,
+          "A": 3.12
         },
         "bm_prob": {
-          "H": 40.5,
+          "H": 40.6,
           "D": 28.6,
-          "A": 30.9
+          "A": 30.8
         },
         "kelly": {
           "pick": "H",
           "model_p": 0.507,
-          "odd": 2.35,
-          "stake_pct": 3.55
+          "odd": 2.37,
+          "stake_pct": 5.0
         }
       }
     ],
@@ -3895,7 +4104,7 @@
           "pick": "D",
           "model_p": 0.395,
           "odd": 3.43,
-          "stake_pct": 3.65
+          "stake_pct": 2.5
         }
       },
       {
@@ -3941,7 +4150,7 @@
           "pick": "A",
           "model_p": 0.632,
           "odd": 1.7,
-          "stake_pct": 2.66
+          "stake_pct": 5.0
         }
       },
       {
@@ -3987,7 +4196,7 @@
           "pick": "H",
           "model_p": 0.271,
           "odd": 5.45,
-          "stake_pct": 2.68
+          "stake_pct": 1.07
         }
       },
       {
@@ -4033,7 +4242,7 @@
           "pick": "D",
           "model_p": 0.223,
           "odd": 5.57,
-          "stake_pct": 1.32
+          "stake_pct": 0.53
         }
       },
       {
@@ -4066,20 +4275,20 @@
           "away_promoted": 0.0
         },
         "bm": {
-          "H": 1.87,
-          "D": 3.61,
-          "A": 4.17
+          "H": 1.85,
+          "D": 3.65,
+          "A": 4.16
         },
         "bm_prob": {
-          "H": 50.9,
-          "D": 26.3,
+          "H": 51.2,
+          "D": 26.0,
           "A": 22.8
         },
         "kelly": {
           "pick": "A",
           "model_p": 0.343,
-          "odd": 4.17,
-          "stake_pct": 3.39
+          "odd": 4.16,
+          "stake_pct": 2.5
         }
       },
       {
@@ -4112,20 +4321,20 @@
           "away_promoted": 0.0
         },
         "bm": {
-          "H": 1.86,
-          "D": 3.61,
-          "A": 4.17
+          "H": 1.85,
+          "D": 3.64,
+          "A": 4.2
         },
         "bm_prob": {
-          "H": 51.0,
-          "D": 26.3,
-          "A": 22.7
+          "H": 51.3,
+          "D": 26.1,
+          "A": 22.6
         },
         "kelly": {
           "pick": "D",
           "model_p": 0.298,
-          "odd": 3.61,
-          "stake_pct": 0.73
+          "odd": 3.64,
+          "stake_pct": 0.64
         }
       },
       {
@@ -4171,7 +4380,7 @@
           "pick": "A",
           "model_p": 0.495,
           "odd": 2.07,
-          "stake_pct": 0.58
+          "stake_pct": 0.81
         }
       },
       {
@@ -4217,7 +4426,7 @@
           "pick": "D",
           "model_p": 0.264,
           "odd": 3.87,
-          "stake_pct": 0.19
+          "stake_pct": 0.15
         }
       },
       {
@@ -4250,20 +4459,20 @@
           "away_promoted": 0.0
         },
         "bm": {
-          "H": 3.18,
-          "D": 3.07,
-          "A": 2.44
+          "H": 3.2,
+          "D": 3.01,
+          "A": 2.47
         },
         "bm_prob": {
-          "H": 29.9,
-          "D": 31.0,
-          "A": 39.0
+          "H": 29.8,
+          "D": 31.7,
+          "A": 38.6
         },
         "kelly": {
           "pick": "H",
           "model_p": 0.347,
-          "odd": 3.18,
-          "stake_pct": 1.19
+          "odd": 3.2,
+          "stake_pct": 1.0
         }
       },
       {
@@ -4296,20 +4505,20 @@
           "away_promoted": 0.0
         },
         "bm": {
-          "H": 2.18,
-          "D": 3.12,
-          "A": 3.7
+          "H": 2.16,
+          "D": 3.18,
+          "A": 3.65
         },
         "bm_prob": {
-          "H": 43.7,
-          "D": 30.5,
-          "A": 25.8
+          "H": 44.0,
+          "D": 29.9,
+          "A": 26.1
         },
         "kelly": {
           "pick": "A",
           "model_p": 0.364,
-          "odd": 3.7,
-          "stake_pct": 3.21
+          "odd": 3.65,
+          "stake_pct": 2.48
         }
       }
     ],

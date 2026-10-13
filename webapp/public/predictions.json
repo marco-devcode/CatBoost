@@ -13,13 +13,13 @@
     "beats_bookmaker_rps": false,
     "kelly": {
       "bankroll_iniziale": 1000.0,
-      "bankroll_finale": 323.27,
-      "profitto": -676.73,
-      "roi_pct": -67.67,
-      "scommesse": 50,
-      "vinte": 9,
-      "perse": 41,
-      "stake_totale_pct": 173.0,
+      "bankroll_finale": 283.9,
+      "profitto": -716.1,
+      "roi_pct": -71.61,
+      "scommesse": 60,
+      "vinte": 10,
+      "perse": 50,
+      "stake_totale_pct": 179.34,
       "fraction": 0.25,
       "scommesse_dettaglio": [
         {
@@ -971,6 +971,196 @@
           "payout": 0.0,
           "delta": -23.77,
           "bankroll_dopo": 323.27
+        },
+        {
+          "n": 51,
+          "giornata": "6",
+          "home": "Napoli",
+          "away": "Frosinone",
+          "date": "2026-10-10",
+          "pick": "D",
+          "pick_label": "Pareggio",
+          "odd": 4.5,
+          "model_p": 40.3,
+          "bm_p": 21.0,
+          "kelly_pct": 2.5,
+          "stake": 8.08,
+          "esito": "H",
+          "win": false,
+          "payout": 0.0,
+          "delta": -8.08,
+          "bankroll_dopo": 315.19
+        },
+        {
+          "n": 52,
+          "giornata": "6",
+          "home": "Genoa",
+          "away": "Fiorentina",
+          "date": "2026-10-10",
+          "pick": "H",
+          "pick_label": "Casa",
+          "odd": 3.09,
+          "model_p": 41.5,
+          "bm_p": 30.2,
+          "kelly_pct": 2.5,
+          "stake": 7.88,
+          "esito": "H",
+          "win": true,
+          "payout": 24.35,
+          "delta": 16.47,
+          "bankroll_dopo": 331.66
+        },
+        {
+          "n": 53,
+          "giornata": "6",
+          "home": "Inter",
+          "away": "Parma",
+          "date": "2026-10-10",
+          "pick": "D",
+          "pick_label": "Pareggio",
+          "odd": 8.25,
+          "model_p": 29.4,
+          "bm_p": 11.3,
+          "kelly_pct": 1.97,
+          "stake": 6.52,
+          "esito": "H",
+          "win": false,
+          "payout": 0.0,
+          "delta": -6.52,
+          "bankroll_dopo": 325.14
+        },
+        {
+          "n": 54,
+          "giornata": "6",
+          "home": "Lecce",
+          "away": "Bologna",
+          "date": "2026-10-11",
+          "pick": "H",
+          "pick_label": "Casa",
+          "odd": 4.3,
+          "model_p": 25.5,
+          "bm_p": 22.4,
+          "kelly_pct": 0.58,
+          "stake": 1.9,
+          "esito": "A",
+          "win": false,
+          "payout": 0.0,
+          "delta": -1.9,
+          "bankroll_dopo": 323.23
+        },
+        {
+          "n": 55,
+          "giornata": "6",
+          "home": "Cagliari",
+          "away": "Juventus",
+          "date": "2026-10-11",
+          "pick": "H",
+          "pick_label": "Casa",
+          "odd": 7.0,
+          "model_p": 20.6,
+          "bm_p": 13.9,
+          "kelly_pct": 0.74,
+          "stake": 2.38,
+          "esito": "D",
+          "win": false,
+          "payout": 0.0,
+          "delta": -2.38,
+          "bankroll_dopo": 320.85
+        },
+        {
+          "n": 56,
+          "giornata": "6",
+          "home": "Como",
+          "away": "Roma",
+          "date": "2026-10-11",
+          "pick": "A",
+          "pick_label": "Trasferta",
+          "odd": 2.6,
+          "model_p": 44.4,
+          "bm_p": 36.2,
+          "kelly_pct": 3.38,
+          "stake": 10.84,
+          "esito": "D",
+          "win": false,
+          "payout": 0.0,
+          "delta": -10.84,
+          "bankroll_dopo": 310.02
+        },
+        {
+          "n": 57,
+          "giornata": "6",
+          "home": "Lazio",
+          "away": "Monza",
+          "date": "2026-10-11",
+          "pick": "A",
+          "pick_label": "Trasferta",
+          "odd": 5.8,
+          "model_p": 28.1,
+          "bm_p": 16.6,
+          "kelly_pct": 1.31,
+          "stake": 4.07,
+          "esito": "H",
+          "win": false,
+          "payout": 0.0,
+          "delta": -4.07,
+          "bankroll_dopo": 305.95
+        },
+        {
+          "n": 58,
+          "giornata": "6",
+          "home": "Sassuolo",
+          "away": "Milan",
+          "date": "2026-10-11",
+          "pick": "H",
+          "pick_label": "Casa",
+          "odd": 4.33,
+          "model_p": 45.9,
+          "bm_p": 22.2,
+          "kelly_pct": 2.5,
+          "stake": 7.65,
+          "esito": "D",
+          "win": false,
+          "payout": 0.0,
+          "delta": -7.65,
+          "bankroll_dopo": 298.3
+        },
+        {
+          "n": 59,
+          "giornata": "6",
+          "home": "Atalanta",
+          "away": "Venezia",
+          "date": "2026-10-12",
+          "pick": "D",
+          "pick_label": "Pareggio",
+          "odd": 4.5,
+          "model_p": 37.8,
+          "bm_p": 21.5,
+          "kelly_pct": 2.5,
+          "stake": 7.46,
+          "esito": "H",
+          "win": false,
+          "payout": 0.0,
+          "delta": -7.46,
+          "bankroll_dopo": 290.84
+        },
+        {
+          "n": 60,
+          "giornata": "6",
+          "home": "Torino",
+          "away": "Udinese",
+          "date": "2026-10-12",
+          "pick": "A",
+          "pick_label": "Trasferta",
+          "odd": 3.5,
+          "model_p": 37.1,
+          "bm_p": 27.4,
+          "kelly_pct": 2.39,
+          "stake": 6.95,
+          "esito": "H",
+          "win": false,
+          "payout": 0.0,
+          "delta": -6.95,
+          "bankroll_dopo": 283.9
         }
       ]
     }
@@ -3455,7 +3645,12 @@
           "D": 21.0,
           "A": 13.5
         },
-        "kelly": null,
+        "kelly": {
+          "pick": "D",
+          "model_p": 0.403,
+          "odd": 4.5,
+          "stake_pct": 2.5
+        },
         "risultato": "3-0",
         "esito": "H",
         "ok": true
@@ -3499,7 +3694,12 @@
           "D": 28.8,
           "A": 41.0
         },
-        "kelly": null,
+        "kelly": {
+          "pick": "H",
+          "model_p": 0.415,
+          "odd": 3.09,
+          "stake_pct": 2.5
+        },
         "risultato": "2-1",
         "esito": "H",
         "ok": true
@@ -3543,7 +3743,12 @@
           "D": 11.3,
           "A": 5.9
         },
-        "kelly": null,
+        "kelly": {
+          "pick": "D",
+          "model_p": 0.294,
+          "odd": 8.25,
+          "stake_pct": 1.97
+        },
         "risultato": "3-0",
         "esito": "H",
         "ok": true
@@ -3587,7 +3792,12 @@
           "D": 27.9,
           "A": 49.7
         },
-        "kelly": null,
+        "kelly": {
+          "pick": "H",
+          "model_p": 0.255,
+          "odd": 4.3,
+          "stake_pct": 0.58
+        },
         "risultato": "1-2",
         "esito": "A",
         "ok": true
@@ -3631,7 +3841,12 @@
           "D": 24.6,
           "A": 61.5
         },
-        "kelly": null,
+        "kelly": {
+          "pick": "H",
+          "model_p": 0.206,
+          "odd": 7.0,
+          "stake_pct": 0.74
+        },
         "risultato": "1-1",
         "esito": "D",
         "ok": false
@@ -3675,7 +3890,12 @@
           "D": 26.1,
           "A": 36.2
         },
-        "kelly": null,
+        "kelly": {
+          "pick": "A",
+          "model_p": 0.444,
+          "odd": 2.6,
+          "stake_pct": 3.38
+        },
         "risultato": "0-0",
         "esito": "D",
         "ok": false
@@ -3719,7 +3939,12 @@
           "D": 23.4,
           "A": 16.6
         },
-        "kelly": null,
+        "kelly": {
+          "pick": "A",
+          "model_p": 0.281,
+          "odd": 5.8,
+          "stake_pct": 1.31
+        },
         "risultato": "3-1",
         "esito": "H",
         "ok": true
@@ -3763,7 +3988,12 @@
           "D": 25.7,
           "A": 52.1
         },
-        "kelly": null,
+        "kelly": {
+          "pick": "H",
+          "model_p": 0.459,
+          "odd": 4.33,
+          "stake_pct": 2.5
+        },
         "risultato": "1-1",
         "esito": "D",
         "ok": false
@@ -3807,7 +4037,12 @@
           "D": 21.5,
           "A": 16.7
         },
-        "kelly": null,
+        "kelly": {
+          "pick": "D",
+          "model_p": 0.378,
+          "odd": 4.5,
+          "stake_pct": 2.5
+        },
         "risultato": "3-1",
         "esito": "H",
         "ok": true
@@ -3851,7 +4086,12 @@
           "D": 31.9,
           "A": 27.4
         },
-        "kelly": null,
+        "kelly": {
+          "pick": "A",
+          "model_p": 0.371,
+          "odd": 3.5,
+          "stake_pct": 2.39
+        },
         "risultato": "2-1",
         "esito": "H",
         "ok": true

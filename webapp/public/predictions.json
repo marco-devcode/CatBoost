@@ -3455,7 +3455,10 @@
           "D": 21.0,
           "A": 13.5
         },
-        "kelly": null
+        "kelly": null,
+        "risultato": "3-0",
+        "esito": "H",
+        "ok": true
       },
       {
         "home": "Genoa",
@@ -3496,7 +3499,10 @@
           "D": 28.8,
           "A": 41.0
         },
-        "kelly": null
+        "kelly": null,
+        "risultato": "2-1",
+        "esito": "H",
+        "ok": true
       },
       {
         "home": "Inter",
@@ -3537,7 +3543,10 @@
           "D": 11.3,
           "A": 5.9
         },
-        "kelly": null
+        "kelly": null,
+        "risultato": "3-0",
+        "esito": "H",
+        "ok": true
       },
       {
         "home": "Lecce",
@@ -3578,7 +3587,10 @@
           "D": 27.9,
           "A": 49.7
         },
-        "kelly": null
+        "kelly": null,
+        "risultato": "1-2",
+        "esito": "A",
+        "ok": true
       },
       {
         "home": "Cagliari",
@@ -3619,7 +3631,10 @@
           "D": 24.6,
           "A": 61.5
         },
-        "kelly": null
+        "kelly": null,
+        "risultato": "1-1",
+        "esito": "D",
+        "ok": false
       },
       {
         "home": "Como",
@@ -3660,7 +3675,10 @@
           "D": 26.1,
           "A": 36.2
         },
-        "kelly": null
+        "kelly": null,
+        "risultato": "0-0",
+        "esito": "D",
+        "ok": false
       },
       {
         "home": "Lazio",
@@ -3701,7 +3719,10 @@
           "D": 23.4,
           "A": 16.6
         },
-        "kelly": null
+        "kelly": null,
+        "risultato": "3-1",
+        "esito": "H",
+        "ok": true
       },
       {
         "home": "Sassuolo",
@@ -3742,7 +3763,10 @@
           "D": 25.7,
           "A": 52.1
         },
-        "kelly": null
+        "kelly": null,
+        "risultato": "1-1",
+        "esito": "D",
+        "ok": false
       },
       {
         "home": "Atalanta",
@@ -3783,7 +3807,10 @@
           "D": 21.5,
           "A": 16.7
         },
-        "kelly": null
+        "kelly": null,
+        "risultato": "3-1",
+        "esito": "H",
+        "ok": true
       },
       {
         "home": "Torino",
@@ -3824,7 +3851,10 @@
           "D": 31.9,
           "A": 27.4
         },
-        "kelly": null
+        "kelly": null,
+        "risultato": "2-1",
+        "esito": "H",
+        "ok": true
       }
     ],
     "7": [

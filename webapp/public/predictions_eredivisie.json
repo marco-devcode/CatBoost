@@ -4629,9 +4629,20 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 1.27,
+          "D": 6.0,
+          "A": 8.5
+        },
+        "bm_prob": {
+          "H": 73.5,
+          "D": 15.6,
+          "A": 11.0
+        },
+        "kelly": null,
+        "risultato": "2-0",
+        "esito": "H",
+        "ok": true
       },
       {
         "home": "Go Ahead Eagles",
@@ -4662,9 +4673,20 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 1.75,
+          "D": 4.0,
+          "A": 4.1
+        },
+        "bm_prob": {
+          "H": 53.6,
+          "D": 23.5,
+          "A": 22.9
+        },
+        "kelly": null,
+        "risultato": "3-3",
+        "esito": "D",
+        "ok": false
       },
       {
         "home": "Feyenoord",
@@ -4695,9 +4717,20 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 1.8,
+          "D": 4.2,
+          "A": 3.75
+        },
+        "bm_prob": {
+          "H": 52.4,
+          "D": 22.5,
+          "A": 25.1
+        },
+        "kelly": null,
+        "risultato": "2-0",
+        "esito": "H",
+        "ok": true
       },
       {
         "home": "For Sittard",
@@ -4728,9 +4761,20 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 6.0,
+          "D": 5.0,
+          "A": 1.44
+        },
+        "bm_prob": {
+          "H": 15.7,
+          "D": 18.8,
+          "A": 65.4
+        },
+        "kelly": null,
+        "risultato": "1-1",
+        "esito": "D",
+        "ok": false
       },
       {
         "home": "Ajax",
@@ -4761,9 +4805,20 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 1.3,
+          "D": 5.5,
+          "A": 8.5
+        },
+        "bm_prob": {
+          "H": 72.0,
+          "D": 17.0,
+          "A": 11.0
+        },
+        "kelly": null,
+        "risultato": "1-1",
+        "esito": "D",
+        "ok": false
       },
       {
         "home": "Utrecht",
@@ -4794,9 +4849,20 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 1.5,
+          "D": 4.33,
+          "A": 6.0
+        },
+        "bm_prob": {
+          "H": 62.6,
+          "D": 21.7,
+          "A": 15.7
+        },
+        "kelly": null,
+        "risultato": "3-1",
+        "esito": "H",
+        "ok": true
       },
       {
         "home": "Zwolle",
@@ -4827,9 +4893,20 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 1.95,
+          "D": 3.75,
+          "A": 3.5
+        },
+        "bm_prob": {
+          "H": 48.1,
+          "D": 25.0,
+          "A": 26.8
+        },
+        "kelly": null,
+        "risultato": "0-1",
+        "esito": "A",
+        "ok": false
       },
       {
         "home": "Telstar",
@@ -4860,9 +4937,20 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 2.0,
+          "D": 3.8,
+          "A": 3.3
+        },
+        "bm_prob": {
+          "H": 46.9,
+          "D": 24.7,
+          "A": 28.4
+        },
+        "kelly": null,
+        "risultato": "2-2",
+        "esito": "D",
+        "ok": false
       },
       {
         "home": "Excelsior",
@@ -4893,9 +4981,20 @@
           "home_promoted": 0.0,
           "away_promoted": 0.0
         },
-        "bm": null,
-        "bm_prob": null,
-        "kelly": null
+        "bm": {
+          "H": 2.55,
+          "D": 3.6,
+          "A": 2.55
+        },
+        "bm_prob": {
+          "H": 36.9,
+          "D": 26.2,
+          "A": 36.9
+        },
+        "kelly": null,
+        "risultato": "1-5",
+        "esito": "A",
+        "ok": true
       }
     ],
     "9": [

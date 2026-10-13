@@ -1,0 +1,83 @@
+name: Aggiorna quote e risultati
+
+# Ogni giorno a mezzanotte UTC: scarica il CSV della stagione da
+# football-data.co.uk (che porta risultati E quote B365), rigenera
+# predictions.json con predict_fixtures.py, e committa. Il push fa
+# scattare il redeploy automatico di cat-boost.vercel.app.
+#
+# Perche' ogni giorno e non lunedi/giovedi come pipeline.yml: le quote
+# della giornata successiva compaiono su football-data alcuni giorni prima
+# del fischio d'inizio, e senza il giro quotidiano il sito mostrava
+# bm=null sulle partite imminenti (caso Giornata 6: 10 partite senza quote).
+
+on:
+  schedule:
+    - cron: "0 0 * * *"   # mezzanotte UTC
+  workflow_dispatch:       # anche manuale dal tab Actions
+
+permissions:
+  contents: write
+
+jobs:
+  aggiorna-dati:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      # Sequenziale: due leghe che spingono su main in parallelo si
+      # pestano i piedi (il secondo fa rebase su un commit che il primo
+      # sta ancora scrivendo).
+      max-parallel: 1
+      fail-fast: false
+      matrix:
+        league: [seriea, eredivisie]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Installa dipendenze
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Il CSV di football-data.co.uk porta risultati E quote B365: e' la
+      # fonte unica, nessuna chiave richiesta. Se il download fallisce lo
+      # step si ferma (exit code != 0) invece di pubblicare un JSON vuoto.
+      - name: Scarica dati stagione corrente
+        run: python src/download_data.py --league ${{ matrix.league }}
+
+      # predict_fixtures rigenera webapp/public/predictions.json:
+      # risultati, quote, confronto bookmaker e simulazione Kelly.
+      # Il freeze resta attivo: le stime delle partite gia' giocate non
+      # cambiano, si aggiornano solo risultato reale, esito e quote.
+      - name: Rigenera predictions.json
+        run: python src/predict_fixtures.py --league ${{ matrix.league }}
+
+      - name: Commit e push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/ webapp/public/
+          if git diff --cached --quiet; then
+            echo "Nessun dato nuovo: niente da committare."
+            exit 0
+          fi
+          git commit -m "ci: aggiorna dati ${{ matrix.league }} ($(date +%Y-%m-%d))"
+          # Se pipeline.yml ha committato nello stesso minuto, rebase e riprova.
+          for i in 1 2 3; do
+            if git push; then exit 0; fi
+            echo "Push rifiutato: rebase e ritento ($i/3)"
+            git pull --rebase --autostash origin main || {
+              git rebase --abort 2>/dev/null || true
+              git reset --hard HEAD 2>/dev/null || true
+              echo "Rebase in conflitto: abort pulito."
+              exit 1
+            }
+          done
+          echo "Push fallito dopo 3 tentativi"
+          exit 1

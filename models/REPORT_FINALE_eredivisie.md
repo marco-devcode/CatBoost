@@ -1,6 +1,6 @@
 # 🏆 Report Finale — CatBoost Eredivisie Match Prediction
 
-**Data**: 2026-10-12 14:29
+**Data**: 2026-10-15 11:01
 **Modello migliore**: Baseline (Pi-Rating + FE) — Eredivisie (`v1_baseline`)
 
 ---
@@ -9,7 +9,7 @@
 
 | Modello | Feature | RPS ↓ | Accuracy |
 |---------|---------|-------|----------|
-| Baseline (Pi-Rating + FE) — Eredivisie | 17 | 0.1340 | 50.41% ◄ **BEST**|
+| Baseline (Pi-Rating + FE) — Eredivisie | 17 | 0.1320 | 50.80% ◄ **BEST**|
 
 ---
 
@@ -17,11 +17,11 @@
 
 | Metrica | Valore | Note |
 |---------|--------|------|
-| **Accuracy** | 0.5041 | Target > 0.52 |
-| **RPS** | 0.1340 | Più basso = meglio |
-| **Recall Home Win** | 74.03% | |
-| **Recall Draw** | 9.28% | Classe più difficile |
-| **Recall Away Win** | 53.45% | |
+| **Accuracy** | 0.5080 | Target > 0.52 |
+| **RPS** | 0.1320 | Più basso = meglio |
+| **Recall Home Win** | 77.07% | |
+| **Recall Draw** | 5.94% | Classe più difficile |
+| **Recall Away Win** | 54.24% | |
 
 ---
 
@@ -29,9 +29,9 @@
 
 | | RPS ↓ | Accuracy |
 |--|-------|----------|
-| **CatBoost (v1_baseline)** | 0.1340 | 50.41% |
-| **Bet365** | 0.1922 | 34.33% |
-| **Delta** | +0.0582 ✅ | +0.1608 ✅ |
+| **CatBoost (v1_baseline)** | 0.1320 | 50.80% |
+| **Bet365** | 0.1907 | 34.31% |
+| **Delta** | +0.0587 ✅ | +0.1649 ✅ |
 
 ---
 
@@ -45,12 +45,12 @@
 
 | Metrica | Valore |
 |---------|--------|
-| Scommesse piazzate | 367 |
+| Scommesse piazzate | 376 |
 | Bankroll iniziale | €1000 |
-| Bankroll finale | €321865786.42 |
-| Profitto | €+321864786.42 |
-| ROI | +32186478.6% |
-| Stake totale | 29571476.9% del bankroll |
+| Bankroll finale | €689035942.44 |
+| Profitto | €+689034942.44 |
+| ROI | +68903494.2% |
+| Stake totale | 73010186.2% del bankroll |
 
 ![Kelly Simulation](kelly_simulation.png)
 
@@ -64,8 +64,8 @@
 
 | Flag | mean |SHAP| | Rank su 17 feature |
 |------|-------------|------|
-| home_promoted | 0.021146 | 16/17 |
-| away_promoted | 0.036448 | 17/17 |
+| home_promoted | 0.012671 | 16/17 |
+| away_promoted | 0.031621 | 17/17 |
 
 ![SHAP Summary](shap_summary.png)
 
@@ -76,13 +76,13 @@
 ```
               precision    recall  f1-score   support
 
-           H     0.5044    0.7403    0.6000       154
-           D     0.5000    0.0928    0.1565        97
-           A     0.5041    0.5345    0.5188       116
+           H     0.4979    0.7707    0.6050       157
+           D     0.5455    0.0594    0.1071       101
+           A     0.5246    0.5424    0.5333       118
 
-    accuracy                         0.5041       367
-   macro avg     0.5028    0.4558    0.4251       367
-weighted avg     0.5031    0.5041    0.4571       367
+    accuracy                         0.5080       376
+   macro avg     0.5227    0.4575    0.4152       376
+weighted avg     0.5191    0.5080    0.4488       376
 
 ```
 

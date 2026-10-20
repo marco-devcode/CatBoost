@@ -245,25 +245,59 @@ def main(league, reset_freeze: bool = False):
 
     if fd_quotes is not None and len(fd_quotes):
         qmap = {}
+        rmap = {}
         for _, r in fd_quotes.iterrows():
             key = (pd.Timestamp(r['Date']).strftime('%Y-%m-%d'),
                    str(r['HomeTeam']), str(r['AwayTeam']))
             try:
                 h, d_, a_ = float(r['B365H']), float(r['B365D']), float(r['B365A'])
             except (KeyError, TypeError, ValueError):
-                continue
-            if all(math.isfinite(v) for v in (h, d_, a_)):
+                h = d_ = a_ = None
+            if h is not None and all(math.isfinite(v) for v in (h, d_, a_)):
                 qmap[key] = (h, d_, a_)
+            # RISULTATI: football-data.co.uk pubblica ogni partita giocata
+            # (FTR/FTHG/FTAG), mentre openfootball NON e' piu' aggiornato
+            # (ultimo auto-update 2026-09-22: 50/63 risultati contro i 70/81
+            # del CSV). Il join (data, casa, fuori) e' 1:1 e senza divergenze
+            # sui risultati in comune, quindi il CSV completa il calendario
+            # dove openfootball non ha ancora il risultato.
+            ftr_fd = r.get('FTR')
+            if isinstance(ftr_fd, str) and ftr_fd.strip().upper() in ('H', 'D', 'A'):
+                try:
+                    hg, ag = int(r['FTHG']), int(r['FTAG'])
+                except (KeyError, TypeError, ValueError):
+                    hg = ag = None
+                if hg is not None and ag is not None:
+                    rmap[key] = (ftr_fd.strip().upper(), hg, ag)
+        # La colonna FTR puo' essere float (tutto NaN) se openfootball non ha
+        # ancora nessun risultato: assegnare una stringa in una colonna float
+        # solleva in pandas>=2. Si passa a object PRIMA di scrivere.
+        if 'FTR' not in fx.columns:
+            print("  Il calendario non ha la colonna FTR: nessun risultato da "
+                  "fondere, restano solo le quote.")
+        elif fx['FTR'].dtype != object:
+            fx['FTR'] = fx['FTR'].astype(object)
         n_applied = 0
+        n_result = 0
         for idx, row in fx.iterrows():
             key = (pd.Timestamp(row['Date']).strftime('%Y-%m-%d'),
                    str(row['HomeTeam']), str(row['AwayTeam']))
             q = qmap.get(key)
-            if q is None:
-                continue
-            fx.at[idx, 'B365H'], fx.at[idx, 'B365D'], fx.at[idx, 'B365A'] = q
-            n_applied += 1
+            if q is not None:
+                fx.at[idx, 'B365H'], fx.at[idx, 'B365D'], fx.at[idx, 'B365A'] = q
+                n_applied += 1
+            res = rmap.get(key)
+            if res is not None:
+                ftr_v, hg, ag = res
+                cur = fx.at[idx, 'FTR']
+                if not (isinstance(cur, str)
+                        and cur.strip().upper() in ('H', 'D', 'A')):
+                    fx.at[idx, 'FTR'] = ftr_v
+                    fx.at[idx, 'FTHG'] = hg
+                    fx.at[idx, 'FTAG'] = ag
+                    n_result += 1
         print(f"  Quote B365 da football-data fuse per chiave: {n_applied}")
+        print(f"  RISULTATI da football-data fusi dove openfootball non li ha: {n_result}")
     else:
         print("  football-data non disponibile: le giocate restano senza quote")
 
@@ -297,14 +331,29 @@ def main(league, reset_freeze: bool = False):
     # la giornata N-1 ha almeno un risultato reale. Quindi le giornate con
     # numero <= (ultima_giornata_giocata + 1) sono CONGELATE: le loro
     # percentuali non si aggiornano piu (no hindsight bias).
+    #
+    # La soglia e' il MAX fra i risultati che il sito CONOSCEVA (JSON
+    # precedente) e quelli appena arrivati da football-data. Serve perche':
+    #  - se football-data rivela in ritardo il risultato della giornata N-1
+    #    (openfootball e' fermo al 22-09), la giornata N va congelata SUBITO:
+    #    ricalcolarla ora userebbe proprio quel risultato = hindsight;
+    #  - la finestra non deve mai RIDURSI: se una fonte torna indietro, le
+    #    giornate gia' congelate devono restare congelate.
     fx_with_result = fx[fx['FTR'].apply(lambda x: isinstance(x, str) and x.strip().upper() in ('H', 'D', 'A'))]
-    if len(fx_with_result):
-        ultima_giocata = int(fx_with_result['giornata'].max())
-    else:
-        ultima_giocata = 0
-    freeze_until = ultima_giocata + 1   # giornate 1..freeze_until sono congelate
+    fx_ultima_giocata = int(fx_with_result['giornata'].max()) if len(fx_with_result) else 0
+    prev_ultima_giocata = 0
+    if not reset_freeze and OUT_JSON.exists():
+        try:
+            with open(OUT_JSON) as f:
+                _old_meta = json.load(f).get("meta", {})
+            prev_ultima_giocata = int(_old_meta.get("ultima_giornata_giocata") or 0)
+        except Exception as e:
+            print(f"  [warn] meta del JSON precedente illeggibile: {e}")
+    ultima_giocata = max(fx_ultima_giocata, prev_ultima_giocata)
+    freeze_until = ultima_giocata + 1   # giornate 1..freeze_until congelate
     print(f"  Freeze (regola N-1): giornate 1..{freeze_until} bloccate "
-          f"(ultima giocata = {ultima_giocata})")
+          f"(ultima giocata = {ultima_giocata}; gia' pubblicata = "
+          f"{prev_ultima_giocata}, appena appresa = {fx_ultima_giocata})")
 
     # Squadre della Serie A corrente: derivate dal calendario stesso (fonte
     # autorevole), NON hardcodate. Serve per il flag neopromossa: chi e' in
@@ -321,6 +370,7 @@ def main(league, reset_freeze: bool = False):
     # prev_estimates contiene solo partite giocate: la chiave e' data+squadre,
     # cosi' un cambio di data non crea una partita nuova con lo stesso nome.
     prev_estimates = {}
+    prev_published = {}
     prev_model_trained_at = None
     model_changed = False
     if OUT_JSON.exists() and not reset_freeze:
@@ -330,10 +380,19 @@ def main(league, reset_freeze: bool = False):
             prev_model_trained_at = old.get("meta", {}).get("model_trained_at")
             for g, ms in old.get("giornate", {}).items():
                 for m in ms:
+                    kk = _match_key(m["home"], m["away"], m["date"])
+                    # prev_published: TUTTE le partite pubblicate, anche quelle
+                    # ancora future. Serve alla regola N-1 (la giornata N non
+                    # si ricalcola piu' quando la N-1 ha un risultato) e al
+                    # passaggio future->giocata: la stima PUBBLICATA prima
+                    # della partita e' quella che va giudicata, non una
+                    # ricalcolata a posteriori.
+                    prev_published[kk] = m
                     if m.get("ok") is not None:
-                        prev_estimates[_match_key(m["home"], m["away"], m["date"])] = m
+                        prev_estimates[kk] = m
             model_changed = (prev_model_trained_at != model_trained_at)
-            print(f"  Freeze ATTIVO su {len(prev_estimates)} partite giocate"
+            print(f"  Freeze ATTIVO su {len(prev_estimates)} partite giocate "
+                  f"({len(prev_published)} pubblicate in totale)"
                   + (" (modello riaddestrato: gli snapshot restano invariati)"
                      if model_changed else ""))
         except Exception as e:
@@ -357,6 +416,7 @@ def main(league, reset_freeze: bool = False):
     bm_rows = []
     model_rows = []
     kelly_log = []
+    n_frozen = 0
 
     for _, row in fx.iterrows():
         g = str(row['giornata'])
@@ -377,8 +437,20 @@ def main(league, reset_freeze: bool = False):
         k = _match_key(m["home"], m["away"], m["date"])
         giornata_n = int(row['giornata'])
         # ── SNAPSHOT / FREEZE ─────────────────────────────────────────────
-        if k in prev_estimates and (played or giornata_n <= freeze_until):
-            old = prev_estimates[k]
+        # TRANSIZIONE future -> giocata: la partita ERA pubblicata come
+        # future (quindi non e' in prev_estimates, che contiene solo le
+        # giocate) e ORA ha un risultato reale. La stima da giudicare e' la
+        # stima PUBBLICATA prima della partita: ricalcolarla adesso la
+        # cambierebbe retroattivamente sul sito e giudicherebbe 'ok' su una
+        # stima diversa da quella mostrata all'utente (hindsight).
+        # Misurato sulla storico (webapp/public/predictions.json):
+        # future->giocate=10 con prob MODIFICATE=0.
+        transizione = (played and k not in prev_estimates
+                       and k in prev_published
+                       and prev_published[k].get("prob") is not None)
+        if transizione or (k in prev_estimates
+                           and (played or giornata_n <= freeze_until)):
+            old = prev_published[k] if transizione else prev_estimates[k]
             m["prob"] = old.get("prob")
             m["pred"] = old.get("pred")
             m["bm"] = old.get("bm")
@@ -395,6 +467,15 @@ def main(league, reset_freeze: bool = False):
             m["esito"] = old.get("esito")
             m["ok"] = old.get("ok")
             m["features"] = old.get("features")
+            if transizione:
+                # La partita ERA future: il risultato reale arriva adesso,
+                # ma la stima da giudicare resta quella pubblicata prima
+                # della partita (m["prob"]/m["pred"] sopra). 'ok' si calcola
+                # su QUELLA pred, non su una stima ricalcolata a posteriori.
+                ftr_u = ftr.strip().upper()
+                m["risultato"] = f"{int(row['FTHG'])}-{int(row['FTAG'])}"
+                m["esito"] = ftr_u
+                m["ok"] = bool(m["pred"] == ftr_u) if m.get("pred") else None
             # Se lo snapshot non aveva le quote ma il CSV/le quote di oggi le
             # portano, si ricostruiscono. Il caso reale (Eredivisie, prima
             # run) era peggio: lo snapshot aveva bm = {"H": None, "D": None,
@@ -445,13 +526,32 @@ def main(league, reset_freeze: bool = False):
                         "kelly": round(kf, 4), "win": (m["esito"] == lab),
                     })
         else:
-            # Partita FUTURA (o mai vista): ricalcola col modello ATTUALE.
-            feats = compute_features_for_match(history, m["home"], m["away"], row['Date'], h2h_cache, current_season_teams)
-            X = pd.DataFrame([{c: feats.get(c, 0.0) for c in FEATURE_ORDER}])
-            probs = model.predict_proba(X)[0]
-            m["prob"] = {LABELS[i]: round(float(probs[i]) * 100, 1) for i in range(3)}
-            m["pred"] = LABELS[int(np.argmax(probs))]
-            m["features"] = {c: round(float(feats.get(c, 0.0)), 3) for c in FEATURE_ORDER}
+            # Partita FUTURA (o mai vista).
+            #
+            # REGOLA N-1 (finestra di freeze = ultima_giocata + 1): se la
+            # giornata e' GIA' dentro la finestra, la stima e' CONGELATA e si
+            # riusa lo snapshot pubblicato invece di ricalcolare col modello
+            # di oggi. Prima la condizione era `k in prev_estimates`, ma
+            # prev_estimates contiene SOLO le partite giocate: per una future
+            # era sempre falsa, quindi la clausola `giornata_n <= freeze_until`
+            # non scattava MAI (codice morto). Misurato fra due run: 330/330
+            # stime future erano cambiate, comprese quelle dentro la finestra.
+            # Il primo run di una giornata nuova (non ancora in prev_published)
+            # la calcola: quello e' il suo primo snapshot, poi si riusa.
+            if (giornata_n <= freeze_until and k in prev_published
+                    and prev_published[k].get("prob") is not None):
+                old = prev_published[k]
+                m["prob"] = old.get("prob")
+                m["pred"] = old.get("pred")
+                m["features"] = old.get("features")
+                n_frozen += 1
+            else:
+                feats = compute_features_for_match(history, m["home"], m["away"], row['Date'], h2h_cache, current_season_teams)
+                X = pd.DataFrame([{c: feats.get(c, 0.0) for c in FEATURE_ORDER}])
+                probs = model.predict_proba(X)[0]
+                m["prob"] = {LABELS[i]: round(float(probs[i]) * 100, 1) for i in range(3)}
+                m["pred"] = LABELS[int(np.argmax(probs))]
+                m["features"] = {c: round(float(feats.get(c, 0.0)), 3) for c in FEATURE_ORDER}
 
             if played:
                 ftr = ftr.strip().upper()
@@ -689,6 +789,7 @@ def main(league, reset_freeze: bool = False):
         json.dump(out, f, indent=2, ensure_ascii=False, allow_nan=False)
     print(f"\nGiornate: {len(giornate)} | Giocate: {len(giocate)} "
           f"| Corrette: {corrette} ({(corrette/max(len(giocate),1)*100):.0f}%)")
+    print(f"Stime future congelate per regola N-1: {n_frozen}")
     print(f"Salvato: {OUT_JSON}")
 
 

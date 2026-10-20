@@ -1,9 +1,21 @@
 name: Aggiorna quote e risultati
 
-# Ogni giorno a mezzanotte UTC: scarica il CSV della stagione da
-# football-data.co.uk (che porta risultati E quote B365), rigenera
-# predictions.json con predict_fixtures.py, e committa. Il push fa
-# scattare il redeploy automatico di cat-boost.vercel.app.
+# Ogni giorno a mezzanotte UTC: rigenera i JSON delle previsioni per OGNI
+# campionato, cosi' i risultati reali e la simulazione Kelly sul sito
+# si aggiornano da soli entro qualche ora dalla fine delle partite.
+#
+# PERCHE' LA CATENA COMPLETA (download -> clean -> ratings -> features ->
+# model -> predict) E NON SOLO "predict":
+# il modello (.cbm) e' GITIGNORED, quindi su un runner fresco non esiste.
+# Un workflow che lancia solo predict_fixtures muore con
+#   FileNotFoundError: models/catboost_seriea_v1.cbm
+# e il sito resta fermo (e' successo dal 14-10 al 20-10: 7 run notturni
+# falliti in fila). Il .cbm NON va committato: e' un binario e in due job
+# in matrice finirebbe in conflitto add/add a ogni rebase.
+#
+# Il commit e' limitato a webapp/public/: e' il JSON che il sito legge.
+# data/ e models/ restano al workflow "Pipeline Campionati" (lunedi'/giovedi'),
+# cosi' i due workflow non si pestano i piedi sui CSV e sui JSON.
 #
 # Perche' ogni giorno e non lunedi/giovedi come pipeline.yml: le quote
 # della giornata successiva compaiono su football-data alcuni giorni prima
@@ -21,7 +33,7 @@ permissions:
 jobs:
   aggiorna-dati:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     strategy:
       # Sequenziale: due leghe che spingono su main in parallelo si
       # pestano i piedi (il secondo fa rebase su un commit che il primo
@@ -34,6 +46,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -45,24 +59,57 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      # Controllo di presenza del secret. La env va dichiarata SULLO STEP
+      # che usa l'API (predict_fixtures), non qui: la env di GitHub Actions
+      # e' per-step, quindi dichiararla solo come controllo non la inoltra.
+      - name: Quote TheOddsAPI (secret)
+        env:
+          THEODDSAPI_KEY: ${{ secrets.THEODDSAPI_KEY }}
+        run: |
+          if [ -n "$THEODDSAPI_KEY" ]; then
+            echo "Chiave TheOddsAPI presente e inoltrata agli step successivi"
+          else
+            echo "ATTENZIONE: secret THEODDSAPI_KEY non impostato."
+            echo "Le previsioni future avranno bm=null (solo le giocate avranno quote)."
+          fi
+
       # Il CSV di football-data.co.uk porta risultati E quote B365: e' la
-      # fonte unica, nessuna chiave richiesta. Se il download fallisce lo
-      # step si ferma (exit code != 0) invece di pubblicare un JSON vuoto.
+      # fonte dei risultati reali (openfootball e' fermo al 22-09, quindi da
+      # solo non arriverebbe piu' nessun risultato). Se il download fallisce
+      # lo step si ferma (exit code != 0) invece di pubblicare un JSON
+      # vuoto o con risultati mancanti.
       - name: Scarica dati stagione corrente
         run: python src/download_data.py --league ${{ matrix.league }}
 
-      # predict_fixtures rigenera webapp/public/predictions.json:
-      # risultati, quote, confronto bookmaker e simulazione Kelly.
+      - name: Clean dati
+        run: python src/clean_data.py --league ${{ matrix.league }}
+
+      - name: Pi-Rating (Dixon-Coles)
+        run: python src/ratings.py --league ${{ matrix.league }}
+
+      - name: Feature engineering
+        run: python src/features.py --league ${{ matrix.league }}
+
+      # Serve perche' il .cbm non e' nel repo: sul runner si allena qui.
+      # Il training e' temporale (cutoff 2025-08-01), quindi le partite del
+      # 2026 non entrano mai nel training: nessun lookahead.
+      - name: Train CatBoost
+        run: python src/model.py --league ${{ matrix.league }}
+
+      # predict_fixtures rigenera webapp/public/predictions_<lega>.json:
+      # risultati reali, quote, confronto bookmaker e simulazione Kelly.
       # Il freeze resta attivo: le stime delle partite gia' giocate non
       # cambiano, si aggiornano solo risultato reale, esito e quote.
       - name: Rigenera predictions.json
+        env:
+          THEODDSAPI_KEY: ${{ secrets.THEODDSAPI_KEY }}
         run: python src/predict_fixtures.py --league ${{ matrix.league }}
 
       - name: Commit e push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/ webapp/public/
+          git add webapp/public/
           if git diff --cached --quiet; then
             echo "Nessun dato nuovo: niente da committare."
             exit 0

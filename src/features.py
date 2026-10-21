@@ -441,7 +441,16 @@ def main(league):
                         ('Date', 'HomeTeam', 'AwayTeam', 'FTHG', 'FTAG', 'FTR', 'season',
                          'HST', 'AST', 'HS', 'AS')]
     for col in all_feature_cols:
-        print(f"  {col:<25} mean={df[col].mean():.3f}, std={df[col].std():.3f}")
+        # Solo colonne numeriche: il CSV ha anche colonne testuali (es.
+        # "Div", "Unnamed: 70") e su quelle .mean() solleva
+        # "TypeError: Cannot perform reduction 'mean' with string dtype".
+        # Il dump e' puramente diagnostico: non deve mai far fallire la
+        # pipeline (i dati sono gia' salvati nella riga sopra).
+        s = pd.to_numeric(df[col], errors="coerce")
+        if s.notna().sum() == 0:
+            print(f"  {col:<25} (non numerica)")
+            continue
+        print(f"  {col:<25} mean={s.mean():.3f}, std={s.std():.3f}")
 
     X_train, X_test, y_train, y_test, feature_cols = build_feature_matrix(df)
 

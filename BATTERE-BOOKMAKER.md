@@ -348,6 +348,39 @@ disponibili). Decisione: si tiene `v2_full`.
 
 ---
 
+## 6c. Verifica in CI (GitHub Actions)
+
+La pipeline `pipeline.yml` (matrice 2 leghe) è stata lanciata su `main` dopo
+il push: run `39661332146`.
+
+- **Serie A: verde**, tutti gli step (download → clean → ratings → features →
+  model → evaluate → predict_fixtures → commit artefatti). Il commit
+  `d10c5bf` ha pubblicato i nuovi artefatti.
+- **Eredivisie: rosso** in "Feature engineering", per un bug **solo
+  diagnostico**: il dump finale delle feature faceva `df[col].mean()` su
+  colonne testuali (`Div`, `Unnamed: 70`) presenti nel CSV Eredivisie
+  scaricato in CI → `TypeError: Cannot perform reduction 'mean' with string
+  dtype`. I dati erano **gia' salvati** (il `to_csv` precede il dump): il
+  job moriva solo sul print. Corretto in `src/features.py` con
+  `pd.to_numeric(..., errors="coerce")` e un ramo esplicito per le colonne
+  non numeriche: il dump non può più far fallire la pipeline.
+
+**Numeri prodotti dalla CI** (tuning completo, dataset aggiornato al
+2026-10-21, 438 righe di test):
+
+| | valore CI |
+|---|---|
+| accuracy | 0.551339 |
+| RPS | 0.130787 |
+| calibrazione alpha | [0.0466, −0.0605, 0.0139] |
+| calibrazione w | 0.751868 |
+
+La calibrazione cross-fitted è stata rigenerata in CI con valori coerenti con
+quelli misurati in locale (§5b): conferma che il meccanismo è riproducibile
+su runner pulito.
+
+---
+
 ## 7. Stato onesto
 
 - ✅ **Freeze rimosso** ovunque (codice, refresh, workflow, test): le

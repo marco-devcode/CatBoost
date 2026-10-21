@@ -1,6 +1,6 @@
 # 🏆 Report Finale — CatBoost Eredivisie Match Prediction
 
-**Data**: 2026-10-19 12:11
+**Data**: 2026-10-21 20:15
 **Modello migliore**: Baseline (Pi-Rating + FE) — Eredivisie (`v1_baseline`)
 
 ---
@@ -9,7 +9,7 @@
 
 | Modello | Feature | RPS ↓ | Accuracy |
 |---------|---------|-------|----------|
-| Baseline (Pi-Rating + FE) — Eredivisie | 17 | 0.1316 | 50.80% ◄ **BEST**|
+| Baseline (Pi-Rating + FE) — Eredivisie | 41 | 0.1334 | 53.77% ◄ **BEST**|
 
 ---
 
@@ -17,11 +17,11 @@
 
 | Metrica | Valore | Note |
 |---------|--------|------|
-| **Accuracy** | 0.5080 | Target > 0.52 |
-| **RPS** | 0.1316 | Più basso = meglio |
-| **Recall Home Win** | 76.43% | |
-| **Recall Draw** | 5.94% | Classe più difficile |
-| **Recall Away Win** | 55.08% | |
+| **Accuracy** | 0.5377 | Target > 0.52 |
+| **RPS** | 0.1334 | Più basso = meglio |
+| **Recall Home Win** | 73.91% | |
+| **Recall Draw** | 11.65% | Classe più difficile |
+| **Recall Away Win** | 62.81% | |
 
 ---
 
@@ -29,9 +29,9 @@
 
 | | RPS ↓ | Accuracy |
 |--|-------|----------|
-| **CatBoost (v1_baseline)** | 0.1316 | 50.80% |
-| **Bet365** | 0.1907 | 34.31% |
-| **Delta** | +0.0591 ✅ | +0.1649 ✅ |
+| **CatBoost (v1_baseline)** | 0.1334 | 53.77% |
+| **Bet365** | 0.1900 | 34.81% |
+| **Delta** | +0.0566 ✅ | +0.1896 ✅ |
 
 ---
 
@@ -45,12 +45,12 @@
 
 | Metrica | Valore |
 |---------|--------|
-| Scommesse piazzate | 376 |
+| Scommesse piazzate | 385 |
 | Bankroll iniziale | €1000 |
-| Bankroll finale | €716076145.10 |
-| Profitto | €+716075145.10 |
-| ROI | +71607514.5% |
-| Stake totale | 69524894.3% del bankroll |
+| Bankroll finale | €356783898.81 |
+| Profitto | €+356782898.81 |
+| ROI | +35678289.9% |
+| Stake totale | 43405050.4% del bankroll |
 
 ![Kelly Simulation](kelly_simulation.png)
 
@@ -62,10 +62,10 @@
 > Se ≈ 0 → il flag non porta segnale e può essere rimosso. Se `home_promoted`
 > e `away_promoted` hanno valori simili → erano ridondanti, conviene unificarli.
 
-| Flag | mean |SHAP| | Rank su 17 feature |
+| Flag | mean |SHAP| | Rank su 41 feature |
 |------|-------------|------|
-| home_promoted | 0.013715 | 16/17 |
-| away_promoted | 0.032629 | 17/17 |
+| home_promoted | 0.013741 | 16/41 |
+| away_promoted | 0.030224 | 17/41 |
 
 ![SHAP Summary](shap_summary.png)
 
@@ -76,13 +76,13 @@
 ```
               precision    recall  f1-score   support
 
-           H     0.5021    0.7643    0.6061       157
-           D     0.6667    0.0594    0.1091       101
-           A     0.5078    0.5508    0.5285       118
+           H     0.5385    0.7391    0.6230       161
+           D     0.5000    0.1165    0.1890       103
+           A     0.5429    0.6281    0.5824       121
 
-    accuracy                         0.5080       376
-   macro avg     0.5589    0.4582    0.4145       376
-weighted avg     0.5481    0.5080    0.4482       376
+    accuracy                         0.5377       385
+   macro avg     0.5271    0.4946    0.4648       385
+weighted avg     0.5296    0.5377    0.4941       385
 
 ```
 

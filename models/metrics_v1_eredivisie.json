@@ -1,6 +1,13 @@
 {
-  "accuracy": 0.507979,
-  "rps": 0.131623,
+  "accuracy": 0.537662,
+  "rps": 0.133364,
+  "calibration_alpha": [
+    -0.170074035090261,
+    -0.059805933703766634,
+    0.2298807376516561
+  ],
+  "calibration_w": 0.830809,
+  "calibration_n_val": 2239,
   "features": [
     "pi_home_H",
     "pi_away_H",
@@ -18,7 +25,31 @@
     "away_goals_scored_5",
     "away_goals_conceded_5",
     "home_promoted",
-    "away_promoted"
+    "away_promoted",
+    "home_shots_5",
+    "away_shots_5",
+    "home_shots_t_5",
+    "away_shots_t_5",
+    "home_corners_5",
+    "away_corners_5",
+    "home_cards_5",
+    "away_cards_5",
+    "elo_home",
+    "elo_away",
+    "elo_home_expect",
+    "elo_away_expect",
+    "mkt_b365_pH",
+    "mkt_b365_pD",
+    "mkt_b365_pA",
+    "mkt_b365_overround",
+    "mkt_pinnacle_pH",
+    "mkt_pinnacle_pD",
+    "mkt_pinnacle_pA",
+    "mkt_pinnacle_overround",
+    "mkt_avg_pH",
+    "mkt_avg_pD",
+    "mkt_avg_pA",
+    "mkt_avg_overround"
   ],
   "league": "eredivisie"
 }

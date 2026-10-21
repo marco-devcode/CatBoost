@@ -23,7 +23,8 @@ fake = types.ModuleType("catboost")
 fake.CatBoostClassifier = object
 sys.modules["catboost"] = fake
 
-from predict import compute_features_for_match, FEATURE_ORDER  # noqa: E402
+from predict import compute_features_for_match  # noqa: E402
+from predict import _build_feature_order  # noqa: E402
 
 # Le feature devono combaciare su TUTTO lo storico, non solo sull'ultima
 # stagione: un bug che si manifesta solo su 2627 passerebbe inosservato.
@@ -36,7 +37,13 @@ LEAGUES = [
 # (predict.is_promoted lavora con l'insieme squadre del CALENDARIO, il
 # training con la stagione precedente): su 2627 coincide, e la differenza
 # sulle stagioni passate e' intenzionale, non un disallineamento.
-CHECKED = [c for c in FEATURE_ORDER if not c.endswith("_promoted")]
+#
+# L'elenco delle feature da controllare e' quello COMPLETO (base + avanzate),
+# costruito sulle colonne del dataset come in training: se l'inferenza
+# aggiungesse o perdesse una feature, qui si vedrebbe.
+def _checked_for(available_cols):
+    return [c for c in _build_feature_order(available_cols)
+            if not c.endswith("_promoted")]
 
 failures = 0
 
@@ -49,6 +56,46 @@ for key, ratings_path, features_path in LEAGUES:
     # e' identico.
     current = feats[feats["Date"] >= "2026-08-01"]
     sample = feats.sample(n=min(300, len(feats)), random_state=1)
+    # Le quote del match servono alle feature di mercato: senza, l'inferenza
+    # darebbe NaN dove il training ha un numero (disallineamento reale).
+    import csv as _csv
+    import datetime as _dt
+
+    def _dparse(s):
+        s = (s or "").strip()
+        for f in ("%d/%m/%y", "%d/%m/%Y", "%Y-%m-%d"):
+            try:
+                return _dt.datetime.strptime(s, f).date().isoformat()
+            except ValueError:
+                pass
+        return s
+
+    raw_path = ROOT / (f"data/{key}_raw.csv" if key != "seriea" else "data/serie_a_raw.csv")
+    odds_by_key = {}
+    if raw_path.exists():
+        with open(raw_path, newline="", encoding="latin-1") as _f:
+            for _row in _csv.DictReader(_f):
+                _d = _dparse(_row.get("Date", ""))
+                _h = (_row.get("HomeTeam") or "").strip()
+                _a = (_row.get("AwayTeam") or "").strip()
+                if not (_d and _h and _a):
+                    continue
+                # TUTTE le fonti di mercato, come in produzione
+                # (src/predict_fixtures.py passa b365 + pinnacle + avg).
+                _books = {}
+                for _label, _cols in (("b365", ("B365H", "B365D", "B365A")),
+                                      ("pinnacle", ("PSH", "PSD", "PSA")),
+                                      ("avg", ("AvgH", "AvgD", "AvgA"))):
+                    try:
+                        _v = tuple(float(_row[c]) for c in _cols)
+                    except (KeyError, TypeError, ValueError):
+                        continue
+                    if all(v > 1.0 for v in _v):
+                        _books[_label] = _v
+                if _books:
+                    odds_by_key[(_d, _h, _a)] = _books
+
+    CHECKED = _checked_for(feats.columns)
     for label, rows in (("26/27", current), ("storico (campione)", sample)):
         bad = {}
         # iterrows, non itertuples: pandas rinomina i campi itertuples che
@@ -57,7 +104,10 @@ for key, ratings_path, features_path in LEAGUES:
         # fallire. Un test che legge il dato sbagliato verde e' peggio di
         # nessun test.
         for _, r in rows.iterrows():
-            d = compute_features_for_match(hist, r.HomeTeam, r.AwayTeam, r.Date)
+            _odds = odds_by_key.get(
+                (r.Date.strftime("%Y-%m-%d"), str(r.HomeTeam).strip(), str(r.AwayTeam).strip()))
+            d = compute_features_for_match(hist, r.HomeTeam, r.AwayTeam, r.Date,
+                                           odds=_odds)
             for c in CHECKED:
                 tv = r[c]
                 iv = d.get(c)

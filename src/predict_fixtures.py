@@ -22,6 +22,7 @@ In piu' (per la dashboard):
 Le stime delle partite passate restano STABILI nel tempo: lo storico cresce ma
 non "sgonfia" le probabilita' gia' pubblicate.
 """
+import os
 import sys
 import io
 import json
@@ -99,17 +100,59 @@ def _match_key(home: str, away: str, date: str) -> str:
     return f"{date}|{home}|{away}"
 
 
-def bookmaker_prob(home_odd, draw_odd, away_odd):
-    """Normalizza le quote B365 rimuovendo l'overround -> probabilita' 1X2."""
+def bookmaker_prob(home_odd, draw_odd, away_odd, method=None):
+    """Quote B365 -> probabilita' 1X2, rimuovendo il margine (de-vig).
+
+    Il metodo di default NON e' piu' la normalizzazione proporzionale (quella
+    storica del repo): e' il metodo "additive", scelto EMPIRICAMENTE su 6135
+    partite Serie A con quote B365 reali (scripts/select_devig.py), dove e'
+    quello con il log-loss minimo, quindi il piu' CALIBRATO come previsione
+    del risultato.
+
+    Numeri (stesso dataset, log-loss sulle partite giocate):
+      multiplicative  0.96105  <- metodo storico del repo
+      additive        0.95982  <- scelto qui
+      power           0.95985
+      shin            0.96006
+      odds_ratio      0.96022
+
+    Perche' il metodo storico e' sbagliato: il bookmaker non distribuisce il
+    margine in modo uniforme (favourite-longshot bias: margine relativo
+    maggiore sui longshot), quindi la normalizzazione proporzionale toglie
+    TROPPO al favorito e TROPPO POCO al longshot. L'effetto e' che il
+    benchmark storico sottostimava la qualita' del bookmaker: il confronto
+    "modello vs bookmaker" era falsato in entrambe le direzioni.
+
+    Riferimenti: Shin (1992, 1993) The Economic Journal; Power (1990) IJF;
+    Strumbelj (2014) IJF; Eckert (2013) Univ. of Canterbury WP.
+    """
     try:
         h, d, a = float(home_odd), float(draw_odd), float(away_odd)
-        if h <= 1.0 or d <= 1.0 or a <= 1.0:
-            return None
+    except (TypeError, ValueError):
+        return None
+    if h <= 1.0 or d <= 1.0 or a <= 1.0:
+        return None
+    if method is None:
+        try:
+            from implied import DE_VIG_METHODS
+            method = os.environ.get("HERMES_DE_VIG_METHOD", "additive")
+            fn = DE_VIG_METHODS.get(method) or DE_VIG_METHODS["additive"]
+            return fn([h, d, a])
+        except Exception:
+            method = "additive"
+    try:
         raw = [1.0 / h, 1.0 / d, 1.0 / a]
         tot = sum(raw)
         if tot <= 0:
             return None
-        return [x / tot for x in raw]  # [pH, pD, pA]
+        if method == "multiplicative":
+            return [x / tot for x in raw]  # [pH, pD, pA]
+        # additive: margine equidistribuito
+        m = (tot - 1.0) / 3.0
+        out = [x - m for x in raw]
+        if any(v <= 0 for v in out):
+            return None
+        return out
     except (TypeError, ValueError):
         return None
 
@@ -125,7 +168,7 @@ def ranked_probability_score(y_true, y_proba):
     return rps / max(len(y_true), 1)
 
 
-def main(league, reset_freeze: bool = False):
+def main(league):
     print("=" * 55)
     print(f"PREDIZIONI FIXTURE {league.name} "
           f"{league.season_fd[:2]}/{league.season_fd[2:]}")
@@ -143,10 +186,23 @@ def main(league, reset_freeze: bool = False):
     model.load_model(str(MODEL_PATH))
     model_trained_at = pd.Timestamp(MODEL_PATH.stat().st_mtime).isoformat(timespec="seconds")
 
-    from predict import (load_history, compute_features_for_match, FEATURE_ORDER,
-                         is_promoted)
+    from predict import (load_history, compute_features_for_match, is_promoted)
+    from predict import _build_feature_order, apply_saved_calibration
 
     history = load_history(league)
+
+    # L'elenco delle feature viene derivato dal MODELO STESSO: CatBoost
+    # registra i nomi delle feature usate in training, quindi l'inferenza
+    # usa esattamente quelle, nell'ordine giusto. Se il training e
+    # l'inferenza divergessero, il modello riceverebbe colonne diverse da
+    # quelle su cui e' stato addestrato -> output rumore.
+    #
+    # La fonte resta il modello, non il dataset corrente: cosi' un dataset
+    # rigenerato non puo' cambiare silenziosamente le feature del modello
+    # gia' allenato.
+    model_feature_names = list(model.feature_names_)
+    FEATURE_ORDER = model_feature_names
+    print(f"Feature dal modello ({len(FEATURE_ORDER)}): {FEATURE_ORDER}")
     print(f"Storico: {len(history)} partite")
 
     # ── Calendario ────────────────────────────────────────────────────
@@ -246,6 +302,7 @@ def main(league, reset_freeze: bool = False):
     if fd_quotes is not None and len(fd_quotes):
         qmap = {}
         rmap = {}
+        extra_quotes = {}
         for _, r in fd_quotes.iterrows():
             key = (pd.Timestamp(r['Date']).strftime('%Y-%m-%d'),
                    str(r['HomeTeam']), str(r['AwayTeam']))
@@ -255,6 +312,19 @@ def main(league, reset_freeze: bool = False):
                 h = d_ = a_ = None
             if h is not None and all(math.isfinite(v) for v in (h, d_, a_)):
                 qmap[key] = (h, d_, a_)
+            # Pinnacle e media di mercato: nel TRAINING il modello vede
+            # anche queste fonti (12 feature di mercato in tutto), quindi
+            # l'inferenza deve riceverle dove disponibili, altrimenti gira
+            # su colonne diverse da quelle su cui e' stata addestrata.
+            # Sono le quote di APERTURA: note prima del match, nessun hindsight.
+            for _label, _cols in (("pinnacle", ('PSH', 'PSD', 'PSA')),
+                                  ("avg", ('AvgH', 'AvgD', 'AvgA'))):
+                try:
+                    _v = tuple(float(r[c]) for c in _cols)
+                except (KeyError, TypeError, ValueError):
+                    continue
+                if all(math.isfinite(v) and v > 1.0 for v in _v):
+                    extra_quotes.setdefault(key, {})[_label] = _v
             # RISULTATI: football-data.co.uk pubblica ogni partita giocata
             # (FTR/FTHG/FTAG), mentre openfootball NON e' piu' aggiornato
             # (ultimo auto-update 2026-09-22: 50/63 risultati contro i 70/81
@@ -286,6 +356,18 @@ def main(league, reset_freeze: bool = False):
             if q is not None:
                 fx.at[idx, 'B365H'], fx.at[idx, 'B365D'], fx.at[idx, 'B365A'] = q
                 n_applied += 1
+            # Pinnacle e media di mercato: stesse quote di apertura, dal CSV.
+            # Servono alle 8 feature mkt_pinnacle_*/mkt_avg_* che il modello
+            # si aspetta (il training le ha dove il CSV storico le aveva).
+            ex = extra_quotes.get(key)
+            if ex:
+                for _label, _cols in (("pinnacle", ('PSH', 'PSD', 'PSA')),
+                                      ("avg", ('AvgH', 'AvgD', 'AvgA'))):
+                    if _label in ex:
+                        for _c, _v in zip(_cols, ex[_label]):
+                            if _c not in fx.columns:
+                                fx[_c] = np.nan
+                            fx.at[idx, _c] = _v
             res = rmap.get(key)
             if res is not None:
                 ftr_v, hg, ag = res
@@ -326,34 +408,15 @@ def main(league, reset_freeze: bool = False):
     if n_odds:
         print(f"  Quote prepartita (TheOddsAPI): {n_odds} partite future")
 
-    # ── Soglia di freeze (regola N-1) ───────────────────────────────────
-    # Una giornata N e' "bloccabile" (snapshot non piu ricalcolato) non appena
-    # la giornata N-1 ha almeno un risultato reale. Quindi le giornate con
-    # numero <= (ultima_giornata_giocata + 1) sono CONGELATE: le loro
-    # percentuali non si aggiornano piu (no hindsight bias).
-    #
-    # La soglia e' il MAX fra i risultati che il sito CONOSCEVA (JSON
-    # precedente) e quelli appena arrivati da football-data. Serve perche':
-    #  - se football-data rivela in ritardo il risultato della giornata N-1
-    #    (openfootball e' fermo al 22-09), la giornata N va congelata SUBITO:
-    #    ricalcolarla ora userebbe proprio quel risultato = hindsight;
-    #  - la finestra non deve mai RIDURSI: se una fonte torna indietro, le
-    #    giornate gia' congelate devono restare congelate.
+    # ── Ultima giornata giocata (informativa) ─────────────────────────────
+    # Il freeze e' stato RIMOSSO: ogni partita viene ricalcolata con il
+    # modello di oggi, giocate e future. Resta pero' utile sapere quale e'
+    # l'ultima giornata con risultato reale (la dashboard la mostra, e serve
+    # al refresh per capire cosa e' gia' stato giocato).
     fx_with_result = fx[fx['FTR'].apply(lambda x: isinstance(x, str) and x.strip().upper() in ('H', 'D', 'A'))]
     fx_ultima_giocata = int(fx_with_result['giornata'].max()) if len(fx_with_result) else 0
-    prev_ultima_giocata = 0
-    if not reset_freeze and OUT_JSON.exists():
-        try:
-            with open(OUT_JSON) as f:
-                _old_meta = json.load(f).get("meta", {})
-            prev_ultima_giocata = int(_old_meta.get("ultima_giornata_giocata") or 0)
-        except Exception as e:
-            print(f"  [warn] meta del JSON precedente illeggibile: {e}")
-    ultima_giocata = max(fx_ultima_giocata, prev_ultima_giocata)
-    freeze_until = ultima_giocata + 1   # giornate 1..freeze_until congelate
-    print(f"  Freeze (regola N-1): giornate 1..{freeze_until} bloccate "
-          f"(ultima giocata = {ultima_giocata}; gia' pubblicata = "
-          f"{prev_ultima_giocata}, appena appresa = {fx_ultima_giocata})")
+    ultima_giocata = fx_ultima_giocata
+    print(f"  Ultima giornata giocata: {ultima_giocata} (freeze: DISATTIVATO)")
 
     # Squadre della Serie A corrente: derivate dal calendario stesso (fonte
     # autorevole), NON hardcodate. Serve per il flag neopromossa: chi e' in
@@ -362,52 +425,37 @@ def main(league, reset_freeze: bool = False):
     print(f"Squadre stagione corrente ({len(current_season_teams)}): "
           f"{sorted(current_season_teams)}")
 
-    # ── Freeze stime passate ──────────────────────────────────────────
-    # Il freeze e' SEMPRE attivo per le partite con risultato reale, anche se il
-    # modello e' stato riaddestrato nel frattempo. Ricalcolare le percentuali
-    # di una partita gia' giocata userebbe informazioni che al momento della
-    # previsione non esistevano (hindsight bias), quindi lo snapshot resta.
-    # prev_estimates contiene solo partite giocate: la chiave e' data+squadre,
-    # cosi' un cambio di data non crea una partita nuova con lo stesso nome.
-    prev_estimates = {}
+    # ── Snapshot precedente (solo come riferimento) ───────────────────────
+    # Il freeze e' stato rimosso: le partite giocate NON vengono piu' prese
+    # dallo snapshot, ma ricalcolate col modello di oggi.
+    #
+    # Perche' il ricalcolo e' lecito (nessun hindsight): lo split di training
+    # e' TEMPORALE (cutoff 2025-08-01), quindi le partite del 2026-27 non
+    # sono mai state nel training; e le feature sono calcolate solo su dati
+    # PRECEDENTI la partita. Ricalcolare una partita gia' giocata non
+    # introduce informazione che non era disponibile al momento della
+    # previsione.
+    #
+    # Resta pero' utile sapere quante stime cambiano rispetto alla
+    # pubblicazione precedente: e' il dato che segnala un modello o una
+    # feature cambiati.
     prev_published = {}
     prev_model_trained_at = None
     model_changed = False
-    if OUT_JSON.exists() and not reset_freeze:
+    if OUT_JSON.exists():
         try:
             with open(OUT_JSON) as f:
                 old = json.load(f)
             prev_model_trained_at = old.get("meta", {}).get("model_trained_at")
             for g, ms in old.get("giornate", {}).items():
                 for m in ms:
-                    kk = _match_key(m["home"], m["away"], m["date"])
-                    # prev_published: TUTTE le partite pubblicate, anche quelle
-                    # ancora future. Serve alla regola N-1 (la giornata N non
-                    # si ricalcola piu' quando la N-1 ha un risultato) e al
-                    # passaggio future->giocata: la stima PUBBLICATA prima
-                    # della partita e' quella che va giudicata, non una
-                    # ricalcolata a posteriori.
-                    prev_published[kk] = m
-                    if m.get("ok") is not None:
-                        prev_estimates[kk] = m
+                    prev_published[_match_key(m["home"], m["away"], m["date"])] = m
             model_changed = (prev_model_trained_at != model_trained_at)
-            print(f"  Freeze ATTIVO su {len(prev_estimates)} partite giocate "
-                  f"({len(prev_published)} pubblicate in totale)"
-                  + (" (modello riaddestrato: gli snapshot restano invariati)"
+            print(f"  Snapshot precedente: {len(prev_published)} partite pubblicate"
+                  + (" (modello riaddestrato: le stime si aggiornano)"
                      if model_changed else ""))
         except Exception as e:
             print(f"  [warn] predictions.json precedente illeggibile: {e}")
-    elif reset_freeze:
-        # Reset ESPLICITO del freeze, deciso dall'utente: le partite giocate
-        # vengono ricalcolate da zero invece di essere riprese dallo
-        # snapshot. Serve quando cambia la definizione di una feature (es.
-        # REST_CAP) e gli snapshot contengono valori ormai superati.
-        #
-        # NON e' un ricalcolo disonesto: lo split di training e' temporale con
-        # cutoff 2025-08-01, quindi le partite del 2026 non sono mai state nel
-        # training del modello. Ricalcolarle non introduce lookahead.
-        print("  RESET FREEZE: le partite giocate verranno ricalcolate "
-              "(lo split di training e' temporale, nessun lookahead)")
 
     # ── Predizioni + bookmaker + kelly ────────────────────────────────
     LABELS = ['H', 'D', 'A']
@@ -416,7 +464,7 @@ def main(league, reset_freeze: bool = False):
     bm_rows = []
     model_rows = []
     kelly_log = []
-    n_frozen = 0
+    n_changed = 0
 
     for _, row in fx.iterrows():
         g = str(row['giornata'])
@@ -436,220 +484,166 @@ def main(league, reset_freeze: bool = False):
 
         k = _match_key(m["home"], m["away"], m["date"])
         giornata_n = int(row['giornata'])
-        # ── SNAPSHOT / FREEZE ─────────────────────────────────────────────
-        # TRANSIZIONE future -> giocata: la partita ERA pubblicata come
-        # future (quindi non e' in prev_estimates, che contiene solo le
-        # giocate) e ORA ha un risultato reale. La stima da giudicare e' la
-        # stima PUBBLICATA prima della partita: ricalcolarla adesso la
-        # cambierebbe retroattivamente sul sito e giudicherebbe 'ok' su una
-        # stima diversa da quella mostrata all'utente (hindsight).
-        # Misurato sulla storico (webapp/public/predictions.json):
-        # future->giocate=10 con prob MODIFICATE=0.
-        transizione = (played and k not in prev_estimates
-                       and k in prev_published
-                       and prev_published[k].get("prob") is not None)
-        if transizione or (k in prev_estimates
-                           and (played or giornata_n <= freeze_until)):
-            old = prev_published[k] if transizione else prev_estimates[k]
-            m["prob"] = old.get("prob")
-            m["pred"] = old.get("pred")
-            m["bm"] = old.get("bm")
-            m["bm_prob"] = old.get("bm_prob")
-            # Lo snapshot puo' contenere bm = {"H": None, "D": None, "A": None}:
-            # un dict PRESENTE ma vuoto (NaN serializzato in null). Copiato
-            # cosi' com'e' arrivava al frontend, dove `m.bm && m.bm_prob` e'
-            # truthy e .toFixed(0) faceva TypeError — pagina bianca su 63
-            # partite. La normalizzazione sotto valida i VALORI, quindi qui si
-            # azzera subito quello che non e' numerico: niente dict-vuoto in
-            # giro.
-            m["kelly"] = old.get("kelly")
-            m["risultato"] = old.get("risultato")
-            m["esito"] = old.get("esito")
-            m["ok"] = old.get("ok")
-            m["features"] = old.get("features")
-            if transizione:
-                # La partita ERA future: il risultato reale arriva adesso,
-                # ma la stima da giudicare resta quella pubblicata prima
-                # della partita (m["prob"]/m["pred"] sopra). 'ok' si calcola
-                # su QUELLA pred, non su una stima ricalcolata a posteriori.
-                ftr_u = ftr.strip().upper()
-                m["risultato"] = f"{int(row['FTHG'])}-{int(row['FTAG'])}"
-                m["esito"] = ftr_u
-                m["ok"] = bool(m["pred"] == ftr_u) if m.get("pred") else None
-            # Se lo snapshot non aveva le quote ma il CSV/le quote di oggi le
-            # portano, si ricostruiscono. Il caso reale (Eredivisie, prima
-            # run) era peggio: lo snapshot aveva bm = {"H": None, "D": None,
-            # "A": None} — un dict PRESENTE ma con valori null, che il test
-            # `bm is not None` lascia passare e poi fa None/100.0 -> la
-            # pipeline muore dopo aver allenato il modello. Percio' qui si
-            # controlla che i valori siano NUMERICI, non che il dict esista.
-            if not _bm_valid(m.get("bm")) and bm_odds is not None:
-                m["bm"] = {"H": round(bm_odds[0], 2), "D": round(bm_odds[1], 2),
-                           "A": round(bm_odds[2], 2)}
-            if not _bm_valid(m.get("bm_prob")) and bm_prob is not None:
-                m["bm_prob"] = {LABELS[i]: round(bm_prob[i] * 100, 1) for i in range(3)}
-            # Quote senza probabilita' non sono confrontabili: si azzerano
-            # insieme, altrimenti la UI mostrerebbe una quota senza edge.
-            if not _bm_valid(m.get("bm")) or not _bm_valid(m.get("bm_prob")):
-                m["bm"] = None
-                m["bm_prob"] = None
-            if (m["bm"] is not None and m["ok"] is not None and m["esito"] is not None
-                    and all(m["prob"].get(l) is not None for l in LABELS)):
-                y_idx = {'H': 0, 'D': 1, 'A': 2}[m["esito"]]
-                pb = np.array([m["bm_prob"][l] / 100.0 for l in LABELS])
-                bm_rows.append((y_idx, pb))
-                model_rows.append((y_idx, [m["prob"][l] / 100.0 for l in LABELS]))
-                best_k = -1.0
-                best_info = None
-                for i, lab in enumerate(LABELS):
-                    pk = m["prob"][lab] / 100.0
-                    if pk > pb[i]:
-                        kf = calculate_dynamic_kelly_stake(pk, m["bm"][lab])
-                        if kf > 0 and kf > best_k:
-                            best_k = kf
-                            best_info = (lab, pk, m["bm"][lab], kf)
-                if best_info is not None:
-                    lab, pk, odd, kf = best_info
-                    # m["kelly"] era impostato SOLO nel ramo future: sul ramo
-                    # snapshot la partita restava senza l'oggetto Kelly anche
-                    # avendo quote ed esito. Il valore e' DERIVATO da prob e
-                    # bm, entrambi congelati, quindi ricalcolarlo qui non
-                    # rompe il freeze (non tocca prob/pred/ok).
-                    m["kelly"] = {"pick": lab, "model_p": round(pk, 3),
-                                  "odd": round(odd, 2), "stake_pct": round(kf * 100, 2)}
-                    _bm_p = bm_prob[LABELS.index(lab)] if bm_prob is not None else 0.0
-                    kelly_log.append({
-                        "home": m["home"], "away": m["away"], "date": m["date"],
-                        "giornata": g, "esito": m.get("esito"),
-                        "pick": lab, "model_p": round(pk, 3), "odd": round(odd, 2),
-                        "bm_p": round(_bm_p, 4),
-                        "kelly": round(kf, 4), "win": (m["esito"] == lab),
-                    })
+        # Snapshot precedente: serve solo per contare quante stime cambiano
+        # (nessun riuso: il freeze e' rimosso).
+        # ── RICALCOLO SEMPRE (FREEZE REMOSSO) ────────────────────────────────
+        # Il freeze storico riusava lo snapshot delle partite giocate, cosi'
+        # che le percentuali gia' pubblicate non cambiassevano. Rimosso su
+        # richiesta esplicita: ogni partita (giocata o futura) viene
+        # ricalcolata con il modello e le feature di OGGI.
+        #
+        # Perche' questo e' lecito (nessun hindsight):
+        #  - il training e' TEMPORALE (cutoff 2025-08-01), quindi le partite
+        #    del 2026-27 non sono mai state nel training del modello;
+        #  - le feature sono calcolate solo su dati PRECEDENTI la partita
+        #    (compute_features_for_match usa `df[df['Date'] < match_date]`).
+        # Quindi ricalcolare una partita gia' giocata non introduce
+        # informazione che non era disponibile al momento della previsione.
+        # Le quote del match alimentano le feature di mercato: sono gia' note
+        # prima del fischio (apertura dal CSV / TheOddsAPI per le future), quindi
+        # non introducono hindsight.
+        # TUTTE le fonti di mercato disponibili per questo match, non solo
+        # B365: in training il modello vede anche Pinnacle e la media di
+        # mercato (Avg), e l'inferenza deve replicare esattamente quel
+        # set di feature, altrimenti il modello gira su colonne diverse da
+        # quelle su cui e' stato addestrato.
+        _odds = {}
+        for _label, _cols in (("b365", ('B365H', 'B365D', 'B365A')),
+                              ("pinnacle", ('PSH', 'PSD', 'PSA')),
+                              ("avg", ('AvgH', 'AvgD', 'AvgA'))):
+            try:
+                _v = tuple(row.get(c) for c in _cols)
+                if all(x is not None and not pd.isna(x) and float(x) > 1.0 for x in _v):
+                    _odds[_label] = tuple(float(x) for x in _v)
+            except (TypeError, ValueError):
+                pass
+        feats = compute_features_for_match(history, m["home"], m["away"], row['Date'],
+                                           h2h_cache, current_season_teams, odds=_odds)
+        # Default NaN per le feature che possono mancare: 0.0 e' un valore
+        # FUORI dominio che il training non ha mai visto su quelle colonne
+        # (li: NaN = "non lo so"). Con 0.0 il modello riceverebbe un
+        # segnale falso su 8-12 colonne di mercato.
+        X = pd.DataFrame([{c: (feats.get(c, np.nan) if c.startswith("mkt_")
+                                else feats.get(c, 0.0)) for c in FEATURE_ORDER}])
+        probs = model.predict_proba(X)[0]
+        # Calibrazione Dirichlet: le percentuali pubblicate devono essere
+        # quelle CALIBRATE, altrimenti il sito mostrerebbe valori diversi da
+        # quelli misurati in evaluate (RPS 0.13044 grezze vs 0.12953 calibrate).
+        probs = apply_saved_calibration(league, probs)
+        m["prob"] = {LABELS[i]: round(float(probs[i]) * 100, 1) for i in range(3)}
+        m["pred"] = LABELS[int(np.argmax(probs))]
+        m["features"] = {c: (None if (c.startswith("mkt_") and
+                                      (c not in feats or
+                                       (isinstance(feats.get(c), float) and
+                                        math.isnan(feats.get(c)))))
+                         else round(float(feats.get(c, 0.0)), 3))
+                         for c in FEATURE_ORDER}
+
+        # Confronto con lo snapshot precedente (informativo): quante stime
+        # sono cambiate rispetto a quelle pubblicate prima.
+        _prev = prev_published.get(k)
+        if _prev and _prev.get("prob"):
+            try:
+                if any(abs(float(_prev["prob"].get(lab, -1)) - m["prob"][lab]) > 0.05
+                       for lab in LABELS):
+                    n_changed += 1
+            except (TypeError, ValueError):
+                pass
+
+        if played:
+            ftr = ftr.strip().upper()
+            m["risultato"] = f"{int(row['FTHG'])}-{int(row['FTAG'])}"
+            m["esito"] = ftr
+            m["ok"] = bool(m["pred"] == ftr)
+
+        # Assegnazione quote (indipendente da `played`): senza il gate, le
+        # partite future — le uniche con quote prepartita da TheOddsAPI —
+        # finivano con bm=None.
+        # `_bm_valid` e' indispensabile: openfootball non ha le colonne B365,
+        # quindi per le partite senza quote arriva bm_odds = [nan, nan, nan].
+        # NaN non e' None: il dict verrebbe costruito, _json_safe lo
+        # convertirebbe in null e il frontend farebbe toFixed(0) su None.
+        if _bm_valid({"H": bm_odds[0], "D": bm_odds[1], "A": bm_odds[2]}) if bm_odds else False:
+            m["bm"] = {"H": round(bm_odds[0], 2), "D": round(bm_odds[1], 2),
+                       "A": round(bm_odds[2], 2)}
+            m["bm_prob"] = {LABELS[i]: round(bm_prob[i] * 100, 1) for i in range(3)}
         else:
-            # Partita FUTURA (o mai vista).
-            #
-            # REGOLA N-1 (finestra di freeze = ultima_giocata + 1): se la
-            # giornata e' GIA' dentro la finestra, la stima e' CONGELATA e si
-            # riusa lo snapshot pubblicato invece di ricalcolare col modello
-            # di oggi. Prima la condizione era `k in prev_estimates`, ma
-            # prev_estimates contiene SOLO le partite giocate: per una future
-            # era sempre falsa, quindi la clausola `giornata_n <= freeze_until`
-            # non scattava MAI (codice morto). Misurato fra due run: 330/330
-            # stime future erano cambiate, comprese quelle dentro la finestra.
-            # Il primo run di una giornata nuova (non ancora in prev_published)
-            # la calcola: quello e' il suo primo snapshot, poi si riusa.
-            if (giornata_n <= freeze_until and k in prev_published
-                    and prev_published[k].get("prob") is not None):
-                old = prev_published[k]
-                m["prob"] = old.get("prob")
-                m["pred"] = old.get("pred")
-                m["features"] = old.get("features")
-                n_frozen += 1
+            m["bm"] = None
+            m["bm_prob"] = None
+
+        # Confronto bookmaker e Kelly: servono il risultato reale, quindi
+        # solo sulle giocate.
+        if bm_odds is not None and played:
+            assert bm_prob is not None
+            y_idx = {'H': 0, 'D': 1, 'A': 2}[ftr]
+            bm_rows.append((y_idx, bm_prob))
+            model_rows.append((y_idx, [m["prob"][l] / 100 for l in LABELS]))
+            # Kelly retrospettivo: punta sull'esito con edge positivo
+            # (p_model > p_bookmaker) usando la quota reale.
+            best_k = -1
+            best_info = None
+            for i, lab in enumerate(LABELS):
+                pk = m["prob"][lab] / 100.0
+                pb = bm_prob[i]
+                if pk > pb:
+                    kf = calculate_dynamic_kelly_stake(pk, bm_odds[i])
+                    if kf > 0 and kf > best_k:
+                        best_k = kf
+                        best_info = (lab, pk, bm_odds[i], kf)
+            if best_info is not None:
+                lab, pk, odd, kf = best_info
+                m["kelly"] = {"pick": lab, "model_p": round(pk, 3),
+                              "odd": round(odd, 2), "stake_pct": round(kf * 100, 2)}
+                _bm_p = bm_prob[LABELS.index(lab)] if bm_prob is not None else 0.0
+                kelly_log.append({
+                    "home": m["home"], "away": m["away"], "date": m["date"],
+                    "giornata": g, "esito": ftr,
+                    "pick": lab, "model_p": round(pk, 3), "odd": round(odd, 2),
+                    "bm_p": round(_bm_p, 4),
+                    "kelly": round(kf, 4), "win": (ftr == lab),
+                })
+
+        # Partita futura: bookmaker + Kelly.
+        #
+        # La condizione era `bm_odds is not None and played`, e questo
+        # scartava TUTTE le quote prepartita: le uniche partite con quote
+        # sono le future (TheOddsAPI non dà lo storico), quindi played
+        # era False e le 8 quote finivano nel `else` che le azzerava.
+        # `played` serve solo al confronto RPS e al Kelly retrospettivo,
+        # che hanno bisogno del risultato reale: non deve governare
+        # l'assegnazione delle quote.
+        # Secondo gate sulle quote (suggerimento Kelly sulle future). Aveva
+        # ancora `bm_odds is not None`, quindi ricostruiva il dict anche
+        # per openfootball, dove bm_odds = [nan, nan, nan]: NaN non e'
+        # None, il gate passa, e i 310 dict-vuoto tornavano QUI dopo che
+        # il gate di sopra li aveva correttamente rifiutati.
+        # Per questo i due gate vanno controllati insieme: correggere
+        # solo il primo non serve a nulla.
+        if _bm_valid({"H": bm_odds[0], "D": bm_odds[1], "A": bm_odds[2]}) if bm_odds else False:
+            m["bm"] = {"H": round(bm_odds[0], 2), "D": round(bm_odds[1], 2),
+                       "A": round(bm_odds[2], 2)}
+            m["bm_prob"] = {LABELS[i]: round(bm_prob[i] * 100, 1) for i in range(3)}
+            # Suggerimento Kelly sulle future: giocata con edge migliore
+            best_k = -1
+            best_info = None
+            for i, lab in enumerate(LABELS):
+                pk = m["prob"][lab] / 100.0
+                pb = bm_prob[i]
+                if pk > pb:
+                    kf = calculate_dynamic_kelly_stake(pk, bm_odds[i])
+                    if kf > 0 and kf > best_k:
+                        best_k = kf
+                        best_info = (lab, pk, bm_odds[i], kf)
+            if best_info is not None:
+                lab, pk, odd, kf = best_info
+                m["kelly"] = {"pick": lab, "model_p": round(pk, 3),
+                              "odd": round(odd, 2), "stake_pct": round(kf * 100, 2)}
             else:
-                feats = compute_features_for_match(history, m["home"], m["away"], row['Date'], h2h_cache, current_season_teams)
-                X = pd.DataFrame([{c: feats.get(c, 0.0) for c in FEATURE_ORDER}])
-                probs = model.predict_proba(X)[0]
-                m["prob"] = {LABELS[i]: round(float(probs[i]) * 100, 1) for i in range(3)}
-                m["pred"] = LABELS[int(np.argmax(probs))]
-                m["features"] = {c: round(float(feats.get(c, 0.0)), 3) for c in FEATURE_ORDER}
-
-            if played:
-                ftr = ftr.strip().upper()
-                m["risultato"] = f"{int(row['FTHG'])}-{int(row['FTAG'])}"
-                m["esito"] = ftr
-                m["ok"] = bool(m["pred"] == ftr)
-
-            # Assegnazione quote: senza il gate su `played`. Il confronto
-            # bookmaker RPS e il Kelly retrospettivo stanno piu' in basso e
-            # richiedono il risultato reale, ma non devono decidere se la
-            # quota viene mostrata. Altrimenti le partite future, che sono
-            # le uniche con quote prepartita, finivano nell'else con bm=None.
-            #
-            # `_bm_valido` e' indispensabile: openfootball non ha le colonne
-            # B365, quindi per le partite senza quote arriva
-            # bm_odds = [nan, nan, nan]. Il dict e' costruito, i valori sono
-            # NaN, e _json_safe li converte in null: si riproduce esattamente
-            # il dict-vuoto che crashava il frontend, stavolta sulle 330
-            # partite future. `is not None` non basta, perche' NaN non e' None.
-            if _bm_valid({"H": bm_odds[0], "D": bm_odds[1], "A": bm_odds[2]}) if bm_odds else False:
-                m["bm"] = {"H": round(bm_odds[0], 2), "D": round(bm_odds[1], 2),
-                           "A": round(bm_odds[2], 2)}
-                m["bm_prob"] = {LABELS[i]: round(bm_prob[i] * 100, 1) for i in range(3)}
-
-            # Confronto bookmaker / Kelly solo sulle giocate (serve risultato)
-            if bm_odds is not None and played:
-                assert bm_prob is not None
-                y_idx = {'H': 0, 'D': 1, 'A': 2}[ftr]
-                bm_rows.append((y_idx, bm_prob))
-                model_rows.append((y_idx, [m["prob"][l] / 100 for l in LABELS]))
-            elif bm_odds is None:
-                m["bm"] = None
-                m["bm_prob"] = None
-
-            # Kelly retrospettivo: tra le 3 giocate, punta su quella con edge
-            # positivo (p_model > p_bookmaker) usando la quota reale.
-            if bm_odds is not None and played:
-                best_k = -1
-                best_info = None
-                for i, lab in enumerate(LABELS):
-                    pk = m["prob"][lab] / 100.0
-                    pb = bm_prob[i]
-                    if pk > pb:
-                        kf = calculate_dynamic_kelly_stake(pk, bm_odds[i])
-                        if kf > 0 and kf > best_k:
-                            best_k = kf
-                            best_info = (lab, pk, bm_odds[i], kf)
-                if best_info is not None:
-                    lab, pk, odd, kf = best_info
-                    win = (ftr == lab)
-                    kelly_log.append({
-                        "home": m["home"], "away": m["away"], "date": m["date"],
-                        "giornata": g, "esito": ftr,
-                        "pick": lab, "model_p": round(pk, 3), "odd": round(odd, 2),
-                        "bm_p": round(bm_prob[LABELS.index(lab)], 4) if bm_prob is not None else 0.0,
-                        "kelly": round(kf, 4), "win": win,
-                    })
-            # Partita futura: bookmaker + Kelly.
-            #
-            # La condizione era `bm_odds is not None and played`, e questo
-            # scartava TUTTE le quote prepartita: le uniche partite con quote
-            # sono le future (TheOddsAPI non dà lo storico), quindi played
-            # era False e le 8 quote finivano nel `else` che le azzerava.
-            # `played` serve solo al confronto RPS e al Kelly retrospettivo,
-            # che hanno bisogno del risultato reale: non deve governare
-            # l'assegnazione delle quote.
-            # Secondo gate sulle quote (suggerimento Kelly sulle future). Aveva
-            # ancora `bm_odds is not None`, quindi ricostruiva il dict anche
-            # per openfootball, dove bm_odds = [nan, nan, nan]: NaN non e'
-            # None, il gate passa, e i 310 dict-vuoto tornavano QUI dopo che
-            # il gate di sopra li aveva correttamente rifiutati.
-            # Per questo i due gate vanno controllati insieme: correggere
-            # solo il primo non serve a nulla.
-            if _bm_valid({"H": bm_odds[0], "D": bm_odds[1], "A": bm_odds[2]}) if bm_odds else False:
-                m["bm"] = {"H": round(bm_odds[0], 2), "D": round(bm_odds[1], 2),
-                           "A": round(bm_odds[2], 2)}
-                m["bm_prob"] = {LABELS[i]: round(bm_prob[i] * 100, 1) for i in range(3)}
-                # Suggerimento Kelly sulle future: giocata con edge migliore
-                best_k = -1
-                best_info = None
-                for i, lab in enumerate(LABELS):
-                    pk = m["prob"][lab] / 100.0
-                    pb = bm_prob[i]
-                    if pk > pb:
-                        kf = calculate_dynamic_kelly_stake(pk, bm_odds[i])
-                        if kf > 0 and kf > best_k:
-                            best_k = kf
-                            best_info = (lab, pk, bm_odds[i], kf)
-                if best_info is not None:
-                    lab, pk, odd, kf = best_info
-                    m["kelly"] = {"pick": lab, "model_p": round(pk, 3),
-                                  "odd": round(odd, 2), "stake_pct": round(kf * 100, 2)}
-                else:
-                    m["kelly"] = None
-            else:
-                m["bm"] = None
-                m["bm_prob"] = None
                 m["kelly"] = None
+        else:
+            m["bm"] = None
+            m["bm_prob"] = None
+            m["kelly"] = None
 
         giornate.setdefault(g, []).append(m)
 
@@ -772,8 +766,8 @@ def main(league, reset_freeze: bool = False):
             "fonte": source,
             "ultima_giornata_giocata": ultima_gg,
             "prossima_giornata": prossima_gg,
-            "freeze_until": freeze_until,
-            "freeze_regola": "La giornata N si aggiorna solo fino ai risultati della N-1 (no hindsight)",
+            "freeze_attivo": False,
+            "freeze_regola": "FREEVE RIMOSSO: ogni partita (giocata o futura) viene ricalcolata col modello di oggi",
             "model_trained_at": model_trained_at,
             **meta_extra,
         },
@@ -789,7 +783,8 @@ def main(league, reset_freeze: bool = False):
         json.dump(out, f, indent=2, ensure_ascii=False, allow_nan=False)
     print(f"\nGiornate: {len(giornate)} | Giocate: {len(giocate)} "
           f"| Corrette: {corrette} ({(corrette/max(len(giocate),1)*100):.0f}%)")
-    print(f"Stime future congelate per regola N-1: {n_frozen}")
+    print(f"Stime ricalcolate (freeze disattivato): {n_changed} cambiate "
+          f"rispetto allo snapshot precedente")
     print(f"Salvato: {OUT_JSON}")
 
 
@@ -797,10 +792,5 @@ if __name__ == "__main__":
     import argparse
     ap = argparse.ArgumentParser(description="Genera le previsioni dal calendario")
     ap.add_argument("--league", default=None, help="chiave lega (default: seriea)")
-    ap.add_argument("--reset-freeze", action="store_true",
-                    help="ricalcola anche le partite gia' giocate, scartando "
-                         "gli snapshot precedenti. Usalo solo se cambia la "
-                         "definizione di una feature: modifica i numeri "
-                         "gia' pubblicati sul sito.")
     args = ap.parse_args()
-    main(get_league(args.league), reset_freeze=args.reset_freeze)
+    main(get_league(args.league))

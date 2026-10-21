@@ -98,8 +98,8 @@ jobs:
 
       # predict_fixtures rigenera webapp/public/predictions_<lega>.json:
       # risultati reali, quote, confronto bookmaker e simulazione Kelly.
-      # Il freeze resta attivo: le stime delle partite gia' giocate non
-      # cambiano, si aggiornano solo risultato reale, esito e quote.
+      # La regola del freeze e' stata rimossa: le stime delle partite gia'
+      # giocate vengono ricalcolate come tutte le altre.
       - name: Rigenera predictions.json
         env:
           THEODDSAPI_KEY: ${{ secrets.THEODDSAPI_KEY }}

@@ -35,6 +35,12 @@ WINDOW = 5
 # training e inferenza non possono divergere.
 # Vedi la nota lunga su REST_CAP in features.add_rest_days.
 from leagues import REST_CAP, get_league  # noqa: E402
+from advanced_features import (  # noqa: E402
+    add_elo_features,
+    add_market_features,
+    add_performance_features,
+    advanced_feature_cols,
+)
 
 
 def load_history(league):
@@ -135,9 +141,45 @@ def is_promoted(history, team, match_date, current_season_teams=None):
     return 0 if seen else 1
 
 
+def _normalizza_odds(odds):
+    """Accetta (h,d,a) o dict per bookmaker e restituisce il dict normalizzato."""
+    if odds is None:
+        return {}
+    if isinstance(odds, dict):
+        out = {}
+        for k, v in odds.items():
+            if v is None:
+                continue
+            try:
+                vals = tuple(float(x) for x in v)
+            except (TypeError, ValueError):
+                continue
+            if len(vals) == 3 and all(np.isfinite(x) and x > 1.0 for x in vals):
+                out[str(k).lower()] = vals
+        return out
+    try:
+        vals = tuple(float(x) for x in odds)
+    except (TypeError, ValueError):
+        return {}
+    if len(vals) == 3 and all(np.isfinite(x) and x > 1.0 for x in vals):
+        return {"b365": vals}
+    return {}
+
+
+def _g(odds_by_book, book, idx):
+    v = odds_by_book.get(book)
+    return float(v[idx]) if v else np.nan
+
+
 def compute_features_for_match(df, home, away, match_date, h2h_cache=None,
-                               current_season_teams=None):
-    """Calcola le feature di un match usando SOLO dati precedenti a match_date."""
+                               current_season_teams=None, odds=None):
+    """Calcola le feature di un match usando SOLO dati precedenti a match_date.
+
+    `odds` = (h, d, a) del bookmaker per QUESTO match, se disponibili. Serve
+    alle feature di mercato: in training arrivano dal CSV (quote di apertura),
+    in inferenza da TheOddsAPI. Se assenti, le feature di mercato valgono NaN
+    (il modello le tratta come mancanti, esattamente come i debut).
+    """
     past = df[df['Date'] < match_date].copy() if match_date else df.copy()
 
     if len(past) == 0:
@@ -251,21 +293,183 @@ def compute_features_for_match(df, home, away, match_date, h2h_cache=None,
     feats['home_promoted'] = is_promoted(df, home, match_date, current_season_teams)
     feats['away_promoted'] = is_promoted(df, away, match_date, current_season_teams)
 
+    # ── Mercato: quote del match de-viggate ─────────────────────────────
+    # Stessa formula del training (advanced_features.add_market_features),
+    # applicata a una riga con le quote di QUESTO match.
+    # `odds` puo' essere:
+    #   - una tupla (h, d, a): solo B365 (retrocompatibile);
+    #   - un dict {"b365": (h,d,a), "pinnacle": (h,d,a), "avg": (h,d,a)}:
+    #     tutte le fonti disponibili, cosi' l'inferenza reproduce ESATTAMENTE
+    #     il training (che ha Pinnacle e Avg dal CSV storico).
+    # Le fonti assenti restano NaN, che e' il valore che il training ha per
+    # le partite senza quelle quote: il modello le tratta come mancanti.
+    odds_by_book = _normalizza_odds(odds)
+    if odds_by_book:
+        try:
+            row = pd.DataFrame([{
+                "B365H": _g(odds_by_book, "b365", 0), "B365D": _g(odds_by_book, "b365", 1),
+                "B365A": _g(odds_by_book, "b365", 2),
+                "PSH": _g(odds_by_book, "pinnacle", 0), "PSD": _g(odds_by_book, "pinnacle", 1),
+                "PSA": _g(odds_by_book, "pinnacle", 2),
+                "AvgH": _g(odds_by_book, "avg", 0), "AvgD": _g(odds_by_book, "avg", 1),
+                "AvgA": _g(odds_by_book, "avg", 2),
+            }])
+            mkt = add_market_features(row, devig_method="additive")
+            for col in mkt.columns:
+                if col.startswith("mkt_"):
+                    feats[col] = float(mkt[col].iloc[0])
+        except Exception:
+            pass
+
+    # Le feature di mercato mancanti devono essere NaN, non 0.0: nel training
+    # la loro assenza e' NaN ("non lo so"), e 0.0 e' un valore FUORI dominio
+    # che il modello non ha mai visto su quelle colonne.
+    for col in ("mkt_b365_pH", "mkt_b365_pD", "mkt_b365_pA", "mkt_b365_overround",
+                "mkt_pinnacle_pH", "mkt_pinnacle_pD", "mkt_pinnacle_pA",
+                "mkt_pinnacle_overround",
+                "mkt_avg_pH", "mkt_avg_pD", "mkt_avg_pA", "mkt_avg_overround"):
+        if col not in feats:
+            feats[col] = np.nan
+
+    # ── Feature avanzate (prestazione, Elo, mercato) ────────────────────────
+    # STESSE funzioni usate in training (src/features.py -> advanced_features):
+    # una sola implementazione, quindi parita' per costruzione.
+    #
+    # Il trucco e' ricostruire il "passato" della squadra come se fosse una
+    # riga del dataset: si aggiungono le colonne di prestazione ed Elo sul
+    # dataframe storico, poi si prende la riga della partita da predire.
+    feats.update(_advanced_features_for_match(df, home, away, match_date, odds))
+
     return feats
 
 
-FEATURE_ORDER = [
-    'pi_home_H', 'pi_away_H', 'pi_home_A', 'pi_away_A',
-    'home_form_5', 'away_form_5',
-    'home_goal_diff_5', 'away_goal_diff_5',
-    # Riposo: i due livelli assoluti. rest_advantage NON e' inclusa perche' e'
-    # la loro differenza (home - away) e quindi ridondante.
-    'home_rest_days', 'away_rest_days',
-    'h2h_home_winrate',
-    'home_goals_scored_5', 'home_goals_conceded_5',
-    'away_goals_scored_5', 'away_goals_conceded_5',
-    'home_promoted', 'away_promoted',
-]
+def _advanced_features_for_match(df, home, away, match_date, odds=None):
+    """Feature avanzate per un singolo match, calcolate sulle stesse formule
+    del training (advanced_features.add_*).
+
+    Per la prestazione e l'Elo si ricostruisce il dataset storico con le
+    colonne avanzate e si prende il valore alla riga del match: i rolling e
+    l'Elo sono gia' calcolati con shift(1), quindi il valore alla riga del
+    match usa solo il passato.
+    """
+    out = {}
+
+    # ── Prestazione (tiri, tiri in porta, angoli, cartellini) ───────────
+    perf = add_performance_features(df, window=5)
+    for col in ("home_shots_5", "away_shots_5", "home_shots_t_5", "away_shots_t_5",
+                "home_corners_5", "away_corners_5", "home_cards_5", "away_cards_5"):
+        if col not in perf.columns:
+            continue
+        # La riga del match: se il match e' gia' nel dataset (partita gia'
+        # giocata), la sua riga ha gia' i rolling corretti; se e' futuro, si
+        # calcola il rolling come se il match fosse l'ultimo.
+        if match_date is not None:
+            mask = (perf["Date"] == match_date) & (perf["HomeTeam"] == home) & (perf["AwayTeam"] == away)
+            if mask.any():
+                out[col] = float(perf.loc[mask, col].iloc[0])
+                continue
+        out[col] = _rolling_future(perf, df, home, away, match_date, col)
+
+    # ── Elo ──────────────────────────────────────────────────────────────
+    elo = add_elo_features(df)
+    if match_date is not None:
+        mask = (elo["Date"] == match_date) & (elo["HomeTeam"] == home) & (elo["AwayTeam"] == away)
+        if mask.any():
+            row = elo.loc[mask].iloc[0]
+            for col in ("elo_home", "elo_away", "elo_home_expect", "elo_away_expect"):
+                if col in elo.columns:
+                    out[col] = float(row[col])
+            return out
+    # Match futuro: Elo calcolato sullo storico fino a match_date.
+    past = df[df["Date"] < match_date].copy() if match_date is not None else df.copy()
+    if len(past) == 0:
+        past = df.copy()
+    elo_past = add_elo_features(past)
+    if len(elo_past):
+        last = elo_past.iloc[-1]
+        ratings = {}
+        for t in set(elo_past["HomeTeam"]) | set(elo_past["AwayTeam"]):
+            sub = elo_past[(elo_past["HomeTeam"] == t) | (elo_past["AwayTeam"] == t)]
+            if len(sub):
+                ratings[t] = sub.iloc[-1]
+        rh = float(ratings.get(home, {"elo_home": 1500.0})["elo_home"]) if home in ratings else 1500.0
+        ra = float(ratings.get(away, {"elo_away": 1500.0})["elo_away"]) if away in ratings else 1500.0
+        from advanced_features import ELO_HOME_ADV
+        exp_h = 1.0 / (1.0 + 10.0 ** ((ra - (rh + ELO_HOME_ADV)) / 400.0))
+        out["elo_home"] = rh
+        out["elo_away"] = ra
+        out["elo_home_expect"] = exp_h
+        out["elo_away_expect"] = 1.0 - exp_h
+
+    return out
+
+
+def _rolling_future(perf, df, home, away, match_date, col):
+    """Rolling di prestazione per un match FUTURO: media delle ultime N
+    partite della squadra in quel ruolo (casa per il locale, trasferta per
+    l'ospite), replicando il shift(1) del training."""
+    if match_date is None:
+        return np.nan
+    past = perf[perf["Date"] < match_date]
+    if col.startswith("home_"):
+        sub = past[past["HomeTeam"] == home].tail(5)
+        stat = col.replace("home_", "").rsplit("_", 1)[0]
+        mapping = {"shots": "HS", "shots_t": "HST", "corners": "HC", "cards": "HY"}
+        src_col = mapping.get(stat)
+    else:
+        sub = past[past["AwayTeam"] == away].tail(5)
+        stat = col.replace("away_", "").rsplit("_", 1)[0]
+        mapping = {"shots": "AS", "shots_t": "AST", "corners": "AC", "cards": "AY"}
+        src_col = mapping.get(stat)
+    if src_col is None or src_col not in past.columns or len(sub) == 0:
+        return np.nan
+    vals = pd.to_numeric(sub[src_col], errors="coerce")
+    return float(vals.mean())
+
+
+# L'elenco delle feature e' costruito come in training (features.py ->
+# build_feature_list): base + avanzate PRESENTI nel dataset. Cosi' i due
+# lati non possono divergere per costruzione, e il check di allineamento in
+# features.py fallisce in CI se qualcosa non torna.
+#
+# Nota: rest_advantage NON e' inclusa perche' e' esattamente
+# home_rest_days - away_rest_days (ridondante deterministica).
+def _build_feature_order(available_cols=None) -> list:
+    from features import build_feature_list
+    return build_feature_list(available_cols)
+
+
+# Default: le feature base + le avanzate che il dataset storico contiene.
+#
+# Il dataset non e' sempre disponibile all'import (in alcuni ambienti il
+# ratings.csv non c'e' ancora), quindi il default e' l'elenco BASE. Chi
+# carica il modello (predict_fixtures, predict_match) usa
+# model.feature_names_, che e' l'elenco esatto del training: e' la fonte
+# autorevole, e non puo' divergere dal modello.
+FEATURE_ORDER = _build_feature_order(None)
+
+
+def apply_saved_calibration(league, probs):
+    """Applica la calibrazione Dirichlet salvata dal training, se esiste.
+
+    La calibrazione e' un array alpha + un peso w: le probabilita' grezze
+    del modello vengono ricalcolate come
+        p_k = softmax(alpha_k + w * log p_k)
+    Se il file non c'e' (modello allenato senza calibrazione) le
+    probabilita' restano quelle grezze.
+    """
+    import json as _json
+    from pathlib import Path as _Path
+    cal_path = _Path(league.model_path).parent / f"calibration_{league.key}.json"
+    if not cal_path.exists():
+        return probs
+    try:
+        with open(cal_path) as f:
+            cal = _json.load(f)
+        from experiments import apply_dirichlet_calibration
+        return apply_dirichlet_calibration(np.asarray([probs]), cal["alpha"], cal["w"])[0]
+    except Exception:
+        return probs
 
 
 def predict_match(home, away, match_date=None, league=None,
@@ -286,12 +490,21 @@ def predict_match(home, away, match_date=None, league=None,
     feats = compute_features_for_match(df, home, away, match_date,
                                         current_season_teams=current_season_teams)
 
-    feature_order = FEATURE_ORDER
+    # L'elenco viene dal MODELO (stessa fonte di predict_fixtures): se il
+    # training e l'inferenza divergessero, il modello riceverebbe colonne
+    # diverse da quelle su cui e' stato addestrato.
+    feature_order = list(model.feature_names_) if hasattr(model, "feature_names_") else FEATURE_ORDER
     X = pd.DataFrame([{c: feats.get(c, 0.0) for c in feature_order}])
 
     model = CatBoostClassifier()
     model.load_model(str(model_path))
     probs = model.predict_proba(X)[0]
+
+    # Calibrazione Dirichlet (se presente): e' un post-processing delle
+    # probabilita' che riduce l'overconfidence del modello. Va applicata
+   # SEMPRE, altrimenti il sito pubblicherebbe probabilita' diverse da quelle
+    # misurate (RPS 0.13044 grezze vs 0.12953 calibrate).
+    probs = apply_saved_calibration(league, probs)
 
     labels = ['H', 'D', 'A']
     out = {labels[i]: round(float(probs[i]) * 100, 1) for i in range(3)}

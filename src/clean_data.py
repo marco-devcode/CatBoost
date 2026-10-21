@@ -68,7 +68,22 @@ def main(league):
         df["season"] = df["season"].map(_norm_season)
 
     # ── 2. Selezione colonne ──────────────────────────────────────────────────
-    df = df[CRITICAL_COLS].copy()
+    # oltre alle colonne critiche si CONSERVANO le colonne di prestazione
+    # (tiri, tiri in porta, angoli, cartellini) e le quote. Servono alle
+    # feature avanzate (src/advanced_features.py): i tiri in porta sono il
+    # proxy di xG piu' economico e documentato, e le quote de-viggate danno
+    # al modello la prior di mercato.
+    #
+    # Le colonne sono conservate SOLO se presenti nel CSV: lo storico ha
+    # copertura variabile (Pinnacle manca su alcune stagioni).
+    EXTRA_COLS = [
+        "HS", "AS", "HST", "AST", "HC", "AC", "HY", "AY",
+        "B365H", "B365D", "B365A", "B365CH", "B365CD", "B365CA",
+        "PSH", "PSD", "PSA", "PSCH", "PSCD", "PSCA",
+        "AvgH", "AvgD", "AvgA",
+    ]
+    keep = CRITICAL_COLS + [c for c in EXTRA_COLS if c in df.columns]
+    df = df[keep].copy()
 
     # Nomi squadra normalizzati (vedi _norm_team)
     df["HomeTeam"] = df["HomeTeam"].map(_norm_team)

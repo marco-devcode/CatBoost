@@ -33,6 +33,12 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from leagues import get_league, REST_CAP  # noqa: E402
+from advanced_features import (  # noqa: E402
+    add_elo_features,
+    add_market_features,
+    add_performance_features,
+    advanced_feature_cols,
+)
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
@@ -269,6 +275,29 @@ FEATURE_COLS = [
     'home_promoted', 'away_promoted',
 ]
 
+# Le feature avanzate (prestazione, Elo, mercato) sono elencate da
+# advanced_features.advanced_feature_cols e VENGONO AGGIUNTE a FEATURE_COLS
+# quando il dataset le contiene davvero: le colonne di mercato (Pinnacle,
+# media mercato) mancano su alcune stagioni, e una feature sempre a zero
+# aggiungerebbe solo rumore.
+#
+# predict.py costruisce FEATURE_ORDER con la STESSA funzione sullo stesso
+# dataset: quindi training e inferenza vedono esattamente le stesse feature,
+# e il check di allineamento in fondo a questo file fallisce se diverge.
+from advanced_features import advanced_feature_cols as _adv_cols  # noqa: E402
+
+
+def build_feature_list(available_cols=None) -> list:
+    """Elenco canonico delle feature: base + avanzate disponibili."""
+    cols = list(FEATURE_COLS)
+    if available_cols is None:
+        return cols
+    avail = set(available_cols)
+    for c in _adv_cols(avail):
+        if c not in cols:
+            cols.append(c)
+    return cols
+
 
 def add_promotion_flags(df, current_season_teams=None):
     """Flag neopromozione.
@@ -314,8 +343,26 @@ def build_feature_matrix(df, cutoff='2025-08-01'):
     "Labels variable is empty". In quel caso si ripiega su uno split
     posizionale (80/20 cronologico) che mantiene l'ordine temporale.
     """
-    df_clean = df[FEATURE_COLS + ['Date', 'FTR']].copy()
-    df_clean = df_clean.dropna(subset=FEATURE_COLS + ['FTR'])
+    # L'elenco delle feature dipende dalle colonne PRESENTI nel dataset:
+    # le feature di mercato (Pinnacle, media) mancano su alcune stagioni.
+    feature_list = build_feature_list(df.columns)
+    df_clean = df[feature_list + ['Date', 'FTR']].copy()
+
+    # DROP: solo le colonne BASE e l'etichetta.
+    #
+    # Prima si scartava la riga se QUALSIASI feature era NaN. Con le feature
+    # avanzate (Elo, prestazione, mercato) questo tagliava il dataset da
+    # 6080 a 2463 righe: le quote Pinnacle mancano su alcune stagioni e i
+    # NaN dei debut si propagano. Il training e' passato da 5642 a 2265
+    # righe e il test da 438 a 198: un modello addestrato su cosi' pochi dati
+    # e' rumore.
+    #
+    # CatBoost gestisce i NaN nativamente (le split trovano la direzione
+    # "manca" come una feature a se'). Quindi: NaN = "non so", che e'
+    # esattamente la verita' per una feature di mercato su una partita senza
+    # quote Pinnacle. Si scarta SOLO la riga senza risultato.
+    base_required = FEATURE_COLS + ['FTR']
+    df_clean = df_clean.dropna(subset=base_required)
 
     df_train = df_clean[df_clean['Date'] < cutoff].copy()
     df_test  = df_clean[df_clean['Date'] >= cutoff].copy()
@@ -371,19 +418,19 @@ def main(league):
                  | set(df.loc[df['season'] == cur_season, 'AwayTeam']))
     df = add_promotion_flags(df, current_season_teams=cur_teams)
 
-    print("5.5 — Shots on Target proxy...")
-    df_raw = pd.read_csv(league.clean_path)
-    if 'HST' in df_raw.columns and 'AST' in df_raw.columns:
-        # Allineato per posizione: df e df_raw hanno lo stesso ordine di
-        # righe solo se sono passati dallo stesso clean_path, quindi si
-        # verifica la lunghezza prima di assegnare .values.
-        if len(df_raw) == len(df):
-            df['HST'] = df_raw['HST'].values
-            df['AST'] = df_raw['AST'].values
-            df = add_shots_proxy(df, window=5)
-        else:
-            print(f"  [skip] shots proxy: lunghezze diverse "
-                  f"(clean={len(df_raw)}, ratings={len(df)})")
+    print("5.5 — Prestazione (tiri, tiri in porta, angoli, cartellini)...")
+    # Le colonne di prestazione arrivano gia' nel ratings_path: clean_data.py
+    # le conserva (insieme alle quote), quindi sono allineate riga per riga
+    # per costruzione. Il vecchio add_shots_proxy le leggeva dal clean_path
+    # con un allineamento POSIZIONALE fragile e il risultato finiva in
+    # FEATURE_COLS solo se qualcuno lo avesse aggiunto: non lo era.
+    df = add_performance_features(df, window=5)
+
+    print("5.6 — Elo con decadimento...")
+    df = add_elo_features(df)
+
+    print("5.7 — Probabilita' implicite di mercato (quote di apertura, de-vig)...")
+    df = add_market_features(df, devig_method="additive")
 
     df.to_csv(league.features_path, index=False)
     print(f"\nDataset con feature salvato in {league.features_path}")
@@ -411,38 +458,50 @@ def main(league):
     y_test.to_csv(league.split_path('y_test_v2'), index=False)
     print(f"\nSplit v2 salvato in data/ ({league.data_prefix}_*)")
 
-    # Verifica di allineamento training/inferenza: se predict.FEATURE_ORDER
-    # divergesse, il modello riceverebbe feature diverse da quelle su cui
-    # e' stato addestrato. Fallo fallire qui, in CI, non sul sito.
-    # predict.py importa catboost, che in alcuni ambienti non e' installato:
-    # in quel caso si confronta la costante letta dal sorgente, senza import.
-    feature_order = None
+    # Verifica di allineamento training/inferenza: se l'elenco delle feature
+    # usate dal training divergesse da quello che l'inferenza usera', il
+    # modello riceverebbe colonne diverse da quelle su cui e' stato
+    # addestrato. Fallo fallire qui, in CI, non sul sito.
+    #
+    # La fonte autorevole e' il MODELO: predict_fixtures e predict_match
+    # costruiscono la riga di inferenza con model.feature_names_. Quindi il
+    # check confronta la lista del training con quella del modello gia'
+    # allenato (se esiste) e, in assenza del modello, con l'elenco che
+    # predict.py costruisce sullo stesso dataset.
+    model_feature_names = None
     try:
-        import predict as _predict
-        feature_order = _predict.FEATURE_ORDER
-    except ModuleNotFoundError as exc:
-        import ast
-        src = (DATA_DIR.parent / "src" / "predict.py").read_text(encoding="utf-8")
-        for node in ast.parse(src).body:
-            if isinstance(node, ast.Assign) and any(
-                    getattr(t, "id", None) == "FEATURE_ORDER" for t in node.targets):
-                feature_order = ast.literal_eval(node.value)
-                break
-        print(f"  (predict.py non importabile: {exc}; "
-              f"FEATURE_ORDER letto dal sorgente)")
+        from catboost import CatBoostClassifier as _CBC
+        if league.model_path.exists():
+            _m = _CBC()
+            _m.load_model(str(league.model_path))
+            model_feature_names = list(_m.feature_names_)
+    except Exception as exc:
+        print(f"  (modello non leggibile: {exc})")
 
-    if feature_order is None:
-        print("  ATTENZIONE: impossibile verificare FEATURE_ORDER, skip")
-    elif feature_order != feature_cols:
-        print("\nERRORE: FEATURE_COLS e predict.FEATURE_ORDER divergono!")
-        print(f"  solo in features: {[c for c in feature_cols if c not in feature_order]}")
-        print(f"  solo in predict: {[c for c in feature_order if c not in feature_cols]}")
-        if [c for c in feature_cols if c in feature_order] != \
-           [c for c in feature_order if c in feature_cols]:
-            print("  ATTENZIONE: anche l'ORDINE diverge")
-        raise SystemExit(1)
+    if model_feature_names is not None:
+        if model_feature_names != feature_cols:
+            print("\nERRORE: le feature del TRAINING divergono da quelle del MODELO!")
+            print(f"  solo in training: {[c for c in feature_cols if c not in model_feature_names]}")
+            print(f"  solo nel modello: {[c for c in model_feature_names if c not in feature_cols]}")
+            raise SystemExit(1)
+        print(f"Allineamento OK: {len(feature_cols)} feature, "
+              f"training == modello == inferenza")
     else:
-        print(f"Allineamento OK: {len(feature_cols)} feature, training == inferenza")
+        # Nessun modello allenato (fresh runner): si confronta con l'elenco
+        # che predict.py costruisce sugli stessi dati.
+        try:
+            import predict as _predict
+            feature_order = _predict._build_feature_order(df.columns)
+        except Exception as exc:
+            print(f"  ATTENZIONE: impossibile verificare l'allineamento: {exc}")
+            feature_order = None
+        if feature_order is not None and feature_order != feature_cols:
+            print("\nERRORE: FEATURE_COLS e predict.FEATURE_ORDER divergono!")
+            print(f"  solo in features: {[c for c in feature_cols if c not in feature_order]}")
+            print(f"  solo in predict: {[c for c in feature_order if c not in feature_cols]}")
+            raise SystemExit(1)
+        if feature_order is not None:
+            print(f"Allineamento OK: {len(feature_cols)} feature, training == inferenza")
 
     print(f"\nFase 5 completata per {league.name} — pronto per il training")
 

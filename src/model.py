@@ -19,6 +19,10 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from leagues import get_league  # noqa: E402
+from experiments import (  # noqa: E402
+    apply_dirichlet_calibration,
+    fit_dirichlet_calibration,
+)
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
@@ -73,11 +77,20 @@ def train_baseline(X_train, X_test, y_train, y_test):
         verbose=100
     )
 
-    model.fit(
-        X_train, y_train,
-        eval_set=(X_test, y_test),
-        early_stopping_rounds=50
-    )
+    # L'early stopping NON deve guardare il test set: scegliere il numero
+    # di iterazioni sulle prestazioni sul test e' leakage (i numeri riportati
+    # diventano ottimisticamente falsati). Uso una fetta temporale del
+    # training. Il modello finale (train_final_model) non usa eval_set.
+    n = len(y_train)
+    n_es = max(int(n * 0.15), 20)
+    if n - n_es >= 50:
+        model.fit(
+            X_train.iloc[:n - n_es], list(y_train[:n - n_es]),
+            eval_set=(X_train.iloc[n - n_es:], list(y_train[n - n_es:])),
+            early_stopping_rounds=50,
+        )
+    else:
+        model.fit(X_train, list(y_train))
 
     return model
 
@@ -229,7 +242,7 @@ def save_model_and_metrics(model, metrics, feature_cols, league, label="v1"):
 # ═══════════════════════════════════════════════════════════════════════════════
 # MAIN
 # ═══════════════════════════════════════════════════════════════════════════════
-def main(league):
+def main(league, fast: bool = False):
     print("╔" + "═" * 53 + "╗")
     title = f"FASE 4 — CatBoost Model Training & Evaluation ({league.name})"
     print("║" + title.ljust(54)[:53] + "║")
@@ -268,10 +281,61 @@ def main(league):
         baseline_model = train_baseline(X_train, X_test, y_train, y_test)
         baseline_metrics = evaluate_model(baseline_model, X_test, y_test, "Baseline")
 
-        best_params, cv_results = hyperparameter_tuning(X_train, y_train)
+        if fast:
+            # Modalita' rapida: salta la griglia di CV temporale (5 fold x 5
+            # configurazioni = 25 training). Usata per le misure LOCALI e per
+            # gli esperimenti: la pipeline CI normale mantiene la griglia.
+            best_params = {'iterations': 1000, 'learning_rate': 0.03, 'depth': 6}
+            cv_results = [{"params": best_params, "note": "griglia CV saltata (--fast)"}]
+            print(f"  [fast] parametri fissi: {best_params}")
+        else:
+            best_params, cv_results = hyperparameter_tuning(X_train, y_train)
         final_model = train_final_model(X_train, y_train, best_params)
 
         final_metrics = evaluate_model(final_model, X_test, y_test, "Tuned")
+
+        # ── Calibrazione Dirichlet (Kull et al., NeurIPS 2019) ────────────
+        # Su 3 classi la calibrazione e' 3 parametri + 1 temperatura, adattati
+        # su un set di VALIDAZIONE.
+        #
+        # ATTENZIONE (bug corretto): la validazione NON puo' essere una
+        # parte del training usata anche per addestrare il modello finale.
+        # Il modello finale e' allenato su TUTTO il training, quindi le sue
+        # previsioni sulle righe di validazione sono IN-SAMPLE (gonfiate) e
+        # la calibrazione che ne deriva e' sbagliata: sul test set il RPS
+        # pegliorava di 0.02 e poi peggiorava di 0.02 applicata al modello
+        # vero. Misurato: con validazione in-sample il RPS test andava da
+        # 0.13019 a 0.15068.
+        #
+        # Soluzione: calibrazione CROSS-FITTED. Si allena un modello
+        # ausiliario solo sulla seconda meta' del training e si usano le sue
+        # previsioni sulla prima meta' (out-of-sample) per adattare alpha e
+        # w. La calibrazione e' cosi' stimata su previsioni che il modello
+        # non ha mai visto, e si applica al modello finale.
+        n_val = max(len(y_train) // 2, 10)
+        calib_model = CatBoostClassifier(
+            iterations=1000, learning_rate=0.03, depth=6,
+            loss_function="MultiClass", eval_metric="Accuracy",
+            random_seed=42, verbose=False,
+        )
+        calib_model.fit(X_train.iloc[n_val:], list(y_train[n_val:]))
+        probs_val = calib_model.predict_proba(X_train.iloc[:n_val])
+        alpha, w = fit_dirichlet_calibration(list(y_train[:n_val]), probs_val)
+        final_metrics["calibration_alpha"] = [float(a) for a in alpha]
+        final_metrics["calibration_w"] = float(w)
+        final_metrics["calibration_n_val"] = int(n_val)
+        print(f"\n  Calibrazione Dirichlet: alpha={np.round(alpha, 4).tolist()} w={w:.4f} "
+              f"(validation = prime {n_val} righe del training)")
+
+        # La calibrazione va salvata SEPARATAMENTE dal .cbm: e' una funzione
+        # post-processing delle probabilita', non parte del modello CatBoost.
+        # predict_fixtures e predict_match la caricano da qui.
+        cal_path = MODELS_DIR / f"calibration_{league.key}.json"
+        with open(cal_path, "w") as f:
+            json.dump({"alpha": [float(a) for a in alpha], "w": float(w),
+                       "n_val": int(n_val), "method": "dirichlet"},
+                      f, indent=2)
+        print(f"  Calibrazione salvata in {cal_path}")
 
         save_model_and_metrics(final_model, final_metrics,
                                list(X_train.columns), league, "v1")
@@ -290,4 +354,8 @@ if __name__ == "__main__":
     import argparse
     ap = argparse.ArgumentParser(description="Training CatBoost")
     ap.add_argument("--league", default=None, help="chiave lega (default: seriea)")
-    main(get_league(ap.parse_args().league))
+    ap.add_argument("--fast", action="store_true",
+                    help="salta la griglia di hyperparameter tuning (CV 5-fold): "
+                         "per misure locali ed esperimenti")
+    args = ap.parse_args()
+    main(get_league(args.league), fast=args.fast)

@@ -298,11 +298,12 @@ for g_key in ["2", "3"]:
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # AGGIORNA TUTTE LE GIORNATE 2..N: date dal CSV (fonte autorevole) + B365 +
-# risultato + features ricalcolate. Le giornate <= freeze conservano prob/pred
-# congelati ma le features/date/quote/risultati vengono allineati alla fonte.
+# risultato + features ricalcolate.
+#
+# La regola del freeze e' stata RIMOSSA: le features (e quindi le stime)
+# vengono ricalcolate per TUTTE le giornate, non solo quelle oltre il freeze.
 # ═══════════════════════════════════════════════════════════════════════════════
 print("\nAllineamento giornate 2..N con il CSV autorevole...")
-frozen = int(meta.get("freeze_until", 3))
 for g_key in sorted(giornate.keys(), key=lambda x: int(x)):
     g_num = int(g_key)
     if g_num < 2:
@@ -362,13 +363,11 @@ for g_key in sorted(giornate.keys(), key=lambda x: int(x)):
             m["bm_prob"] = bm_p
             n_bm += 1
 
-        # ── Features: solo per le NON congelate ──────────────────────────
-        # Le giornate <= freeze conservano le features originali (regola N-1:
-        # la previsione non deve cambiare dopo la pubblicazione).
-        if g_num > frozen:
-            feats = compute_features(home, away, m["date"], ratings)
-            m["features"] = {c: round(float(feats.get(c, 0.0)), 3)
-                             for c in FEATURE_ORDER}
+        # ── Features: ricalcolate per tutte le giornate ───────────────────
+        # (regola del freeze rimossa: niente resta congelato)
+        feats = compute_features(home, away, m["date"], ratings)
+        m["features"] = {c: round(float(feats.get(c, 0.0)), 3)
+                         for c in FEATURE_ORDER}
 
         # ── Kelly: solo per le giocate con quota ─────────────────────────
         if bm and played:
@@ -397,7 +396,10 @@ _prossima = min((int(g) for g, ms in giornate.items()
                  if any(x.get("ok") is None for x in ms)), default=_ultima + 1)
 meta["ultima_giornata_giocata"] = _ultima
 meta["prossima_giornata"] = _prossima
-# Regola N-1: la giornata N si congela quando la N-1 ha un risultato reale.
+# La regola N-1 e il freeze sono stati rimossi: non esiste piu' una giornata
+# congelata. "freeze_until" resta nel JSON per compatibilita' del frontend ma
+# non vincola piu' nulla.
+meta["freeze_attivo"] = False
 meta["freeze_until"] = _ultima + 1
 
 total_played = sum(1 for g in giornate.values() for m in g if m.get("ok") is not None)

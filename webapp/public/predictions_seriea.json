@@ -1,6 +1,6 @@
 {
   "meta": {
-    "last_update": "2026-10-21T20:02:38",
+    "last_update": "2026-10-21T23:54:15",
     "league": "seriea",
     "league_name": "Serie A",
     "stagione": "2627",
@@ -6768,9 +6768,9 @@
           "elo_away": 159.797,
           "elo_home_expect": 0.602,
           "elo_away_expect": 0.398,
-          "mkt_b365_pH": 0.641,
-          "mkt_b365_pD": 0.201,
-          "mkt_b365_pA": 0.158,
+          "mkt_b365_pH": 0.645,
+          "mkt_b365_pD": 0.199,
+          "mkt_b365_pA": 0.156,
           "mkt_b365_overround": 0.039,
           "mkt_pinnacle_pH": null,
           "mkt_pinnacle_pD": null,
@@ -6782,20 +6782,20 @@
           "mkt_avg_overround": null
         },
         "bm": {
-          "H": 1.53,
-          "D": 4.67,
-          "A": 5.85
+          "H": 1.52,
+          "D": 4.71,
+          "A": 5.93
         },
         "bm_prob": {
-          "H": 64.1,
-          "D": 20.1,
-          "A": 15.8
+          "H": 64.5,
+          "D": 19.9,
+          "A": 15.6
         },
         "kelly": {
           "pick": "H",
           "model_p": 0.678,
-          "odd": 1.53,
-          "stake_pct": 3.52
+          "odd": 1.52,
+          "stake_pct": 2.94
         }
       },
       {
@@ -7204,7 +7204,7 @@
         "bm": {
           "H": 1.35,
           "D": 5.75,
-          "A": 8.05
+          "A": 8.03
         },
         "bm_prob": {
           "H": 72.8,
@@ -7214,8 +7214,8 @@
         "kelly": {
           "pick": "A",
           "model_p": 0.181,
-          "odd": 8.05,
-          "stake_pct": 0.65
+          "odd": 8.03,
+          "stake_pct": 0.64
         }
       },
       {

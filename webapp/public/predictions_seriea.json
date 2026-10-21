@@ -1,6 +1,6 @@
 {
   "meta": {
-    "last_update": "2026-10-21T19:39:06",
+    "last_update": "2026-10-21T20:02:38",
     "league": "seriea",
     "league_name": "Serie A",
     "stagione": "2627",
@@ -7083,8 +7083,8 @@
         "away": "Juventus",
         "date": "2026-10-25",
         "prob": {
-          "H": 23.4,
-          "D": 26.5,
+          "H": 23.3,
+          "D": 26.6,
           "A": 50.1
         },
         "pred": "A",
@@ -7118,10 +7118,10 @@
           "elo_away": 264.298,
           "elo_home_expect": 0.425,
           "elo_away_expect": 0.575,
-          "mkt_b365_pH": 0.11,
-          "mkt_b365_pD": 0.218,
-          "mkt_b365_pA": 0.673,
-          "mkt_b365_overround": 0.037,
+          "mkt_b365_pH": 0.108,
+          "mkt_b365_pD": 0.216,
+          "mkt_b365_pA": 0.676,
+          "mkt_b365_overround": 0.041,
           "mkt_pinnacle_pH": null,
           "mkt_pinnacle_pD": null,
           "mkt_pinnacle_pA": null,
@@ -7132,19 +7132,19 @@
           "mkt_avg_overround": null
         },
         "bm": {
-          "H": 8.19,
-          "D": 4.35,
-          "A": 1.46
+          "H": 8.22,
+          "D": 4.36,
+          "A": 1.45
         },
         "bm_prob": {
-          "H": 11.0,
-          "D": 21.8,
-          "A": 67.3
+          "H": 10.8,
+          "D": 21.6,
+          "A": 67.6
         },
         "kelly": {
           "pick": "H",
-          "model_p": 0.234,
-          "odd": 8.19,
+          "model_p": 0.233,
+          "odd": 8.22,
           "stake_pct": 1.27
         }
       },

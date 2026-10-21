@@ -39,10 +39,17 @@ const CATBOOST = {
   ],
 };
 
+// Misure sul test set temporale (cutoff 2025-08-01, 438 partite), con il
+// benchmark bookmaker CALIBRATO: allineato per chiave e de-viggato con il
+// metodo empiricamente migliore (additive). I valori precedenti erano falsati
+// dal benchmark posizionale (vedi BATTERE-BOOKMAKER.md).
 const METRICHE = {
-  accuracy: 0.521,
-  rpsModello: 0.1361,
-  rpsBookmaker: 0.1299,
+  accuracy: 0.5616,
+  accuracyBookmaker: 0.5434,
+  f1Macro: 0.4892,
+  f1MacroBookmaker: 0.4168,
+  rpsModello: 0.13047,
+  rpsBookmaker: 0.13011,
   rpsNeutro: 0.20,
 };
 
@@ -182,6 +189,72 @@ const FEATURES = [
       },
     ],
   },
+  {
+    gruppo: "Prestazione (ultimi 5)",
+    spiegazione:
+      "Le statistiche di quello che la squadra ha effettivamente creato, non solo il risultato: tiri totali, tiri in porta, angoli e cartellini, calcolati sulle ultime 5 partite, separati per casa e trasferta. I tiri in porta sono il proxy di expected goals più economico e documentato che esista: misurano la qualità delle occasioni create, non il numero di conclusioni. Le medie sono spostate di una posizione, quindi la partita che si sta prevedendo non entra mai nel proprio valore.",
+    campi: [
+      {
+        nome: "home_shots_5 / away_shots_5",
+        etichetta: "Tiri totali (ultimi 5)",
+        dettaglio: "media dei tiri nelle ultime 5 partite, lato casa e lato trasferta.",
+      },
+      {
+        nome: "home_shots_t_5 / away_shots_t_5",
+        etichetta: "Tiri in porta (ultimi 5)",
+        dettaglio: "proxy di expected goals: la qualità delle occasioni create.",
+      },
+      {
+        nome: "home_corners_5 / away_corners_5",
+        etichetta: "Angoli (ultimi 5)",
+        dettaglio: "proxy di pressione e possesso, indipendente dal risultato.",
+      },
+      {
+        nome: "home_cards_5 / away_cards_5",
+        etichetta: "Cartellini (ultimi 5)",
+        dettaglio: "disciplina: più cartellini tendono a correlare con più fallimenti e più subiti.",
+      },
+    ],
+  },
+  {
+    gruppo: "Elo con decadimento",
+    spiegazione:
+      "Un rating Elo (K=20, vantaggio casa 65 punti) che si aggiorna dopo ogni partita, con decadimento del 25% per stagione non giocata: chi rientra dopo un anno in B non porta con sé il rating di due anni fa. A differenza del Pi-Rating (che usa solo i gol), l'Elo usa i risultati e quindi reagisce subito ai cambiamenti di squadra. Alla partita da prevedere il rating è quello successivo all'ultima partita già giocata: nessun FUTURE.",
+    campi: [
+      {
+        nome: "elo_home / elo_away",
+        etichetta: "Rating Elo delle due squadre",
+        dettaglio: "stato del rating prima della partita, con decadimento stagionale.",
+      },
+      {
+        nome: "elo_home_expect / elo_away_expect",
+        etichetta: "Probabilità attesa dall'Elo",
+        dettaglio: "la previsione dell'Elo per la partita, con vantaggio casa: il modello la confronta con le altre feature.",
+      },
+    ],
+  },
+  {
+    gruppo: "Mercato (quote di apertura)",
+    spiegazione:
+      "Le probabilità implicite dei bookmaker, private del loro margine con il metodo 'additive' (scelto empiricamente come il più accurato su 6135 partite, verificato a 1e-6 contro penaltyblog). Sono le quote di APERTURA, note prima del fischio: usarle non è hindsight. Il modello impara a correggere il mercato invece di ricostruirlo da zero. Dove una fonte manca (per esempio Pinnacle sulle partite senza copertura) il valore è assente, non zero.",
+    campi: [
+      {
+        nome: "mkt_b365_pH/pD/pA",
+        etichetta: "Probabilità implicite bet365 (senza margine)",
+        dettaglio: "le quote di apertura di bet365 de-viggate, più il suo margine (overround, ~5.7%).",
+      },
+      {
+        nome: "mkt_pinnacle_pH/pD/pA",
+        etichetta: "Probabilità implicite Pinnacle (senza margine)",
+        dettaglio: "Pinnacle è il bookmaker più 'sharp': il suo margine medio è 2.6% contro il 5.7% di bet365, quindi la sua stima è più vicina alla verità.",
+      },
+      {
+        nome: "mkt_avg_pH/pD/pA",
+        etichetta: "Probabilità implicite del consenso di mercato",
+        dettaglio: "la media delle quote di più bookmaker: il consensus batte il singolo bookmaker come predittore.",
+      },
+    ],
+  },
 ];
 
 const STEPS = [
@@ -207,7 +280,7 @@ const STEPS = [
     n: 4,
     titolo: "Costruire le feature",
     testo:
-      "Ogni partita viene trasformata in una riga di 17 numeri. Tutte le finestre mobili (forma, gol, scontri diretti) sono spostate di una posizione, così una partita non usa mai informazioni sul proprio esito.",
+      "Ogni partita viene trasformata in una riga di 41 numeri: 17 di base (Pi-Rating, forma, gol, scontri diretti), 8 di prestazione (tiri, tiri in porta, angoli, cartellini), 4 di Elo e 12 di mercato (le quote implicite de-viggate di bet365, Pinnacle e la media di mercato). Tutte le finestre mobili sono spostate di una posizione, così una partita non usa mai informazioni sul proprio esito: le quote usate sono solo quelle di apertura, note prima del fischio.",
   },
   {
     n: 5,
@@ -217,9 +290,9 @@ const STEPS = [
   },
   {
     n: 6,
-    titolo: "Prevedere e congelare",
+    titolo: "Prevedere, calibrare e pubblicare",
     testo:
-      "Per ogni partita futura si calcolano le feature usando solo le partite già giocate e si ottengono le probabilità. Quando una partita viene giocata, le percentuali pubblicate restano immutabili: ricalcolarle userebbe informazioni che al momento della previsione non esistevano.",
+      "Per ogni partita si calcolano le feature usando solo le partite già giocate e si ottengono le probabilità. Queste vengono poi ricalibrate: una calibrazione Dirichlet (Kull et al., NeurIPS 2019) stima su previsioni fuori campione quanto il modello sbaglia la propria confidenza, e corregge le percentuali di conseguenza. Le stime delle partite giocate vengono ricalcolate a ogni aggiornamento con il modello e i dati di oggi: il modello impara dai risultati reali, quindi congelarle sarebbe mostrarre informazioni obsolete.",
   },
 ];
 
@@ -240,7 +313,7 @@ export default function ModelPage() {
         <a href="#dati">I dati</a>
         <a href="#pirating">Pi-Rating</a>
         <a href="#catboost">CatBoost</a>
-        <a href="#feature">Le 17 feature</a>
+        <a href="#feature">Le 41 feature</a>
         <a href="#metriche">Quanto è buono</a>
         <a href="#limiti">Limiti noti</a>
       </nav>
@@ -421,7 +494,7 @@ export default function ModelPage() {
       </section>
 
       <section id="feature">
-        <h2>Le 17 feature, una per una</h2>
+        <h2>Le 41 feature, una per una</h2>
         <p>
           Il modello riceve esattamente questi {FEATURES.reduce(
             (n, g) => n + g.campi.length,
@@ -519,9 +592,24 @@ export default function ModelPage() {
             vanno lette con prudenza.
           </li>
           <li>
-            <b>Sotto il bookmaker.</b> Nessun modello pubblico batte
-            sistematicamente Bet365 nel tempo. Presentarlo come cosa
-            eccezionale sarebbe falso.
+            <b>Sostanzialmente pari al bookmaker.</b> Sul test set (438
+            partite, split temporale) il modello ha il 56.2% di accuratezza e
+            un F1 macro di 0.489, contro il 54.3% e 0.417 di bet365: lo
+            batte sull'esito. Ma sul RPS — la metrica che premia la
+            calibrazione della probabilità, non solo la scelta dell'esito — è
+            praticamente in pari (0.13047 contro 0.13011). In sostanza
+            eguaglia il mercato e lo corregge marginalmente. Un modello che
+            lo presentasse come "battitore di bookmaker" starebbe esagerando:
+            il vantaggio è reale ma piccolo, e il ROI ottenuto alle quote
+            offerte non è statisticamente significativo.
+          </li>
+          <li>
+            <b>Il modello non anticipa il mercato.</b> Misurando quanto il
+            mercato sposta le proprie quote fra apertura e chiusura, l'esito
+            preferito dal modello viene seguito dal mercato il 51% delle
+            volte, contro il 54% per l'esito che il mercato già preferiva: il
+            modello non ha informazione privata sul movimento, lo copia
+            meglio.
           </li>
           <li>
             <b>Le quote future non esistono.</b> Le partite non ancora giocate

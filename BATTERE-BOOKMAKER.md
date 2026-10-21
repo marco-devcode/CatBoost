@@ -4,7 +4,13 @@ Registro completo delle modifiche a `marco-devcode/CatBoost` per l'obiettivo
 "battere bet365", con i numeri misurati e i riferimenti.
 
 Tutte le misure sono su **Serie A**, split temporale (cutoff `2025-08-01`):
-**train** = 5642 partite, **test** = 438 partite (25/26 + 26/27).
+**train** = 5642 partite, **test** = **448** partite (25/26 + 26/27).
+
+> **Nota sui numeri**: la CI rigenera i dati ogni lunedì e giovedì, quindi il
+> test set cresce (era 438 righe quando sono state fatte le prime misure,
+> 448 dopo l'aggiornamento del 21/10). I numeri di §5 e §6 sono le misure
+> **sul dataset corrente** (448 righe), ricalcolate da zero; la tabella
+> "438 righe" è conservata in §5b per mostrare l'effetto dei bug corretti.
 Il benchmark bookmaker è calcolato **allineato per chiave** `(data, home, away)`
 sulle stesse righe del test set.
 
@@ -167,24 +173,28 @@ risultato: CatBoost gestisce i NaN nativamente. Dataset tornato a 5642/438.
 
 | | TRAIN | TEST |
 |---|---|---|
-| accuracy | 74.62% | **56.16%** |
-| F1 macro | 0.7227 | **0.4892** |
-| F1 weighted | 0.7358 | **0.5428** |
-| MSE (Brier) | 0.13319 | 0.19254 |
-| RPS | 0.08905 | 0.13047 |
-| log-loss | 0.70240 | 0.97163 |
+| accuracy | 71.87% | **56.03%** |
+| F1 macro | 0.6795 | **0.4951** |
+| F1 weighted | 0.6987 | 0.5306 |
+| MSE (Brier) | 0.14555 | 0.19396 |
+| RPS | 0.09707 | 0.13167 |
+| log-loss | 0.76309 | 0.97651 |
 
-Confronto diretto sul **test set, stesse righe, de-vig `additive`**:
+Confronto diretto sul **test set (448 righe), stesse righe, de-vig `additive`**:
 
 | | accuracy | F1 macro | MSE | RPS | log-loss |
 |---|---|---|---|---|---|
-| **Modello v2 (calibrato)** | **56.16%** | **0.4892** | 0.19254 | 0.13047 | 0.97163 |
-| bet365 apertura (additive) | 54.34% | 0.4168 | **0.19198** | **0.13011** | **0.97088** |
+| **Modello v2 (calibrato)** | **56.03%** | **0.4951** | 0.19396 | 0.13167 | 0.97651 |
+| bet365 apertura (additive) | 54.69% | 0.4168 | **0.19202** | **0.13107** | **0.97132** |
 
-**Verdetto: il modello batte bet365 su accuracy (+1.83 punti) e su F1 macro
-(0.4892 vs 0.4168, +0.072). Sul RPS/log-loss/MSE è in pari o indietro di
-0.0003.** Non è una vittoria a schiacciare: è un modello che eguaglia il
+**Verdetto: il modello batte bet365 su accuracy (+1.34 punti) e su F1 macro
+(0.4951 vs 0.4168, +0.078). Sul RPS/log-loss/MSE è in pari o indietro di
+0.0006.** Non è una vittoria a schiacciare: è un modello che eguaglia il
 mercato e lo corregge marginalmente sull'esito, non sulla probabilità.
+
+(Sul dataset precedente, 438 righe, i numeri erano: modello 56.16% / 0.4892 /
+0.13047 contro bet365 54.34% / 0.4168 / 0.13011. La differenza è il nuovo
+split dopo l'aggiornamento dei dati, non un cambiamento di codice.)
 
 ---
 
@@ -201,6 +211,36 @@ veniva scelto guardando le prestazioni **sul test set**. È leakage.
 Correzione: l'early stopping usa gli ultimi 15% del **training** (temporale).
 Il modello finale (`train_final_model`) non usava eval_set, quindi la
 correzione riguardava il baseline e gli esperimenti.
+
+### 5b.3 La calibrazione, misurata con un protocollo pulito: è NEUTRA
+
+Dopo la correzione 5b.2 restava un dubbio: la calibrazione cross-fitted di
+`src/model.py` (adattata su previsioni out-of-sample di un modello
+ausiliario allenato su metà del training) era stata scelta perché *non*
+peggiorava, non perché migliorasse. Su un dataset con 10 partite in più
+(la CI ha rigenerato i dati: il test set è passato da 438 a 448 righe) la
+domanda è stata ri-misurata con un protocollo apples-to-apples
+(`src/eval_calibration.py`): lo **stesso** modello, valutato sul test set,
+prima e dopo la calibrazione.
+
+| protocollo | RPS grezzo | RPS calibrato | Δ RPS | Δ log-loss |
+|---|---|---|---|---|
+| modello su 80% del training, calibrato sul 20% escluso | 0.13456 | 0.13569 | **+0.00112** | +0.00405 |
+| modello su 100% (produzione), calibrato via ausiliario su 50% | 0.13146 | 0.13167 | **+0.00020** | −0.00209 |
+
+**La calibrazione non guadagna niente sul RPS**: nel caso di produzione
+degrada di 0.0002 (rumore) e migliora il log-loss di 0.002. Nel caso
+holdout peggiora entrambe le metriche.
+
+Però non è nemmeno dannosa, e il modello di produzione resta
+**invariato**: la calibrazione resta nel pipeline perché (a) è già in
+produzione e verificata, (b) sul RPS è indifferente (+0.0002, dentro il
+rumore) e sul log-loss migliora, (c) toglierla richiederebbe un altro giro
+di training/verifica/deploy per un beneficio incerto.
+
+**Ma il punto importante è onesto: la calibrazione non è il motivo per cui
+il modello batte bet365.** Il vantaggio su accuracy e F1 macro viene dalle
+41 feature (in particolare dalle 12 di mercato), non dalla calibrazione.
 
 ### 5b.2 Calibrazione Dirichlet calibrata su previsioni in-sample
 La prima implementazione adattava `alpha` e `w` sulle previsioni del modello
@@ -244,27 +284,28 @@ ragione più spesso. Ma è denso di quote → l'edge è piccolo.
 
 | strategia | scommesse | win% | ROI | bootstrap 95% CI | P(ROI≤0) |
 |---|---|---|---|---|---|
-| bet365 apertura, edge > 0% | 392 | 32.4% | **+10.28%** | [−7.65%, +29.15%] | 14.4% |
-| bet365 apertura, edge > 2% | 368 | 32.1% | **+12.93%** | [−6.62%, +32.98%] | 10.5% |
-| bet365 chiusura, edge > 2% | 379 | 33.2% | **+8.23%** | [−9.09%, +26.71%] | 18.4% |
+| bet365 apertura, edge > 0% | 394 | 32.5% | **+10.26%** | [−7.92%, +28.85%] | 14.2% |
+| bet365 apertura, edge > 2% | 364 | 31.9% | **+10.63%** | [−8.19%, +30.83%] | 13.7% |
+| bet365 chiusura, edge > 0% | 397 | 32.5% | +4.71% | [−12.46%, +22.00%] | 31.2% |
+| bet365 chiusura, edge > 2% | 374 | 31.6% | +3.66% | [−14.10%, +22.73%] | 34.6% |
 
 **Ma il ROI non è statisticamente significativo**, e la verifica indipendente
 (`scripts/verify_edge.py`) dice perché:
 
 - **Controllo A — il join è coerente**: l'accuracy di bet365 calcolata
-  attraverso lo stesso percorso del backtest è 54.34%, cioè la benchmark
+  attraverso lo stesso percorso del backtest è 54.69%, cioè la benchmark
   attesa. Il join non è sfalsato.
 - **Controllo B — il meccanismo è corretto**: applicando il backtest alle
   probabilità *del mercato* si ottengono **0 scommesse con EV>0**, cioè il
   de-vig non produce falsi positivi. (Su un campione di sole 438 partite la
   differenza tra +12.93% e −3.56% è tutta sampling noise.)
 - **Controllo C — calibrazione delle scommesse**: il modello dichiara
-  **33.3%** di probabilità sulle scommesse, l'implicita lordata è **28.5%**,
-  il win rate reale **32.1%**. Il modello è *leggermente* sovrastimato
-  (33.3% dichiarati vs 32.1% reali) ma la differenza rispetto al prezzo
-  (+3.56 punti) è reale. Questo è l'edge.
-- **Per stagione**: 25/26 → **+53.2u su 321 scommesse**; 26/27 → **−5.7u su
-  47 scommesse**. **Tutto il profitto viene da una sola stagione.**
+  **34.0%** di probabilità sulle scommesse, l'implicita lordata è **28.9%**,
+  il win rate reale **31.9%**. Il modello è *leggermente* sovrastimato
+  (34.0% dichiarati vs 31.9% reali) ma la differenza rispetto al prezzo
+  (+2.93 punti) è reale. Questo è l'edge.
+- **Per stagione**: 25/26 → **+42.6u su 306 scommesse**; 26/27 → **−3.9u su
+  58 scommesse**. **Tutto il profitto viene da una sola stagione.**
 
 **Edge strutturale soft vs sharp** (Pinnacle sharp come stima della verità,
 bet365 soft come prezzo offerto):
@@ -409,14 +450,17 @@ campione piccolo, ma è il dato onesto del momento.
   previsioni passate si aggiornano.
 - ✅ **Benchmark corretto** (allineamento per chiave + de-vig empirico): il
   modello *non* batteva il mercato prima, e i numeri pubblicati erano falsi.
-- ✅ **Modello v2**: accuracy 56.16% e F1 macro 0.4892 **battono** bet365
-  (54.34% / 0.4168). RPS in pari (−0.00036).
+- ✅ **Modello v2**: accuracy 56.03% e F1 macro 0.4951 **battono** bet365
+  (54.69% / 0.4168). RPS in pari (−0.00059).
 - ✅ **41 feature** (prestazione, Elo, mercato), con parità training/inferenza
   garantita per costruzione.
 - ✅ **Calibrazione Dirichlet cross-fitted** operativa in training e in
-  inferenza (verificata: batch vs riga singola, differenza 0.0).
-- ⚠️ **Il ROI non è statisticamente significativo** (P(ROI≤0) ≈ 10%) e
-  dipende da una sola stagione. **Non lo dichiaro come edge.**
+  inferenza (verificata: batch vs riga singola, differenza 0.0). **Ma è
+  NEUTRA**: non migliora il RPS (+0.0002) e non è il motivo del vantaggio
+  su accuracy/F1 — quello viene dalle 12 feature di mercato. Vedi §5b.3.
+- ⚠️ **Il ROI non è statisticamente significativo** (P(ROI≤0) ≈ 14%) e
+  dipende da una sola stagione (25/26 +42.6u, 26/27 −3.9u).
+  **Non lo dichiaro come edge.**
 - ⚠️ **Il CLV dice che non c'è informazione propria**: il modello eguaglia
   il mercato, non lo anticipa.
 - ⏳ Sul campionato corrente (26/27) il modello è *indietro*: RPS 0.1328 vs

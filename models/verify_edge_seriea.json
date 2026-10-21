@@ -1,5 +1,5 @@
 {
-  "market_accuracy_via_join": 0.54337899543379,
+  "market_accuracy_via_join": 0.546875,
   "join_ok": true,
-  "model_accuracy": 0.5616438356164384
+  "model_accuracy": 0.5602678571428571
 }

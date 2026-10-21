@@ -228,11 +228,26 @@ def main():
     # ── Calibrazione Dirichlet: validation = prima meta' del training ──────
     print(f"\n{'='*100}\n  CALIBRAZIONE DIRICHLET (validation = prima meta' del training, temporale)\n{'='*100}")
     n_val = len(y_train) // 2
-    y_val, y_fit = y_train[:n_val], y_train[n_val:]
+    y_val = y_train[:n_val]
 
     cal_report = {}
     for name, (model, cols) in models.items():
-        p_val = model.predict_proba(X_train[cols][:n_val])
+        # Calibrazione CROSS-FITTED (come in src/model.py).
+        #
+        # BUG CORRETTO: prima qui si adattava alpha/w sulle previsioni del
+        # modello finale sulla prima meta' del training. Ma quel modello e'
+        # allenato su TUTTO il training: quelle previsioni sono IN-SAMPLE
+        # (il modello ha gia' visto quelle etichette) e sono quasi perfette.
+        # Il calibratore impara quindi che il modello e' infallibile e
+        # affila le probabilita' (w >> 1): sul test set il risultato e' un
+        # modello troppo sicuro di sé, cio' una calibrazione distorta.
+        #
+        # Correzione: un modello AUSILIARIO allenato solo sulla seconda
+        # meta' del training predice la prima meta' (out-of-sample), e su
+        # quelle previsioni si adattano alpha e w.
+        aux = train_catboost(X_train[cols].iloc[n_val:], y_train[n_val:],
+                             X_test[cols], y_test)
+        p_val = aux.predict_proba(X_train[cols][:n_val])
         alpha, w = fit_dirichlet_calibration(y_val, p_val)
         p_te_cal = apply_dirichlet_calibration(model.predict_proba(X_test[cols]), alpha, w)
         p_tr_cal = apply_dirichlet_calibration(model.predict_proba(X_train[cols]), alpha, w)

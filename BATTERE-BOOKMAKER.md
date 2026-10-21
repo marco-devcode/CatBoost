@@ -381,6 +381,28 @@ su runner pulito.
 
 ---
 
+## 6d. Verifica sul sito pubblicato (browser reale)
+
+Verifica con Firefox headless + Marionette su `https://cat-boost.vercel.app`
+(non un semplice `curl` del JSON: la pagina è stata navigata e renderizzata).
+
+| pagina | esito |
+|---|---|
+| `/` | render OK — 42/70 corrette (60%), confronto Bookmaker (RPS) CatBoost 0.1322 vs bet365 0.1309, Kelly, «Variabili usate (41)» |
+| `/kelly` | render OK — bankroll €915, 63 puntate, 18 vinte (29%), nessun errore |
+| `/modello` | render OK — «Le 41 feature», 3 famiglie nuove, metriche aggiornate |
+
+Controlli: **0 NaN**, **0 Infinity**, **0 undefined**, nessun overlay di errore
+Next.js, nessun «Maximum update depth». Il JSON servito ha 380 partite, 41
+feature per partita, `freeze_attivo: false`.
+
+Nota: la dashboard mostra RPS **0.1322 vs 0.1309** perché confronta il modello
+con bet365 **sulle 70 partite già giocate della stagione corrente**, non sul
+test set di 438 partite. Su quello stagionale il modello è indietro: è un
+campione piccolo, ma è il dato onesto del momento.
+
+---
+
 ## 7. Stato onesto
 
 - ✅ **Freeze rimosso** ovunque (codice, refresh, workflow, test): le

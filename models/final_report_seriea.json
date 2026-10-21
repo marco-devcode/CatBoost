@@ -1,30 +1,30 @@
 {
   "best_model": "v1_baseline",
   "best_model_desc": "Baseline (Pi-Rating + FE) — Serie A",
-  "accuracy": 0.4932,
-  "rps_model": 0.1422,
-  "f1_macro": 0.4378,
-  "f1_weighted": 0.4697,
+  "accuracy": 0.5513,
+  "rps_model": 0.1308,
+  "f1_macro": 0.4986,
+  "f1_weighted": 0.5312,
   "f1_per_class": {
-    "H": 0.5871,
-    "D": 0.1905,
-    "A": 0.5359
+    "H": 0.6311,
+    "D": 0.2558,
+    "A": 0.609
   },
   "precision_per_class": {
-    "H": 0.5221,
-    "D": 0.2759,
-    "A": 0.5325
+    "H": 0.5628,
+    "D": 0.3548,
+    "A": 0.6129
   },
-  "recall_home": 0.6705,
-  "recall_draw": 0.1455,
-  "recall_away": 0.5395,
+  "recall_home": 0.7182,
+  "recall_draw": 0.2,
+  "recall_away": 0.6051,
   "recall_per_class": {
-    "H": 0.6705,
-    "D": 0.1455,
-    "A": 0.5395
+    "H": 0.7182,
+    "D": 0.2,
+    "A": 0.6051
   },
-  "n_test": 438,
-  "n_features": 17,
+  "n_test": 448,
+  "n_features": 41,
   "features": [
     "pi_home_H",
     "pi_away_H",
@@ -42,18 +42,42 @@
     "away_goals_scored_5",
     "away_goals_conceded_5",
     "home_promoted",
-    "away_promoted"
+    "away_promoted",
+    "home_shots_5",
+    "away_shots_5",
+    "home_shots_t_5",
+    "away_shots_t_5",
+    "home_corners_5",
+    "away_corners_5",
+    "home_cards_5",
+    "away_cards_5",
+    "elo_home",
+    "elo_away",
+    "elo_home_expect",
+    "elo_away_expect",
+    "mkt_b365_pH",
+    "mkt_b365_pD",
+    "mkt_b365_pA",
+    "mkt_b365_overround",
+    "mkt_pinnacle_pH",
+    "mkt_pinnacle_pD",
+    "mkt_pinnacle_pA",
+    "mkt_pinnacle_overround",
+    "mkt_avg_pH",
+    "mkt_avg_pD",
+    "mkt_avg_pA",
+    "mkt_avg_overround"
   ],
-  "rps_bookmaker": 0.1789,
-  "accuracy_bookmaker": 0.3721,
+  "rps_bookmaker": 0.178,
+  "accuracy_bookmaker": 0.3772,
   "beats_bookmaker_rps": true,
   "kelly": {
     "bankroll_iniziale": 1000.0,
-    "bankroll_finale": 9485525.74,
-    "profitto": 9484525.74,
-    "roi_pct": 948452.57,
-    "scommesse": 438,
-    "stake_totale_pct": 1308975.0,
+    "bankroll_finale": 34068377.44,
+    "profitto": 34067377.44,
+    "roi_pct": 3406737.74,
+    "scommesse": 448,
+    "stake_totale_pct": 5158290.4,
     "mode": "dinamico",
     "odds_thresholds": [
       1.8,
@@ -71,24 +95,24 @@
       5.0,
       2.5
     ],
-    "n_troncate_al_cap": 341
+    "n_troncate_al_cap": 325
   },
   "shap_neopromossa": {
     "home_promoted": {
-      "mean_abs_shap": 0.03071104383569305,
+      "mean_abs_shap": 0.008299637942051685,
       "rank": 16,
-      "n_features_total": 17,
-      "shap_feature1_classH": -0.01933954694937618,
-      "shap_feature0_classH": 0.01572788229953113,
-      "delta_classH": -0.03506742924890731
+      "n_features_total": 41,
+      "shap_feature1_classH": -0.008875480792887858,
+      "shap_feature0_classH": 0.0030974876545447672,
+      "delta_classH": -0.011972968447432624
     },
     "away_promoted": {
-      "mean_abs_shap": 0.036767276309670666,
+      "mean_abs_shap": 0.011387279636341507,
       "rank": 17,
-      "n_features_total": 17,
-      "shap_feature1_classH": 0.0855509987413248,
-      "shap_feature0_classH": -0.04058305578175257,
-      "delta_classH": 0.12613405452307735
+      "n_features_total": 41,
+      "shap_feature1_classH": 0.02213903265079099,
+      "shap_feature0_classH": -0.010142331209911072,
+      "delta_classH": 0.03228136386070206
     }
   }
 }

@@ -1,169 +1,169 @@
 {
   "Atalanta": {
-    "attack": 0.5518,
-    "defence": 0.2524
+    "attack": 0.559,
+    "defence": 0.2351
   },
   "Bari": {
-    "attack": -0.6974,
-    "defence": 0.2025
+    "attack": -0.6475,
+    "defence": 0.2168
   },
   "Benevento": {
-    "attack": -0.0298,
-    "defence": -0.2976
+    "attack": -0.0749,
+    "defence": -0.3154
   },
   "Bologna": {
-    "attack": 0.2904,
-    "defence": 0.1428
+    "attack": 0.2864,
+    "defence": 0.129
   },
   "Brescia": {
-    "attack": -0.2605,
-    "defence": -0.4064
+    "attack": -0.31,
+    "defence": -0.4667
   },
   "Cagliari": {
-    "attack": 0.092,
-    "defence": -0.0149
+    "attack": 0.0741,
+    "defence": -0.0399
   },
   "Carpi": {
-    "attack": -0.5422,
-    "defence": 0.0896
+    "attack": -0.53,
+    "defence": 0.1184
   },
   "Catania": {
-    "attack": -0.4002,
-    "defence": 0.0328
+    "attack": -0.4128,
+    "defence": 0.0655
   },
   "Cesena": {
-    "attack": -0.5721,
-    "defence": -0.1129
+    "attack": -0.5565,
+    "defence": -0.0615
   },
   "Chievo": {
-    "attack": -0.1564,
-    "defence": -0.0809
+    "attack": -0.1981,
+    "defence": -0.0998
   },
   "Como": {
-    "attack": 0.4629,
-    "defence": 0.3463
+    "attack": 0.4759,
+    "defence": 0.3308
   },
   "Cremonese": {
-    "attack": -0.1076,
-    "defence": -0.0977
+    "attack": -0.1258,
+    "defence": -0.1013
   },
   "Crotone": {
-    "attack": 0.107,
-    "defence": -0.3807
+    "attack": 0.1017,
+    "defence": -0.3582
   },
   "Empoli": {
-    "attack": -0.0446,
-    "defence": -0.0478
+    "attack": -0.0338,
+    "defence": -0.0517
   },
   "Fiorentina": {
-    "attack": 0.328,
-    "defence": 0.1001
+    "attack": 0.3231,
+    "defence": 0.0822
   },
   "Frosinone": {
-    "attack": 0.2037,
-    "defence": -0.1342
+    "attack": 0.2861,
+    "defence": -0.1589
   },
   "Genoa": {
-    "attack": 0.068,
-    "defence": 0.0471
+    "attack": 0.0545,
+    "defence": 0.041
   },
   "Inter": {
-    "attack": 0.788,
-    "defence": 0.4094
+    "attack": 0.7899,
+    "defence": 0.4049
   },
   "Juventus": {
-    "attack": 0.4686,
-    "defence": 0.4617
+    "attack": 0.4527,
+    "defence": 0.4356
   },
   "Lazio": {
-    "attack": 0.3992,
-    "defence": 0.2325
+    "attack": 0.4036,
+    "defence": 0.2387
   },
   "Lecce": {
-    "attack": -0.1855,
-    "defence": 0.0003
+    "attack": -0.1717,
+    "defence": 0.0033
   },
   "Livorno": {
-    "attack": -0.5969,
-    "defence": -0.0107
+    "attack": -0.5701,
+    "defence": 0.0364
   },
   "Milan": {
-    "attack": 0.502,
-    "defence": 0.2878
+    "attack": 0.5074,
+    "defence": 0.2769
   },
   "Monza": {
-    "attack": 0.03,
-    "defence": -0.1509
+    "attack": 0.0827,
+    "defence": -0.1426
   },
   "Napoli": {
-    "attack": 0.5211,
-    "defence": 0.412
+    "attack": 0.5075,
+    "defence": 0.4056
   },
   "Novara": {
-    "attack": -0.6605,
-    "defence": 0.1533
+    "attack": -0.6184,
+    "defence": 0.176
   },
   "Palermo": {
-    "attack": -0.1057,
-    "defence": -0.2748
+    "attack": -0.1607,
+    "defence": -0.2899
   },
   "Parma": {
-    "attack": -0.0263,
-    "defence": 0.0056
+    "attack": -0.0536,
+    "defence": -0.0125
   },
   "Pescara": {
-    "attack": -0.4952,
-    "defence": -0.4428
+    "attack": -0.4986,
+    "defence": -0.3895
   },
   "Pisa": {
-    "attack": -0.3904,
-    "defence": -0.2583
+    "attack": -0.3467,
+    "defence": -0.2483
   },
   "Roma": {
-    "attack": 0.5038,
-    "defence": 0.3712
+    "attack": 0.4988,
+    "defence": 0.374
   },
   "Salernitana": {
-    "attack": 0.0064,
-    "defence": -0.2989
+    "attack": -0.0082,
+    "defence": -0.2843
   },
   "Sampdoria": {
-    "attack": 0.1101,
-    "defence": -0.1357
+    "attack": 0.1182,
+    "defence": -0.1362
   },
   "Sassuolo": {
-    "attack": 0.3102,
-    "defence": -0.0931
+    "attack": 0.3038,
+    "defence": -0.1168
   },
   "Siena": {
-    "attack": -0.568,
-    "defence": 0.1535
+    "attack": -0.5463,
+    "defence": 0.1743
   },
   "Spal": {
-    "attack": -0.093,
-    "defence": -0.1839
+    "attack": -0.1311,
+    "defence": -0.1961
   },
   "Spezia": {
-    "attack": -0.0003,
-    "defence": -0.1915
+    "attack": -0.0056,
+    "defence": -0.2202
   },
   "Torino": {
-    "attack": 0.1458,
-    "defence": 0.0747
+    "attack": 0.1512,
+    "defence": 0.0784
   },
   "Udinese": {
-    "attack": 0.1801,
-    "defence": 0.0183
+    "attack": 0.1619,
+    "defence": 0.0015
   },
   "Venezia": {
     "attack": -0.1364,
-    "defence": -0.1797
+    "defence": -0.1355
   },
   "Verona": {
     "attack": 0.0,
     "defence": 0.0
   },
   "_global": {
-    "home_advantage": 0.1453
+    "home_advantage": 0.1437
   }
 }

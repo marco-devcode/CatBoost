@@ -1,0 +1,452 @@
+{
+  "xgb_params": {
+    "subsample": 0.8,
+    "reg_lambda": 0.5,
+    "reg_alpha": 0.0,
+    "n_estimators": 400,
+    "min_child_weight": 5,
+    "max_depth": 4,
+    "learning_rate": 0.01,
+    "gamma": 0.0,
+    "colsample_bytree": 0.7
+  },
+  "cv_rps": {
+    "xgb_best": 0.19343,
+    "catboost_produzione": 0.19026877661979744
+  },
+  "set_scores_cv": {
+    "A produzione": {
+      "rps_oof": 0.19182104590631863,
+      "n_features": 32,
+      "train_rows": 4137
+    },
+    "B produzione+xG": {
+      "rps_oof": 0.1924134074839794,
+      "n_features": 64,
+      "train_rows": 4137
+    },
+    "C produzione+bet365": {
+      "rps_oof": 0.19221294221390708,
+      "n_features": 35,
+      "train_rows": 4137
+    },
+    "D max_deployabile": {
+      "rps_oof": 0.19290936892968646,
+      "n_features": 68,
+      "train_rows": 4137
+    },
+    "E D+line_shopping": {
+      "rps_oof": 0.19347944177334578,
+      "n_features": 84,
+      "train_rows": 4137
+    },
+    "A_tutte_righe": {
+      "rps_oof": 0.19274130932686903,
+      "n_features": 32,
+      "train_rows": 5642
+    }
+  },
+  "n_features_used": 90,
+  "coverage_train": {
+    "mkt_b365_overround": 0.9991137894363701,
+    "mkt_pinnacle_pH": 0.8679546260191422,
+    "mkt_pinnacle_pD": 0.8679546260191422,
+    "mkt_pinnacle_pA": 0.8679546260191422,
+    "mkt_pinnacle_overround": 0.8679546260191422,
+    "mkt_avg_pH": 0.401807869549805,
+    "mkt_avg_pD": 0.401807869549805,
+    "mkt_avg_pA": 0.401807869549805,
+    "mkt_avg_overround": 0.401807869549805,
+    "xG_5_home": 0.7307692307692307,
+    "xG_5_away": 0.7297057780928748,
+    "xG_season_home": 0.7307692307692307,
+    "xG_season_away": 0.7297057780928748,
+    "xGA_5_home": 0.7307692307692307,
+    "xGA_5_away": 0.7297057780928748,
+    "xGA_season_home": 0.7307692307692307,
+    "xGA_season_away": 0.7297057780928748,
+    "npxG_5_home": 0.7307692307692307,
+    "npxG_5_away": 0.7297057780928748,
+    "npxG_season_home": 0.7307692307692307,
+    "npxG_season_away": 0.7297057780928748,
+    "npxGA_5_home": 0.7307692307692307,
+    "npxGA_5_away": 0.7297057780928748,
+    "npxGA_season_home": 0.7307692307692307,
+    "npxGA_season_away": 0.7297057780928748,
+    "ppda_5_home": 0.7307692307692307,
+    "ppda_5_away": 0.7297057780928748,
+    "ppda_season_home": 0.7307692307692307,
+    "ppda_season_away": 0.7297057780928748,
+    "ppda_allowed_5_home": 0.7307692307692307,
+    "ppda_allowed_5_away": 0.7297057780928748,
+    "ppda_allowed_season_home": 0.7307692307692307,
+    "ppda_allowed_season_away": 0.7297057780928748,
+    "deep_5_home": 0.7307692307692307,
+    "deep_5_away": 0.7297057780928748,
+    "deep_season_home": 0.7307692307692307,
+    "deep_season_away": 0.7297057780928748,
+    "deep_allowed_5_home": 0.7307692307692307,
+    "deep_allowed_5_away": 0.7297057780928748,
+    "deep_allowed_season_home": 0.7307692307692307,
+    "deep_allowed_season_away": 0.7297057780928748,
+    "mkt_betfair_pH": 0.9718185040765686,
+    "mkt_betfair_pD": 0.9718185040765686,
+    "mkt_betfair_pA": 0.9718185040765686,
+    "mkt_williamhill_pH": 0.9831619992910315,
+    "mkt_williamhill_pD": 0.9831619992910315,
+    "mkt_williamhill_pA": 0.9831619992910315,
+    "mkt_interwetten_pH": 0.8947181850407657,
+    "mkt_interwetten_pD": 0.8947181850407657,
+    "mkt_interwetten_pA": 0.8947181850407657,
+    "mkt_blackbet_pH": 0.598014888337469,
+    "mkt_blackbet_pD": 0.598014888337469,
+    "mkt_blackbet_pA": 0.598014888337469,
+    "mkt_b365_ou25_p_over": 0.4012761432116271,
+    "mkt_b365_ahh_line": 0.40145338532435304,
+    "mkt_b365_ahh_cover": 0.40145338532435304,
+    "mkt_avg_ahh_line": 0.40163062743707906,
+    "mkt_avg_ahh_cover": 0.40163062743707906
+  },
+  "importance": {
+    "mkt_b365_pA": 0.09286260034518162,
+    "mkt_b365_pH": 0.0810178605263439,
+    "mkt_williamhill_pH": 0.04561697732076239,
+    "mkt_betfair_pH": 0.03150369111519717,
+    "mkt_betfair_pA": 0.023828134492356264,
+    "mkt_williamhill_pA": 0.02181945540069057,
+    "mkt_pinnacle_pH": 0.01737799878269815,
+    "mkt_pinnacle_pA": 0.014784332505839501,
+    "mkt_williamhill_pD": 0.013908082666965284,
+    "mkt_b365_pD": 0.012860145969464873,
+    "mkt_betfair_pD": 0.012419158894947836,
+    "mkt_pinnacle_pD": 0.01129069292984248,
+    "pi_away_H": 0.010349693927211478,
+    "mkt_interwetten_pD": 0.010293372795899052,
+    "deep_allowed_season_away": 0.00991720299643403,
+    "ppda_season_away": 0.00955450047814006,
+    "mkt_interwetten_pH": 0.009381158218903746,
+    "ppda_5_away": 0.00912022384688336,
+    "home_shots_t_5": 0.009048021925460267,
+    "xGA_season_home": 0.008750592731760274,
+    "pi_home_H": 0.008728069609684497,
+    "mkt_blackbet_pA": 0.008621215820033848,
+    "mkt_blackbet_pD": 0.00855644987523331,
+    "deep_5_away": 0.008523172078352974,
+    "deep_allowed_season_home": 0.008495717303654563,
+    "xGA_5_away": 0.008466173782569147,
+    "deep_season_home": 0.008444079070669153,
+    "npxGA_5_away": 0.00844382143229155,
+    "away_form_5": 0.008380557884466922,
+    "ppda_allowed_season_away": 0.008380462133805514,
+    "mkt_avg_pA": 0.008377330988465444,
+    "away_promoted": 0.00828805287434441,
+    "xG_5_away": 0.008266205436059703,
+    "xGA_5_home": 0.008243284998095093,
+    "npxGA_season_home": 0.00823727244883079,
+    "ppda_season_home": 0.008233876261711463,
+    "mkt_avg_overround": 0.00823196371628385,
+    "mkt_avg_ahh_cover": 0.008188749567261918,
+    "pi_home_A": 0.008187619808169325,
+    "mkt_interwetten_pA": 0.008137654743958006,
+    "away_goals_scored_5": 0.00810523376742924,
+    "ppda_allowed_5_home": 0.008046071210561521,
+    "npxG_5_away": 0.008034868876736875,
+    "mkt_blackbet_pH": 0.00794974555162478,
+    "away_shots_5": 0.00793655861259641,
+    "npxG_season_away": 0.007931274064494877,
+    "mkt_avg_pH": 0.007926139558666891,
+    "npxGA_5_home": 0.007901262154864737,
+    "mkt_avg_pD": 0.007869280940394293,
+    "elo_home": 0.007862111979791439,
+    "npxG_season_home": 0.007852047795581261,
+    "ppda_5_home": 0.007851235889199733,
+    "deep_allowed_5_away": 0.007793560428944504,
+    "mkt_b365_ou25_p_over": 0.007781685866249558,
+    "home_corners_5": 0.007742263245995347,
+    "xG_season_away": 0.007740467180753777,
+    "mkt_b365_ahh_line": 0.0077359718352686966,
+    "away_goals_conceded_5": 0.007706606982943226,
+    "h2h_home_winrate": 0.007685183512793311,
+    "home_cards_5": 0.007680736536199045,
+    "mkt_b365_overround": 0.007651469408775424,
+    "xG_season_home": 0.007639858407179406,
+    "npxG_5_home": 0.007636088595056542,
+    "xG_5_home": 0.007632952020555258,
+    "away_goal_diff_5": 0.007612200779275642,
+    "deep_5_home": 0.0075807037472734535,
+    "mkt_avg_ahh_line": 0.007566225161436293,
+    "deep_allowed_5_home": 0.007564496713929843,
+    "home_goals_scored_5": 0.007557053827465743,
+    "npxGA_season_away": 0.007552105393799359,
+    "elo_away": 0.007548082385339884,
+    "xGA_season_away": 0.0075325446195059105,
+    "home_form_5": 0.0075177649620014365,
+    "away_shots_t_5": 0.007404713044484995,
+    "home_goal_diff_5": 0.007374156244493026,
+    "pi_away_A": 0.0073454043938246125,
+    "ppda_allowed_5_away": 0.007342616272761237,
+    "deep_season_away": 0.007309944074136302,
+    "home_shots_5": 0.007278940108684355,
+    "ppda_allowed_season_home": 0.0072721669832900016,
+    "away_corners_5": 0.007234122382863891,
+    "home_goals_conceded_5": 0.007160776389105003,
+    "away_rest_days": 0.007089759011946754,
+    "mkt_pinnacle_overround": 0.00708694522575764,
+    "mkt_b365_ahh_cover": 0.0070851600188384985,
+    "elo_away_expect": 0.0070195875968176455,
+    "away_cards_5": 0.007011914217782012,
+    "elo_home_expect": 0.006953446099989558,
+    "home_rest_days": 0.006912956402776766,
+    "home_promoted": 0.006257911814840194
+  },
+  "drop_column": {
+    "mkt_b365_pA": {
+      "diff": 0.0008517110643139619,
+      "ci_low": -0.00029704079899175214,
+      "ci_high": 0.0020184945805162553,
+      "p_bootstrap": 0.1504,
+      "n": 448
+    },
+    "mkt_b365_pH": {
+      "diff": 0.00020560124307978473,
+      "ci_low": -0.0009027900081396256,
+      "ci_high": 0.0013171756939957893,
+      "p_bootstrap": 0.7208,
+      "n": 448
+    },
+    "mkt_williamhill_pH": {
+      "diff": -0.0006174773108269076,
+      "ci_low": -0.0016321904280288029,
+      "ci_high": 0.00039594304982588176,
+      "p_bootstrap": 0.2324,
+      "n": 448
+    },
+    "mkt_betfair_pH": {
+      "diff": 6.287449650707884e-05,
+      "ci_low": -0.0006582782444943158,
+      "ci_high": 0.000781639767679922,
+      "p_bootstrap": 0.8788,
+      "n": 448
+    },
+    "mkt_betfair_pA": {
+      "diff": -7.828191787254525e-05,
+      "ci_low": -0.0008879492583928534,
+      "ci_high": 0.0007272026534671861,
+      "p_bootstrap": 0.8528,
+      "n": 448
+    },
+    "mkt_williamhill_pA": {
+      "diff": -0.0007849564532357251,
+      "ci_low": -0.0015465444064263656,
+      "ci_high": -1.7739380367498282e-05,
+      "p_bootstrap": 0.0444,
+      "n": 448
+    },
+    "mkt_pinnacle_pH": {
+      "diff": -0.0001652838588855176,
+      "ci_low": -0.0011314522536322552,
+      "ci_high": 0.0007954112240411291,
+      "p_bootstrap": 0.7232,
+      "n": 448
+    },
+    "mkt_pinnacle_pA": {
+      "diff": -0.0004130171740942107,
+      "ci_low": -0.0012476761549888448,
+      "ci_high": 0.00042362294778170947,
+      "p_bootstrap": 0.3362,
+      "n": 448
+    }
+  },
+  "final": {
+    "catboost_produzione": {
+      "n_features": 32,
+      "accuracy": 0.5379464285714286,
+      "f1_macro": 0.4659098627356119,
+      "mse": 0.19344569400059258,
+      "log_loss": 0.9775912152789984,
+      "rps": 0.13182466890199612
+    },
+    "catboost_tutte_righe": {
+      "n_features": 32,
+      "accuracy": 0.5558035714285714,
+      "f1_macro": 0.4928108865159242,
+      "mse": 0.19294838586298507,
+      "log_loss": 0.9746017791354603,
+      "rps": 0.13110996038714098
+    },
+    "xgboost_A": {
+      "n_features": 32,
+      "accuracy": 0.546875,
+      "f1_macro": 0.48360947679267824,
+      "mse": 0.19304583431394037,
+      "log_loss": 0.9734824629031816,
+      "rps": 0.13090695052323573
+    },
+    "xgboost_B": {
+      "n_features": 64,
+      "accuracy": 0.5401785714285714,
+      "f1_macro": 0.4714351924392404,
+      "mse": 0.19213857181780045,
+      "log_loss": 0.9710090194756292,
+      "rps": 0.13086974487942987
+    },
+    "xgboost_C": {
+      "n_features": 35,
+      "accuracy": 0.5334821428571429,
+      "f1_macro": 0.4782078927317192,
+      "mse": 0.19273036238673297,
+      "log_loss": 0.9730317644646657,
+      "rps": 0.13099972609819263
+    },
+    "xgboost_D": {
+      "n_features": 68,
+      "accuracy": 0.5602678571428571,
+      "f1_macro": 0.49470799247341035,
+      "mse": 0.19215199745871017,
+      "log_loss": 0.9719817270836099,
+      "rps": 0.13075860908835835
+    },
+    "xgboost_E": {
+      "n_features": 84,
+      "accuracy": 0.5334821428571429,
+      "f1_macro": 0.49207134416137627,
+      "mse": 0.19643750700224594,
+      "log_loss": 0.9885102403910773,
+      "rps": 0.13306902963389844
+    },
+    "bet365": {
+      "n_features": 0,
+      "accuracy": 0.546875,
+      "f1_macro": 0.4181758282746472,
+      "rps": 0.13107563786572846
+    }
+  },
+  "tests_vs_bet365": {
+    "catboost_produzione": {
+      "bootstrap": {
+        "diff": 0.0011235465544014373,
+        "ci_low": -0.0013646731740212163,
+        "ci_high": 0.0036821552585023848,
+        "p_bootstrap": 0.3856,
+        "n": 448
+      },
+      "wilcoxon": {
+        "stat": 48576.0,
+        "p": 0.5323761697645519
+      },
+      "dm": {
+        "stat": 0.7285766796079589,
+        "p": 0.46664216678764037,
+        "source": "DM (Harvey-Leybourne-Newbold 1997, t con df=T-1)"
+      }
+    },
+    "catboost_tutte_righe": {
+      "bootstrap": {
+        "diff": 5.148378211877598e-05,
+        "ci_low": -0.0024983176300409607,
+        "ci_high": 0.002673952107556536,
+        "p_bootstrap": 0.9762,
+        "n": 448
+      },
+      "wilcoxon": {
+        "stat": 46737.0,
+        "p": 0.1952912988284221
+      },
+      "dm": {
+        "stat": 0.7015175564493784,
+        "p": 0.48334514535369144,
+        "source": "DM (Harvey-Leybourne-Newbold 1997, t con df=T-1)"
+      }
+    },
+    "xgboost_A": {
+      "bootstrap": {
+        "diff": 7.42574656969513e-05,
+        "ci_low": -0.002781508364738059,
+        "ci_high": 0.0030007771244643542,
+        "p_bootstrap": 0.9704,
+        "n": 448
+      },
+      "wilcoxon": {
+        "stat": 46575.0,
+        "p": 0.17568315943388624
+      },
+      "dm": {
+        "stat": 0.22862212704122822,
+        "p": 0.8192671791499926,
+        "source": "DM (Harvey-Leybourne-Newbold 1997, t con df=T-1)"
+      }
+    },
+    "xgboost_B": {
+      "bootstrap": {
+        "diff": -0.0003088396363557818,
+        "ci_low": -0.0031306614715459987,
+        "ci_high": 0.00250054444618433,
+        "p_bootstrap": 0.8244,
+        "n": 448
+      },
+      "wilcoxon": {
+        "stat": 47668.0,
+        "p": 0.3393050861263073
+      },
+      "dm": {
+        "stat": null,
+        "p": null,
+        "source": "varianza long-run non positiva"
+      }
+    },
+    "xgboost_C": {
+      "bootstrap": {
+        "diff": -0.00011386774351894521,
+        "ci_low": -0.002894787948178716,
+        "ci_high": 0.0027077730389122655,
+        "p_bootstrap": 0.9278,
+        "n": 448
+      },
+      "wilcoxon": {
+        "stat": 47550.0,
+        "p": 0.31800064181909127
+      },
+      "dm": {
+        "stat": null,
+        "p": null,
+        "source": "varianza long-run non positiva"
+      }
+    },
+    "xgboost_D": {
+      "bootstrap": {
+        "diff": -0.0004755438811171781,
+        "ci_low": -0.003210489350596668,
+        "ci_high": 0.0022309138783789114,
+        "p_bootstrap": 0.724,
+        "n": 448
+      },
+      "wilcoxon": {
+        "stat": 46737.0,
+        "p": 0.1952912988284221
+      },
+      "dm": {
+        "stat": null,
+        "p": null,
+        "source": "varianza long-run non positiva"
+      }
+    },
+    "xgboost_E": {
+      "bootstrap": {
+        "diff": 0.002990088268536356,
+        "ci_low": -0.0013799011912929435,
+        "ci_high": 0.007388663652622642,
+        "p_bootstrap": 0.1814,
+        "n": 448
+      },
+      "wilcoxon": {
+        "stat": 45761.0,
+        "p": 0.09873031337184716
+      },
+      "dm": {
+        "stat": 1.1716750553075044,
+        "p": 0.24195167772750836,
+        "source": "DM (Harvey-Leybourne-Newbold 1997, t con df=T-1)"
+      }
+    }
+  }
+}

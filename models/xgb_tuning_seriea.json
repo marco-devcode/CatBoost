@@ -1,0 +1,15 @@
+{
+  "rps_oof": 0.19343,
+  "xgb_params": {
+    "subsample": 0.8,
+    "reg_lambda": 0.5,
+    "reg_alpha": 0.0,
+    "n_estimators": 400,
+    "min_child_weight": 5,
+    "max_depth": 4,
+    "learning_rate": 0.01,
+    "gamma": 0.0,
+    "colsample_bytree": 0.7
+  },
+  "n_features": 83
+}

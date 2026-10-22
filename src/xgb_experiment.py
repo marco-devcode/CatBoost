@@ -225,11 +225,34 @@ def build_xg_features(df: pd.DataFrame, xg_by_row: dict) -> pd.DataFrame:
     return out
 
 
+def _tune(sampler, cv_rps, make_model, cols, mask, args, xgb_params=None):
+    """Ricerca randomizzata degli iperparametri su CV temporale."""
+    best = None
+    t0 = time.time()
+    for k, p in enumerate(sampler, 1):
+        try:
+            s = cv_rps(lambda: make_model(p), cols, mask)
+        except Exception as e:  # noqa: BLE001
+            print(f"    cfg {k}: fallita ({str(e)[:80]})")
+            continue
+        if best is None or s < best[0]:
+            best = (s, p)
+            print(f"    cfg {k:>2}: RPS OOF {s:.5f}  <- migliore")
+        if k % 8 == 0:
+            print(f"    ...{k}/{len(sampler)} ({time.time()-t0:.0f}s)")
+    if best is not None:
+        print(f"\n  → migliore XGBoost: RPS OOF {best[0]:.5f}")
+        print(f"    {best[1]}")
+    return best
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--league", default="seriea")
     ap.add_argument("--tune", type=int, default=12)
     ap.add_argument("--out", default=None)
+    ap.add_argument("--force-tune", action="store_true",
+                    help="rifare il tuning anche se esiste il checkpoint")
     args = ap.parse_args()
     from leagues import get_league
     league = get_league(args.league)
@@ -426,25 +449,25 @@ def main():
     tune_cols = (prod_keep + [c for c in deploy_all if c not in prod_keep])
     tune_mask = has_xg_all
 
-    print(f"\n  TUNING XGBoost ({args.tune} configurazioni, CV temporale a 4 fold, "
-          f"su {len(tune_cols)} feature)...")
+    ckpt_path = ROOT / "models" / f"xgb_tuning_{league.key}.json"
     best = None
-    t0 = time.time()
-    for k, p in enumerate(sampler, 1):
-        try:
-            s = cv_rps(lambda: xgb_model(p), tune_cols, tune_mask)
-        except Exception as e:  # noqa: BLE001
-            print(f"    cfg {k}: fallita ({e})")
-            continue
-        if best is None or s < best[0]:
-            best = (s, p)
-            print(f"    cfg {k:>2}: RPS OOF {s:.5f}  <- migliore")
+    if ckpt_path.exists() and not args.force_tune:
+        ck = json.loads(ckpt_path.read_text())
+        if ck.get("n_features") == len(tune_cols):
+            best = (ck["rps_oof"], ck["xgb_params"])
+            print(f"\n  parametri ripresi dal checkpoint {ckpt_path.name}: "
+                  f"RPS OOF {best[0]:.5f}")
+            print(f"    {best[1]}")
+    if best is None:
+        best = _tune(sampler, cv_rps, lambda: xgb_model, tune_cols, tune_mask, args, xgb_params=None)
     if best is None:
         print("  NESSUNA CONFIGURAZIONE VALIDA")
         return
     xgb_params = best[1]
-    print(f"\n  → migliore XGBoost: RPS OOF {best[0]:.5f}")
-    print(f"    {xgb_params}")
+    ckpt_path.write_text(json.dumps(
+        {"rps_oof": best[0], "xgb_params": xgb_params,
+         "n_features": len(tune_cols)}, indent=2))
+    print(f"    (tuning: {args.tune} configurazioni su {len(tune_cols)} feature)")
 
     xg_cols = xg_cols_all
     has_xg = has_xg_all
@@ -548,7 +571,9 @@ def main():
     from evaluate_market import load_odds_by_key
     odds_by_key = load_odds_by_key(Path(league.raw_path))
     y_b, b365 = [], []
-    for i, r in df.iloc[n_tr:].iterrows():
+    # NB: dopo il dropna l'indice di df NON e' contiguo, quindi df.iloc[n_tr:]
+    # non e' il test set: si usa df_test, che e' lo stesso ordine di Xte2.
+    for k, (_, r) in enumerate(df_test.iterrows()):
         key = (r["Date"].strftime("%Y-%m-%d"), str(r["HomeTeam"]).strip(),
                str(r["AwayTeam"]).strip())
         o = odds_by_key.get(key, {}).get("b365_open")
@@ -557,7 +582,7 @@ def main():
         p = devig3(*o) if isinstance(o, (list, tuple, np.ndarray)) else None
         if p is None:
             continue
-        y_b.append(yte[i - n_tr])
+        y_b.append(yte[k])
         b365.append(p)
     y_b = np.array(y_b)
     b365 = np.array(b365)

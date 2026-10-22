@@ -850,7 +850,132 @@ ridotto a 32: le quote Pinnacle e il consensus non esistono per le partite
 future in produzione, e allenarsi su colonne che in inferenza mancano e'
 uno spallamento, non un vantaggio.
 
-<!-- RISULTATI_XGB -->
+### 11.8 I risultati
+
+**Verifica di integrita'**: il CatBoost di produzione addestrato su tutte
+le righe con le 32 feature dà **accuracy 55,58% / RPS 0,13111 / F1 macro
+0,4928** — identico al millesimo ai numeri pubblicati nella sezione 10.
+La nuova pipeline riproduce quindi il modello in uso; le differenze che
+seguono sono reali, non artefatti.
+
+**RPS out-of-fold (CV temporale, solo training, stesse righe per tutti i
+set):**
+
+| Set | Feature | RPS OOF | Righe train |
+|---|---|---|---|
+| A produzione | 32 | **0,19182** | 4.137 |
+| B produzione + xG | 64 | 0,19241 | 4.137 |
+| C produzione + bet365 esteso | 35 | 0,19221 | 4.137 |
+| D massimo deployabile | 68 | 0,19291 | 4.137 |
+| E D + line shopping | 84 | 0,19348 | 4.137 |
+| A su tutte le righe | 32 | 0,19274 | 5.642 |
+
+**Test set (448 partite, unica verifica finale):**
+
+| Modello | Feature | Accuracy | F1 macro | MSE/Brier | RPS | Log loss |
+|---|---|---|---|---|---|---|
+| CatBoost produzione (su 4.137 righe) | 32 | 53,79% | 0,4659 | 0,19305 | 0,13182 | 0,97759 |
+| **CatBoost produzione (tutte le righe)** | 32 | 55,58% | 0,4928 | 0,19214 | 0,13111 | 0,97460 |
+| XGBoost A (produzione) | 32 | 54,69% | 0,4836 | 0,19305 | 0,13091 | 0,97348 |
+| XGBoost B (+xG) | 64 | 54,02% | 0,4714 | 0,19214 | 0,13087 | 0,97101 |
+| XGBoost C (+bet365 esteso) | 35 | 53,35% | 0,4782 | 0,19273 | 0,13100 | 0,97303 |
+| **XGBoost D (massimo deployabile)** | 68 | **56,03%** | **0,4947** | 0,19215 | **0,13076** | 0,97198 |
+| XGBoost E (+line shopping) | 84 | 53,35% | 0,4921 | 0,19644 | 0,13307 | 0,98851 |
+| **bet365 (benchmark, de-viggato)** | — | 54,69% | 0,4182 | — | 0,13108 | — |
+
+**Test paired contro bet365 (RPS per partita, appaiate):**
+
+| Modello | diff RPS | CI 95% | p bootstrap | Wilcoxon | DM |
+|---|---|---|---|---|---|
+| CatBoost produzione | +0,001124 | [−0,001365, +0,003682] | 0,386 | 0,532 | 0,467 |
+| CatBoost tutte le righe | +0,000051 | [−0,002498, +0,002674] | 0,976 | 0,195 | 0,483 |
+| XGBoost A | +0,000074 | [−0,002782, +0,003001] | 0,970 | 0,176 | 0,819 |
+| XGBoost B | −0,000309 | [−0,003131, +0,002501] | 0,824 | 0,339 | n.d. |
+| XGBoost C | −0,000114 | [−0,002895, +0,002708] | 0,928 | 0,318 | n.d. |
+| **XGBoost D** | **−0,000476** | [−0,003210, +0,002231] | 0,724 | 0,195 | n.d. |
+| XGBoost E | +0,002990 | [−0,001380, +0,007389] | 0,181 | 0,099 | 0,242 |
+
+*DM = Diebold-Mariano con correzione Harvey-Leybourne-Newbold; "n.d." = la
+varianza long-run delle differenze non e' positiva, il test non e'
+applicabile su quel confronto (il bootstrap e il Wilcoxon lo coprono).*
+
+### 11.9 Importanza e significativita' delle feature
+
+Gain di XGBoost (prime 12):
+
+| Feature | Gain |
+|---|---|
+| `mkt_b365_pA` | 9,29% |
+| `mkt_b365_pH` | 8,10% |
+| `mkt_williamhill_pH` | 4,56% |
+| `mkt_betfair_pH` | 3,15% |
+| `mkt_betfair_pA` | 2,38% |
+| `mkt_williamhill_pA` | 2,18% |
+| `mkt_pinnacle_pH` | 1,74% |
+| `mkt_pinnacle_pA` | 1,48% |
+| `mkt_williamhill_pD` | 1,39% |
+| `mkt_b365_pD` | 1,29% |
+| `mkt_betfair_pD` | 1,24% |
+| `mkt_pinnacle_pD` | 1,13% |
+
+Le prime 12 feature sono **tutte quote di mercato**. Le feature xG
+(`deep_allowed_season_away` 0,99%, `ppda_season_away` 0,96%) stanno in
+fondo alla classifica.
+
+**Drop-column test** (quanto peggiora la RPS sul test set togliendo una
+feature, con bootstrap paired): **nessuna feature e' individualmente
+significativa**. L'unica con p<0,05 e' `mkt_williamhill_pA` (p=0,044) ed e'
+in direzione *opposta*: toglierla **migliora** la RPS (−0,00078). Sono
+rumore da overfitting, non segnale.
+
+### 11.10 Il verdetto: abbiamo battuto il mercato?
+
+**No.** Non in modo statisticamente dimostrabile, con nessuno dei set.
+
+Il modello migliore e' XGBoost D (68 feature deployabili): RPS 0,13076
+contro 0,13108 di bet365, accuracy 56,03% contro 54,69%. Numericamente
+davanti su entrambe le metriche. Ma la differenza e' **−0,000476 con CI
+95% [−0,003210, +0,002231] e p=0,72**: l'intervallo attraversa lo zero e il
+p-value non e' nemmeno vicino alla significativita'. Con 448 partite
+l'errore standard di questa differenza e' ~0,0014: per rilevare un edge
+reale del 4% sulla RPS servirebbero circa 30.000 partite.
+
+Cosa dice il quadro complessivo:
+
+1. **L'xG di Understat non aggiunge valore.** Il set B (produzione + 40
+   feature xG) ha RPS 0,13087 contro 0,13091 del set A, e un F1 macro
+   peggiore (0,4714 contro 0,4836). L'xG e' un segnale reale ma
+   **ridondante** rispetto a tiri in porta, angoli e Elo che il modello
+   gia' usa: aggiunge informazione, non potere predittivo.
+2. **Le quote degli altri bookmaker non aiutano e, in eccesso, danneggiano.**
+   Il set E (84 feature, tutte le quote disponibili) e' il peggiore in
+   assoluto: RPS 0,13307, contro 0,13076 del set D. Sembra un paradosso —
+   piu' informazione, peggio risultato — ma non lo e': le quote degli altri
+   bookmaker sono quote del *mercato*, e un modello che le usa impara a
+   copiare il mercato invece che a prevedere la partita. Sulla RPS (che
+   premia la calibrazione) il danno e' netto.
+3. **Il vantaggio, se c'e', e' tutto nel mercato.** L'importanza e' dominata
+   dalle quote de-viggate; il segnale di calcio puro non aggiunge. Questo
+   e' il risultato piu' importante di tutta la sezione, ed e' coerente con
+   la sezione 6: il modello non ha un edge proprio sul mercato, e' un
+   buon traduttore delle quote.
+4. **XGBoost e CatBoost sono equivalenti.** XGBoost A (32 feature) RPS
+   0,13091 contro CatBoost 0,13111, XGBoost D 0,13076: differenze tutte
+   dentro il rumore. Non c'e' un algoritmo migliore, c'e' lo stesso mercato
+   letto in due modi.
+
+**Cosa NON cambia:** il modello in produzione resta CatBoost con le 32
+feature semplificate. XGBoost non e' migliore, e le feature nuove non sono
+abbastanza solide per giustificare il rischio di una fonte dati esterna in
+produzione. Il codice, i dati e il protocollo restano nella repo per
+riutilizzo.
+
+**Cosa suggerisce il quadro per il valore.** Se il modello e' il mercato,
+l'unica leva reale non e' un modello migliore: e' **dove si scommette**.
+L'overround medio e' 5,67% su bet365 contro 2,61% su Pinnacle: spostare il
+volume da un bookmaker all'altro vale piu' di qualunque decimo di punto di
+accuracy. E' la direzione indicata dalla sezione 7 e quella che resta da
+implementare.
 
 ## 12. Riferimenti
 

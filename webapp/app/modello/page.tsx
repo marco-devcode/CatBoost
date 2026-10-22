@@ -23,20 +23,19 @@ const PI_RATING = {
   modello: "Poisson con correzione Dixon-Coles",
 };
 
+// Iperparametri scelti con metodo statistico sul TRAINING (CV temporale
+// su 7 configurazioni, src/select_features.py --mode params): 200
+// iterazioni, learning rate 0.05, depth 4. La griglia a 5 combinazioni
+// che il repo eseguiva a ogni run e' stata rimossa: non aggiungeva
+// informazione e costava 25 training per lega.
 const CATBOOST = {
   loss: "MultiClass",
-  iterazioni: 500,
+  iterazioni: 200,
   learningRate: 0.05,
-  depth: 6,
+  depth: 4,
   seed: 42,
-  foldCount: 5,
-  grid: [
-    { iterazioni: 1000, learningRate: 0.03, depth: 6 },
-    { iterazioni: 1000, learningRate: 0.03, depth: 8 },
-    { iterazioni: 1000, learningRate: 0.05, depth: 6 },
-    { iterazioni: 1000, learningRate: 0.05, depth: 8 },
-    { iterazioni: 1500, learningRate: 0.02, depth: 6 },
-  ],
+  foldCount: 4,
+  selezione: "CV temporale sul solo training (mai sul test set)",
 };
 
 // Misure sul test set temporale (cutoff 2025-08-01, 438 partite), con il
@@ -236,7 +235,7 @@ const FEATURES = [
   {
     gruppo: "Mercato (quote di apertura)",
     spiegazione:
-      "Le probabilità implicite dei bookmaker, private del loro margine con il metodo 'additive' (scelto empiricamente come il più accurato su 6135 partite, verificato a 1e-6 contro penaltyblog). Sono le quote di APERTURA, note prima del fischio: usarle non è hindsight. Il modello impara a correggere il mercato invece di ricostruirlo da zero. Dove una fonte manca (per esempio Pinnacle sulle partite senza copertura) il valore è assente, non zero.",
+      "Le probabilità implicite dei bookmaker, private del loro margine con il metodo 'additive' (scelto empiricamente come il più accurato su 6135 partite, verificato a 1e-6 contro penaltyblog). Sono le quote di APERTURA, note prima del fischio: usarle non è hindsight. Il modello impara a correggere il mercato invece di ricostruirlo da zero. Il modello usa SOLO le tre di bet365: le quote Pinnacle e la media di mercato vengono calcolate per la diagnostica ma non entrano nel modello, perché sulle partite future non esistono (da un bookmaker solo arriva una sola fonte) e allenarsi su colonne che in inferenza mancano renderebbe le previsioni pubblicate diverse da quelle misurate.",
     campi: [
       {
         nome: "mkt_b365_pH/pD/pA",
@@ -245,13 +244,13 @@ const FEATURES = [
       },
       {
         nome: "mkt_pinnacle_pH/pD/pA",
-        etichetta: "Probabilità implicite Pinnacle (senza margine)",
-        dettaglio: "Pinnacle è il bookmaker più 'sharp': il suo margine medio è 2.6% contro il 5.7% di bet365, quindi la sua stima è più vicina alla verità.",
+        etichetta: "Probabilità implicite Pinnacle (NON usate dal modello)",
+        dettaglio: "Pinnacle è il bookmaker più 'sharp' (margine 2.6% contro il 5.7% di bet365), ma sulle partite future non è disponibile: allenarsi su colonne che in inferenza mancano è un disallineamento. Resta calcolata per la diagnostica.",
       },
       {
         nome: "mkt_avg_pH/pD/pA",
-        etichetta: "Probabilità implicite del consenso di mercato",
-        dettaglio: "la media delle quote di più bookmaker: il consensus batte il singolo bookmaker come predittore.",
+        etichetta: "Probabilità implicite del consenso (NON usate dal modello)",
+        dettaglio: "la media delle quote di più bookmaker batte il singolo bookmaker come predittore, ma per lo stesso motivo non è disponibile sulle future.",
       },
     ],
   },
@@ -313,7 +312,7 @@ export default function ModelPage() {
         <a href="#dati">I dati</a>
         <a href="#pirating">Pi-Rating</a>
         <a href="#catboost">CatBoost</a>
-        <a href="#feature">Le 41 feature</a>
+        <a href="#feature">Le 32 feature</a>
         <a href="#metriche">Quanto è buono</a>
         <a href="#limiti">Limiti noti</a>
       </nav>
@@ -478,9 +477,9 @@ export default function ModelPage() {
             albero nuovo rispetto al modello costruito finora
           </li>
           <li>
-            <b>Alberi:</b> {CATBOOST.iterazioni} (baseline), con ricerca su{" "}
-            {CATBOOST.grid.length} combinazioni via{" "}
-            {CATBOOST.foldCount}-fold cross-validation temporale
+            <b>Alberi:</b> {CATBOOST.iterazioni}, scelti con{" "}
+            {CATBOOST.foldCount}-fold cross-validation temporale su 7
+            configurazioni — {CATBOOST.selezione}
           </li>
           <li>
             <b>Seme fisso:</b> {CATBOOST.seed}, per riproducibilità completa
@@ -494,7 +493,7 @@ export default function ModelPage() {
       </section>
 
       <section id="feature">
-        <h2>Le 41 feature, una per una</h2>
+        <h2>Le 32 feature, una per una</h2>
         <p>
           Il modello riceve esattamente questi {FEATURES.reduce(
             (n, g) => n + g.campi.length,

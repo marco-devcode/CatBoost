@@ -1,6 +1,6 @@
 # 🏆 Report Finale — CatBoost Serie A Match Prediction
 
-**Data**: 2026-10-22 08:13
+**Data**: 2026-10-22 08:27
 **Modello migliore**: Baseline (Pi-Rating + FE) — Serie A (`v1_baseline`)
 
 ---
@@ -9,7 +9,7 @@
 
 | Modello | Feature | RPS ↓ | Accuracy |
 |---------|---------|-------|----------|
-| Baseline (Pi-Rating + FE) — Serie A | 41 | 0.1311 | 55.58% ◄ **BEST**|
+| Baseline (Pi-Rating + FE) — Serie A | 32 | 0.1311 | 55.58% ◄ **BEST**|
 
 ---
 
@@ -62,10 +62,10 @@
 > Se ≈ 0 → il flag non porta segnale e può essere rimosso. Se `home_promoted`
 > e `away_promoted` hanno valori simili → erano ridondanti, conviene unificarli.
 
-| Flag | mean |SHAP| | Rank su 41 feature |
+| Flag | mean |SHAP| | Rank su 32 feature |
 |------|-------------|------|
-| home_promoted | 0.002270 | 16/41 |
-| away_promoted | 0.012533 | 17/41 |
+| home_promoted | 0.002270 | 16/32 |
+| away_promoted | 0.012533 | 17/32 |
 
 ![SHAP Summary](shap_summary.png)
 

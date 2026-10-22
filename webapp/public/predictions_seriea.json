@@ -1,6 +1,6 @@
 {
   "meta": {
-    "last_update": "2026-10-22T02:15:31",
+    "last_update": "2026-10-22T06:07:20",
     "league": "seriea",
     "league_name": "Serie A",
     "stagione": "2627",
@@ -6593,9 +6593,9 @@
         "away": "Monza",
         "date": "2026-10-23",
         "prob": {
-          "H": 46.8,
-          "D": 28.6,
-          "A": 24.5
+          "H": 46.7,
+          "D": 28.7,
+          "A": 24.6
         },
         "pred": "H",
         "features": {
@@ -6628,10 +6628,10 @@
           "elo_away": 183.606,
           "elo_home_expect": 0.532,
           "elo_away_expect": 0.468,
-          "mkt_b365_pH": 0.445,
+          "mkt_b365_pH": 0.446,
           "mkt_b365_pD": 0.279,
           "mkt_b365_pA": 0.276,
-          "mkt_b365_overround": 0.034,
+          "mkt_b365_overround": 0.033,
           "mkt_pinnacle_pH": null,
           "mkt_pinnacle_pD": null,
           "mkt_pinnacle_pA": null,
@@ -6644,18 +6644,18 @@
         "bm": {
           "H": 2.19,
           "D": 3.45,
-          "A": 3.48
+          "A": 3.49
         },
         "bm_prob": {
-          "H": 44.5,
+          "H": 44.6,
           "D": 27.9,
           "A": 27.6
         },
         "kelly": {
           "pick": "H",
-          "model_p": 0.468,
+          "model_p": 0.467,
           "odd": 2.19,
-          "stake_pct": 0.73
+          "stake_pct": 0.67
         }
       },
       {

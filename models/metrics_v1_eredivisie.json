@@ -1,12 +1,12 @@
 {
-  "accuracy": 0.537662,
-  "rps": 0.133364,
+  "accuracy": 0.519481,
+  "rps": 0.129831,
   "calibration_alpha": [
-    -0.170074035090261,
-    -0.059805933703766634,
-    0.2298807376516561
+    -0.08183338894854929,
+    0.09277751862869983,
+    -0.010944777569207968
   ],
-  "calibration_w": 0.830809,
+  "calibration_w": 1.00427,
   "calibration_n_val": 2239,
   "features": [
     "pi_home_H",
@@ -40,16 +40,7 @@
     "elo_away_expect",
     "mkt_b365_pH",
     "mkt_b365_pD",
-    "mkt_b365_pA",
-    "mkt_b365_overround",
-    "mkt_pinnacle_pH",
-    "mkt_pinnacle_pD",
-    "mkt_pinnacle_pA",
-    "mkt_pinnacle_overround",
-    "mkt_avg_pH",
-    "mkt_avg_pD",
-    "mkt_avg_pA",
-    "mkt_avg_overround"
+    "mkt_b365_pA"
   ],
   "league": "eredivisie"
 }

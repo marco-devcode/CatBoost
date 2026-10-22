@@ -725,7 +725,134 @@ training a run): il tempo del job di training scende da ~12 minuti a poco
 più di un minuto per lega, e il modello è **più semplice da mantenere**
 (una sola configurazione, non una ricerca a ogni run).
 
-## 11. Riferimenti
+## 11. Sezione XGBoost: modello alternativo, fonti dati nuove, e la domanda "abbiamo battuto il mercato?"
+
+### 11.1 Perche' una sezione XGBoost
+
+Il modello in produzione e' CatBoost. Aggiungere un secondo modello serve
+a due cose: (a) verificare che il vantaggio che misuriamo non sia un
+artefatto di un algoritmo, (b) misurare quanto vale l'informazione che
+manca, cioe' le feature che il repo non usava. Il confronto e' fatto
+sullo STESSO split temporale, sullo STESSO benchmark bet365 de-viggato e
+con gli STESSI test paired del resto del progetto.
+
+### 11.2 L'analisi dei dati disponibili: cosa il repo non stava usando
+
+Il raw CSV del football-data ha **210 colonne**; il modello ne usava 41.
+Ecco cosa c'era e non veniva usato (con la copertura reale):
+
+| Fonte | Colonne | Righe | Note |
+|---|---|---|---|
+| **Understat** (xG) | 4.940 partite, 13 stagioni | 2014-15 → 2026-27 | xG, npxG, PPDA, deep completions, xPTS |
+| Quote di apertura, altri book | Betfair 5.991, William Hill 5.605, Interwetten 5.104, Pinnacle 5.129, BlackBet 3.420 | 9-15 stagioni | mai usate |
+| Line over/under 2.5 | `B365>2.5` 2.726, `Avg>2.5` 2.728 | 7 stagioni | mai usate |
+| Asian Handicap | `AHh` 2.728, `B365AHH` 2.727, `AvgAHH` 2.728 | 7 stagioni | mai usate |
+| xG Opta nel CSV | `HxG`/`AxG` | **70 righe, solo 26/27** | inutilizzabile storicamente |
+| Quote di chiusura | `PSCH` 5.136, `B365CH`, `VCH`, `MaxCH` | — | **hindsight: mai usate** |
+| Gol primo tempo | `HTHG`/`HTAG`/`HTR` | 6.135 | **hindsight: mai usate** |
+
+La scoperta che conta: `HxG`/`AxG` (l'xG Opta, la fonte "ufficiale") nel
+football-data copre **solo 70 righe, tutte della stagione corrente**.
+L'xG storico esiste solo su Understat, che e' una fonte aperta senza API
+key e con dati dal 2014-15.
+
+### 11.3 Le fonti dati: dove sono e come si scaricano
+
+| Fonte | URL | Accesso | Esito |
+|---|---|---|---|
+| **Understat** | `GET https://understat.com/getLeagueData/{league}/{season}` | aperto, serve `Referer` + `X-Requested-With`, risposta gzip | **scaricato: 4.940 partite** |
+| football-data.co.uk | `https://www.football-data.co.uk/mmz4281/{season}/I1.csv` | aperto | **irraggiungibile da questo ambiente (HTTP 000)**: i dati sono pero' gia' nel repo |
+| StatsBomb Open Data | `github.com/statsbomb/open-data` | aperto | non usato: copre poche stagioni |
+| API-Football / TheOddsAPI | a pagamento | chiave | TheOddsAPI c'e' gia' in locale per le quote |
+
+La pagina della lega su Understat non contiene piu' i dati inline: li
+carica con AJAX. L'endpoint e' `getLeagueData/{league}/{season}` e va
+richiesto con gli header giusti, altrimenti risponde 404.
+
+**Script:** `scripts/download_understat.py` (standalone, gira senza pandas
+perche' viene eseguito sul telefono, dove pandas non c'e').
+
+### 11.4 La pulizia dei dati
+
+1. **Join per chiave, mai posizionale**: (squadra casa, squadra fuori, data).
+   Understat sposta alcune date di un giorno (Napoli-Inter: dataset
+   30/11/2015, Understat 01/12/2015), quindi il join accetta una
+   tolleranza di 2 giorni e sceglie la data piu' vicina. Con la tolleranza
+   il match sale dal **93,5% al 93,7%** delle partite Understat; il resto
+   sono partite future (dopo il 19/10/2026) e squadre uscite dalla Serie A
+   prima del 2014.
+2. **Nomi squadra**: Understat usa "Hellas Verona" dove il dataset usa
+   "Verona" e "AC Milan" dove il dataset usa "Milan": si risolve con un
+   matching a token verso le squadre del dataset.
+3. **Aggregati per squadra ricostruiti sul dataset**: per ogni squadra si
+   ordinano le partite per data e si calcolano media su 5 partite e media
+   di stagione **con shift(1)**: la partita da prevedere non entra mai nei
+   propri aggregati.
+4. **Colonne vietate**: `FTHG`, `FTAG`, `FTR`, `HS`, `AS`, `HST`, `AST`,
+   `HC`, `AC`, `HY`, `AY`, `HTHG`, `HTAG`, `HTR` e tutte le quote di
+   chiusura sono escluse per costruzione: sono note solo dopo la partita.
+5. **Solo colonne numeriche**: XGBoost non accetta `Date`, `HomeTeam`,
+   `AwayTeam`, `FTR`.
+
+### 11.5 Il bug che ha falsato il primo tentativo (e come e' stato trovato)
+
+Il primo run ha dato **39,73% di accuracy per tutti e sei i modelli**,
+contro il 53,79% di bet365: sei modelli diversi con lo stesso identico
+numero non sono "modelli deboli", sono un allineamento rotto. Il mio script
+ricostruiva il dataset con `iloc[-6090:]`, cioe' le ultime N righe del file
+features, mentre la pipeline di produzione fa:
+
+```
+df = df[feature_list + ['Date','FTR']].dropna(subset=FEATURE_COLS + ['FTR'])
+train = df[df['Date'] < '2025-08-01']
+```
+
+Il `dropna` elimina 60 righe, quindi le ultime 6.090 righe del file non
+sono le stesse 6.090 righe del train+test: ogni etichetta era spostata di
+60 partite. Verifica: la procedura corretta, ricalcolata, coincide con i
+file ufficiali `X_train_v2.csv` / `X_test_v2.csv` con **differenza
+assoluta massima 0.0** su train e test.
+
+E' la stessa classe di errore del benchmark falsato della sezione 1: un
+confronto fatto su righe non allineate produce numeri che sembrano
+plausibili e sono invece rumore. La lezione applicata: **ogni
+esperimento in questo repo deve verificare l'allineamento prima di
+pubblicare un numero.**
+
+### 11.6 Il protocollo
+
+- **Tuning** su CV **temporale** a 4 fold (mai split casuale: le partite
+  sono ordinate nel tempo e uno split random mescolerebbe il futuro con
+  il passato), 20 configurazioni di XGBoost, sul **solo training**.
+- Gli iperparametri scelti vengono poi applicati a tutti i set di feature,
+  cosi' il confronto fra set e' equo.
+- **Importanza**: gain di XGBoost.
+- **Significativita'**: *drop-column test* — si toglie una feature, si
+  riaddestra, e si confronta la RPS sul test set con bootstrap paired.
+- **Confronto finale**: bootstrap paired + Wilcoxon + Diebold-Mariano
+  contro bet365, come nel resto del progetto.
+
+### 11.7 La distinzione che conta: deployabile o no
+
+Una feature vale solo se le sue quote sono disponibili **prima** del fischio
+finale anche in produzione, dove l'API restituisce un solo bookmaker:
+
+| Set | Contenuto | Deployabile? |
+|---|---|---|
+| **A** produzione | le 32 feature del modello in uso | si |
+| **B** produzione + xG | + 40 feature xG Understat | **si** (Understat e' aperto e aggiorna dopo ogni giornata) |
+| **C** produzione + bet365 esteso | + line over/under 2.5 e Asian Handicap di bet365 | **si** (stesse quote di bet365) |
+| **D** massimo deployabile | B + C | **si** |
+| **E** D + line shopping | + quote di Betfair, William Hill, Interwetten, Pinnacle, BlackBet | **no**: richiede un abbonamento multi-book |
+
+Questa distinzione e' la ragione per cui il set a 41 feature era stato
+ridotto a 32: le quote Pinnacle e il consensus non esistono per le partite
+future in produzione, e allenarsi su colonne che in inferenza mancano e'
+uno spallamento, non un vantaggio.
+
+<!-- RISULTATI_XGB -->
+
+## 12. Riferimenti
 
 - Shin, H.S. (1992). *Pricing of winner and loser in a market for
   state-contingent claims with insider trading*. Journal of Finance 47(5).

@@ -1,6 +1,6 @@
 # 🏆 Report Finale — CatBoost Eredivisie Match Prediction
 
-**Data**: 2026-10-22 08:17
+**Data**: 2026-10-22 08:32
 **Modello migliore**: Baseline (Pi-Rating + FE) — Eredivisie (`v1_baseline`)
 
 ---
@@ -9,7 +9,7 @@
 
 | Modello | Feature | RPS ↓ | Accuracy |
 |---------|---------|-------|----------|
-| Baseline (Pi-Rating + FE) — Eredivisie | 41 | 0.1298 | 51.95% ◄ **BEST**|
+| Baseline (Pi-Rating + FE) — Eredivisie | 32 | 0.1298 | 51.95% ◄ **BEST**|
 
 ---
 
@@ -62,10 +62,10 @@
 > Se ≈ 0 → il flag non porta segnale e può essere rimosso. Se `home_promoted`
 > e `away_promoted` hanno valori simili → erano ridondanti, conviene unificarli.
 
-| Flag | mean |SHAP| | Rank su 41 feature |
+| Flag | mean |SHAP| | Rank su 32 feature |
 |------|-------------|------|
-| home_promoted | 0.003394 | 16/41 |
-| away_promoted | 0.020333 | 17/41 |
+| home_promoted | 0.003394 | 16/32 |
+| away_promoted | 0.020333 | 17/32 |
 
 ![SHAP Summary](shap_summary.png)
 

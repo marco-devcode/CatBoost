@@ -24,7 +24,7 @@
     "A": 0.6281
   },
   "n_test": 385,
-  "n_features": 41,
+  "n_features": 32,
   "features": [
     "pi_home_H",
     "pi_away_H",
@@ -57,16 +57,7 @@
     "elo_away_expect",
     "mkt_b365_pH",
     "mkt_b365_pD",
-    "mkt_b365_pA",
-    "mkt_b365_overround",
-    "mkt_pinnacle_pH",
-    "mkt_pinnacle_pD",
-    "mkt_pinnacle_pA",
-    "mkt_pinnacle_overround",
-    "mkt_avg_pH",
-    "mkt_avg_pD",
-    "mkt_avg_pA",
-    "mkt_avg_overround"
+    "mkt_b365_pA"
   ],
   "rps_bookmaker": 0.1306,
   "accuracy_bookmaker": 0.5273,
@@ -101,7 +92,7 @@
     "home_promoted": {
       "mean_abs_shap": 0.0033937672808497586,
       "rank": 16,
-      "n_features_total": 41,
+      "n_features_total": 32,
       "shap_feature1_classH": 0.007026752924867419,
       "shap_feature0_classH": -0.002951778800609166,
       "delta_classH": 0.009978531725476584
@@ -109,7 +100,7 @@
     "away_promoted": {
       "mean_abs_shap": 0.020332548469770152,
       "rank": 17,
-      "n_features_total": 41,
+      "n_features_total": 32,
       "shap_feature1_classH": 0.04535942898881845,
       "shap_feature0_classH": -0.025405370502358558,
       "delta_classH": 0.070764799491177

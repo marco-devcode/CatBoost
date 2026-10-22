@@ -1,6 +1,6 @@
 {
   "meta": {
-    "last_update": "2026-10-22T00:02:56",
+    "last_update": "2026-10-22T01:17:09",
     "league": "eredivisie",
     "league_name": "Eredivisie",
     "stagione": "2627",
@@ -7793,9 +7793,9 @@
         "away": "Telstar",
         "date": "2026-10-23",
         "prob": {
-          "H": 40.1,
-          "D": 36.7,
-          "A": 23.2
+          "H": 41.5,
+          "D": 34.9,
+          "A": 23.5
         },
         "pred": "H",
         "features": {
@@ -7828,10 +7828,10 @@
           "elo_away": 255.936,
           "elo_home_expect": 0.305,
           "elo_away_expect": 0.695,
-          "mkt_b365_pH": 0.61,
-          "mkt_b365_pD": 0.227,
-          "mkt_b365_pA": 0.163,
-          "mkt_b365_overround": 0.056,
+          "mkt_b365_pH": 0.603,
+          "mkt_b365_pD": 0.231,
+          "mkt_b365_pA": 0.166,
+          "mkt_b365_overround": 0.053,
           "mkt_pinnacle_pH": null,
           "mkt_pinnacle_pD": null,
           "mkt_pinnacle_pA": null,
@@ -7842,19 +7842,19 @@
           "mkt_avg_overround": null
         },
         "bm": {
-          "H": 1.59,
-          "D": 4.07,
-          "A": 5.51
+          "H": 1.61,
+          "D": 4.02,
+          "A": 5.45
         },
         "bm_prob": {
-          "H": 61.0,
-          "D": 22.7,
-          "A": 16.3
+          "H": 60.3,
+          "D": 23.1,
+          "A": 16.6
         },
         "kelly": {
           "pick": "D",
-          "model_p": 0.367,
-          "odd": 4.07,
+          "model_p": 0.349,
+          "odd": 4.02,
           "stake_pct": 2.5
         }
       },

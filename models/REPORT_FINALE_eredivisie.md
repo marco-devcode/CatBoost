@@ -1,6 +1,6 @@
 # 🏆 Report Finale — CatBoost Eredivisie Match Prediction
 
-**Data**: 2026-10-22 00:02
+**Data**: 2026-10-22 01:16
 **Modello migliore**: Baseline (Pi-Rating + FE) — Eredivisie (`v1_baseline`)
 
 ---
@@ -30,8 +30,8 @@
 | | RPS ↓ | Accuracy |
 |--|-------|----------|
 | **CatBoost (v1_baseline)** | 0.1323 | 52.73% |
-| **Bet365** | 0.1900 | 34.81% |
-| **Delta** | +0.0577 ✅ | +0.1792 ✅ |
+| **Bet365** | 0.1306 | 52.73% |
+| **Delta** | -0.0017 ⚠️ | +0.0000 ⚠️ |
 
 ---
 
@@ -47,10 +47,10 @@
 |---------|--------|
 | Scommesse piazzate | 385 |
 | Bankroll iniziale | €1000 |
-| Bankroll finale | €420157964.43 |
-| Profitto | €+420156964.43 |
-| ROI | +42015696.4% |
-| Stake totale | 44252666.5% del bankroll |
+| Bankroll finale | €1002.27 |
+| Profitto | €+2.27 |
+| ROI | +0.2% |
+| Stake totale | 845.9% del bankroll |
 
 ![Kelly Simulation](kelly_simulation.png)
 

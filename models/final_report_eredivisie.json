@@ -68,16 +68,16 @@
     "mkt_avg_pA",
     "mkt_avg_overround"
   ],
-  "rps_bookmaker": 0.19,
-  "accuracy_bookmaker": 0.3481,
-  "beats_bookmaker_rps": true,
+  "rps_bookmaker": 0.1306,
+  "accuracy_bookmaker": 0.5273,
+  "beats_bookmaker_rps": false,
   "kelly": {
     "bankroll_iniziale": 1000.0,
-    "bankroll_finale": 420157964.43,
-    "profitto": 420156964.43,
-    "roi_pct": 42015696.44,
+    "bankroll_finale": 1002.27,
+    "profitto": 2.27,
+    "roi_pct": 0.23,
     "scommesse": 385,
-    "stake_totale_pct": 44252666.5,
+    "stake_totale_pct": 845.9,
     "mode": "dinamico",
     "odds_thresholds": [
       1.8,
@@ -95,7 +95,7 @@
       5.0,
       2.5
     ],
-    "n_troncate_al_cap": 276
+    "n_troncate_al_cap": 144
   },
   "shap_neopromossa": {
     "home_promoted": {

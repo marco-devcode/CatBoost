@@ -246,7 +246,11 @@ def main():
         w_test_best = None
         for w in np.arange(0.0, 1.01, 0.05):
             m = metrics(y.tolist(), blend(pm, pk, float(w)).tolist())
-            if w_test_best is None or m["log_loss"] < w_test_best[1]["log_loss"]:
+            # BUG CORRETTO: w_test_best[1] e' il log-loss (float), non un
+            # dizionario: indicizzarlo con ["log_loss"] sollevava
+            # "TypeError: 'float' object is not subscriptable" e faceva
+            # fallire lo script DOPO aver stampato i risultati principali.
+            if w_test_best is None or m["log_loss"] < w_test_best[1]:
                 w_test_best = (float(w), m["log_loss"])
         print(f"     w* validazione = {w_val:.2f} | w* test = {w_test_best[0]:.2f}"
               f"  -> scarto {abs(w_val - w_test_best[0]):.2f}")

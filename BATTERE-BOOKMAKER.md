@@ -329,10 +329,12 @@ perché lo copia meglio, non perché lo sappia anticipare.**
 
 **Perché la shrinkage sul mercato non funziona** (`src/market_blend.py`):
 la combinazione `p = w·p_model + (1−w)·p_mercato` ha un peso ottimale
-instabile — **w\* = 0.45 sul test set, w\* = 0.00 sulla validazione
-cross-fitted**. Un parametro che passa da 0 a 0.45 fra due set è
-overfitting, non un edge. Su w=0.40 il RPS scende a 0.12961 (meglio di
-bet365 0.13011), ma è un **teto**, non una stima onesta.
+instabile — **w\* = 0.35 sul test set, w\* = 0.00 sulla validazione
+cross-fitted** (scarto 0.35: il codice lo segnala come "peso INSTABILE").
+Un parametro che passa da 0 a 0.35 fra due set è overfitting, non un edge.
+Il consensus di mercato da solo (avg_open) fa RPS 0.13088 contro 0.13108 di
+bet365: è migliore, ma non abbastanza per giustificare una strategia con un
+parametro che non regge.
 
 ---
 

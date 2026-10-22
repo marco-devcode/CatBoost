@@ -446,15 +446,26 @@ il push: run `39661332146`.
   `pd.to_numeric(..., errors="coerce")` e un ramo esplicito per le colonne
   non numeriche: il dump non può più far fallire la pipeline.
 
-**Numeri prodotti dalla CI** (tuning completo, dataset aggiornato al
-2026-10-21, 438 righe di test):
+**Numeri prodotti dalla CI** (tuning completo via CV, dataset aggiornato,
+448 righe di test) — questa è la **configurazione di produzione**:
 
-| | valore CI |
-|---|---|
-| accuracy | 0.551339 |
-| RPS | 0.130787 |
-| calibrazione alpha | [0.0466, −0.0605, 0.0139] |
-| calibrazione w | 0.751868 |
+| | valore CI | bet365 |
+|---|---|---|
+| accuracy | 0.551339 | 0.5469 |
+| F1 macro | 0.4986 | 0.4182 |
+| RPS | **0.130787** | 0.1311 |
+| calibrazione alpha | [0.0466, −0.0605, 0.0139] | — |
+| calibrazione w | 0.751868 | — |
+
+Con la griglia di CV completa il modello **vince anche sul RPS**, ma di
+**0.0003**: dentro il rumore, non un vantaggio. (Il run locale con parametri
+fissi, `--fast`, dava 0.1315 e perdeva di 0.0004: la differenza è la
+selezione degli iperparametri, non il codice.)
+
+Nota: il report finale della CI (`models/final_report_seriea.json`) ora
+riporta il benchmark **corretto**: `rps_bookmaker 0.1311`,
+`accuracy_bookmaker 0.5469` — prima 0.178 e 0.3772, con
+`beats_bookmaker_rps: True` per via del benchmark fasullo (vedi §5c).
 
 La calibrazione cross-fitted è stata rigenerata in CI con valori coerenti con
 quelli misurati in locale (§5b): conferma che il meccanismo è riproducibile

@@ -143,3 +143,45 @@ jobs:
             echo "Push fallito dopo 3 tentativi"
             exit 1
           fi
+
+  # ── Test ────────────────────────────────────────────────────────────────
+  # La suite di test esisteva ma NESSUNA pipeline la eseguiva: i test
+  # erano file che nessuno usava, quindi un test rotto passava
+  # inosservato (e' successo: per settimane la suite era verde solo per
+  #che nessuno la lanciava). Qui gira dopo i due job di training.
+  #
+  # I test NON richiedono il modello .cbm (quello e' gitignored e non
+  # esiste su un runner pulito): test_inference_matches_training importa
+  # 'predict' con un modulo finto al posto di catboost.
+  test:
+    name: Test (suite)
+    needs: pipeline
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas numpy
+
+      - name: Suite di test
+        run: |
+          fail=0
+          for t in scripts/test_*.py; do
+            if python "$t"; then
+              echo "::notice::OK $(basename $t)"
+            else
+              echo "::error::FAIL $(basename $t)"
+              fail=1
+            fi
+          done
+          echo "=== suite completata, fail=$fail ==="
+          exit $fail

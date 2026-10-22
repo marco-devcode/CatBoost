@@ -115,10 +115,11 @@ sottovalutava il bookmaker. Adottato `additive` in
   soglia `freeze_until` e il flag `--reset-freeze`.
 - `meta.freeze_attivo: false` nel JSON pubblicato.
 
-Propagato anche a: `src/refresh_predictions.py` (features ricalcolate per tutte
-le giornate), `.github/workflows/pipeline.yml` (input `reset_freeze` e flag
-`--reset-freeze` eliminati — la pipeline CI would-have fallito), e
-`.github/workflows/daily-update.yml`.
+Propagato anche a: `.github/workflows/pipeline.yml` (input `reset_freeze` e
+flag `--reset-freeze` eliminati — la pipeline CI would-have fallito) e
+`.github/workflows/daily-update.yml`. (Lo script `src/refresh_predictions.py`
+che faceva il refresh manuale è stato poi cancellato: non era in nessuna
+pipeline, vedi §8b.)
 
 **Perché il ricalcolo è lecito (nessun hindsight)**: lo split di training è
 **temporale** (cutoff 2025-08-01 → le partite 2026-27 non sono mai state nel
@@ -556,12 +557,45 @@ raggiungibile con i dati attuali del repo.
 | `src/predict.py` | modificato | feature avanzate in inferenza, calibrazione applicata |
 | `src/model.py` | modificato | `--fast`, early stopping senza leakage, calibrazione cross-fitted |
 | `src/clean_data.py` | modificato | conserva colonne prestazione e quote |
-| `src/refresh_predictions.py` | modificato | freeze rimosso anche dal refresh |
-| `.github/workflows/pipeline.yml` | modificato | via `--reset-freeze` (che non esiste più) e input `reset_freeze` |
+| `.github/workflows/pipeline.yml` | modificato | via `--reset-freeze` (che non esiste più), input `reset_freeze`, e **nuovo job `test`** che esegue la suite |
 | `.github/workflows/daily-update.yml` | modificato | commento freeze aggiornato |
 | `scripts/test_freeze_odds_guard.py` | modificato | riscritto sul contratto post-freeze (il vecchio falliva già su HEAD) |
 | `scripts/test_inference_matches_training.py` | modificato | parità sull'elenco feature completo, quote passate al match |
 | `data/serie_a_raw.csv` | modificato | 5 righe vuote rimosse (allineamento) |
+
+## 8b. Pulizia: file non usati dalla repo
+
+La repo conteneva script che **nessuna pipeline eseguiva** e che non erano
+importati da nessun altro modulo: erano file morti che solo occupavano
+spazio e creavano l'illusione di un progetto più grande di quanto fosse.
+
+| file cancellato | perché era morto |
+|---|---|
+| `src/download_benchmark.py` | file **vuoto** (0 righe), dal primo commit, mai in un workflow |
+| `src/recompute_22era.py` | script one-off per la 22ª giornata: il commit `88b31d2` ne aveva rimosso l'uso dalla pipeline ("ci: rimuove lo step di ricalcolo modello-22") lasciando il file indietro |
+| `src/refresh_predictions.py` | script one-off per le date hardcodate di G4+ della stagione 26/27, mai in un workflow (il refresh notturno fa la catena completa) |
+| `scripts/verify_multi_league.py` | verifica della transizione multi-lega, superata (la transizione è fatta) |
+
+**Cosa invece non è stato cancellato, e perché:**
+
+- Gli **script di misura** (`src/evaluate_market.py`, `src/diagnose_vs_market.py`,
+  `src/experiments.py`, `src/eval_calibration.py`, `src/eval_missing_market.py`,
+  `src/market_blend.py`, `scripts/select_devig.py`, `scripts/verify_edge.py`)
+  non sono in pipeline, ma sono gli strumenti con cui sono state prodotte
+  **tutte** le misure di questo documento: sono usati, e ogni numero qui
+  citato è riproducibile con un comando. `scripts/smoke_all.sh` verifica
+  che girino tutti fino in fondo.
+- `src/compare_ratings.py` **è** usato: dal workflow `compare.yml`.
+- I **test** (`scripts/test_*.py`) non erano eseguiti da nessuna pipeline:
+  erano quindi file che nessuno usava. Invece di cancellarli, sono stati
+  **messi in uso**: il workflow `pipeline.yml` ha ora un job `test` (con
+  `needs: pipeline`) che li esegue tutti, e fallisce la pipeline se uno
+  fallisce. I test non richiedono il modello `.cbm` (che è gitignored e non
+  esiste su un runner pulito): `test_inference_matches_training` importa
+  `predict` con un modulo finto al posto di catboost.
+- `test_calendar_names_match.py` è stato reso **tollerante alla rete**: se
+  openfootball non risponde, avvisa e salta la lega invece di far fallire
+  la CI per un problema esterno.
 
 ## 9. Riferimenti
 

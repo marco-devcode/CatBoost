@@ -31,8 +31,15 @@ for key, lg in LEAGUES.items():
         continue
 
     # 1. squadre del calendario openfootball, normalizzate
-    with urllib.request.urlopen(lg.openfootball_url, timeout=60) as r:
-        cal = json.loads(r.read().decode("utf-8"))
+    # Se la fonte non risponde, il test NON deve fallire: un problema di
+    # rete non e' un problema del codice, e far fallire la CI per quello
+    # rende la pipeline inaffidabile. Si avvisa e si salta la lega.
+    try:
+        with urllib.request.urlopen(lg.openfootball_url, timeout=60) as r:
+            cal = json.loads(r.read().decode("utf-8"))
+    except Exception as e:
+        print(f"  SKIP {key}: calendario non raggiungibile ({type(e).__name__}: {e})")
+        continue
     matches = cal.get("matches", cal)
     cal_names = set()
     for m in matches:

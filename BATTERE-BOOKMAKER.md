@@ -169,7 +169,7 @@ risultato: CatBoost gestisce i NaN nativamente. Dataset tornato a 5642/438.
 
 ---
 
-## 5. Risultati misurati (test set, 438 partite)
+## 5. Risultati misurati (test set, 448 partite)
 
 | | TRAIN | TEST |
 |---|---|---|
@@ -202,6 +202,39 @@ split dopo l'aggiornamento dei dati, non un cambiamento di codice.)
 
 Entrambi producevano numeri falsi **nella direzione favorevole**. Vanno
 registrati, perché i numeri sbagliati erano *migliori* di quelli veri.
+
+### 5c. BUG: anche `src/evaluate.py` allineava le quote per posizione
+
+`src/evaluate_market.py` (il nuovo harness) era corretto, ma **la pipeline
+CI esegue ancora `src/evaluate.py`**, che produce `models/final_report_*.json`
+— il report finale committato. E quel file aveva lo stesso difetto:
+
+```python
+df_full["B365H"] = pd.to_numeric(raw["B365H"], errors="coerce").values[:len(df_full)]
+```
+
+più un **cutoff hardcoded a `2022-08-01`** (il training usa `2025-08-01`), per
+cui le righe abbinate erano anche di un periodo diverso dal test set.
+
+Conseguenza: il report finale dichiarava `rps_bookmaker = 0.178`,
+`accuracy_bookmaker = 0.377` e **`beats_bookmaker_rps: True`** — il modello
+"vinceva" contro un bookmaker con le quote mescolate a caso. Il sito non
+mostra quel file (usa il confronto calcolato in `predict_fixtures`), ma il
+report è committato in `models/` ed è la prova del repository: dichiarava una
+vittoria che non esiste.
+
+Correzione: `src/evaluate.py` ora abbina le quote **per chiave** (riutilizzando
+`_test_keys` e `load_odds_by_key` di `src/evaluate_market.py`), usa il cutoff
+reale del training, e de-vigga con il metodo `additive`. Risultato:
+
+| | prima (falsato) | dopo (corretto) |
+|---|---|---|
+| `rps_bookmaker` | 0.178 | **0.1311** |
+| `accuracy_bookmaker` | 0.3772 | **0.5469** |
+| `beats_bookmaker_rps` | **True** | **False** |
+
+Il Delta RPS del report è ora "⚠️ BM vince" (−0.0004): il report dice la
+verità, cioè che sul RPS il bookmaker è avanti di 0.0004.
 
 ### 5b.1 Early stopping sul test set
 `src/model.py::train_baseline` e `src/experiments.py::train_catboost` passavano
@@ -253,6 +286,7 @@ Misura dell'impatto (test set, modello v2):
 | calibrazione | RPS test | accuracy test | log-loss test |
 |---|---|---|---|
 | nessuna | 0.13019 | 56.16% | 0.97259 |
+| *(misure sul dataset di 438 righe, per confrontare le varianti)* | | | |
 | calibrata su validation in-sample (BUG) | **0.15068** | 51.60% | **1.26732** |
 | calibrata cross-fitted (CORRETTA) | 0.13047 | 56.16% | 0.97163 |
 
@@ -269,7 +303,7 @@ Parametri finali: `alpha = [0.056, -0.089, 0.033]`, `w = 0.751`.
 
 `src/diagnose_vs_market.py`, con calibrazione applicata.
 
-**Disaccordo** (438 partite di test):
+**Disaccordo** (448 partite di test):
 
 | bookmaker | accordo | modello corretto | bookmaker corretto |
 |---|---|---|---|
@@ -297,7 +331,7 @@ ragione più spesso. Ma è denso di quote → l'edge è piccolo.
   attesa. Il join non è sfalsato.
 - **Controllo B — il meccanismo è corretto**: applicando il backtest alle
   probabilità *del mercato* si ottengono **0 scommesse con EV>0**, cioè il
-  de-vig non produce falsi positivi. (Su un campione di sole 438 partite la
+  de-vig non produce falsi positivi. (Su un campione di sole 448 partite la
   differenza tra +12.93% e −3.56% è tutta sampling noise.)
 - **Controllo C — calibrazione delle scommesse**: il modello dichiara
   **34.0%** di probabilità sulle scommesse, l'implicita lordata è **28.9%**,
@@ -380,14 +414,18 @@ bookmaker): quindi `mkt_pinnacle_*` e `mkt_avg_*` sono NaN. Misurato
 
 | condizione | accuracy | F1 macro | MSE | RPS | log-loss |
 |---|---|---|---|---|---|
-| (a) tutte le 12 feature di mercato | **56.16%** | 0.5152 | 0.19284 | **0.13019** | 0.97259 |
-| (b) Pinnacle/Avg = NaN (caso future) | 53.42% | 0.4704 | 0.19399 | 0.13121 | 0.97674 |
-| (c) modello **allenato** solo con B365 | 52.97% | 0.4749 | 0.19477 | 0.13118 | 0.98226 |
+| (a) tutte le 12 feature di mercato | **55.80%** | 0.5087 | 0.19459 | **0.13146** | 0.97860 |
+| (b) Pinnacle/Avg = NaN (caso future) | 54.24% | 0.4799 | 0.19538 | 0.13247 | 0.98327 |
+| (c) modello **allenato** solo con B365 | 53.13% | 0.4729 | 0.19638 | 0.13298 | 0.98901 |
 
 Il degrado è **+0.001 di RPS** e (b) ≈ (c): tenere `v2_full` e lasciare che
 CatBoost tratti le colonne mancanti come NaN è **indifferente** rispetto ad
 addestrare un modello solo-B365, e migliore (il training le usa dove
 disponibili). Decisione: si tiene `v2_full`.
+
+(Su un dataset di 438 righe, prima dell'aggiornamento CI, le stesse tre
+condizioni davano 56.16% / 0.13019, 53.42% / 0.13121 e 52.97% / 0.13118: la
+direzione e la conclusione non cambiano.)
 
 ---
 
@@ -441,7 +479,7 @@ feature per partita, `freeze_attivo: false`.
 
 Nota: la dashboard mostra RPS **0.1322 vs 0.1309** perché confronta il modello
 con bet365 **sulle 70 partite già giocate della stagione corrente**, non sul
-test set di 438 partite. Su quello stagionale il modello è indietro: è un
+test set di 448 partite. Su quello stagionale il modello è indietro: è un
 campione piccolo, ma è il dato onesto del momento.
 
 ---
@@ -468,7 +506,7 @@ campione piccolo, ma è il dato onesto del momento.
 - ⏳ Sul campionato corrente (26/27) il modello è *indietro*: RPS 0.1328 vs
   0.1309 del bookmaker, Kelly ROI −11.5%.
 
-**La conclusione scientifica**: con 438 partite di test e un mercato che
+**La conclusione scientifica**: con 448 partite di test e un mercato che
 incorpora già tutta l'informazione pubblica, un modello di Serie A basato su
 Pi-Rating + tiri + Elo **pareggia il bookmaker e lo corregge marginalmente
 sull'esito**. Batterlo in valore richiederebbe (a) più partite di test per

@@ -54,10 +54,20 @@ def ranked_probability_score(y_true, y_proba):
     return np.mean(rps_list)
 
 def odds_to_prob(bh, bd, ba):
+    """Probabilita' implicite SENZA margine (de-vig).
+
+    BUG CORRETTO: qui c'era la normalizzazione proporzionale, che e'
+    statisticamente sbagliata (il bookmaker carica un margine relativo
+    maggiore sui longshot) e ha il log-loss peggiore di tutti i metodi
+    misurati. Il metodo 'additive' e' quello scelto empiricamente su 6135
+    partite Serie A (scripts/select_devig.py) e validato a 1e-6 contro
+    penaltyblog 1.13.1. Con il metodo vecchio il benchmark del bookmaker
+    era SOTTOSTIMATO (log-loss 0.96105 contro 0.95982).
+    """
     try:
-        raw = [1.0/float(bh), 1.0/float(bd), 1.0/float(ba)]
-        total = sum(raw)
-        return [p/total for p in raw]
+        from implied import DE_VIG_METHODS
+        p = DE_VIG_METHODS["additive"]((float(bh), float(bd), float(ba)))
+        return p if p is not None else [0.45, 0.25, 0.30]
     except Exception:
         return [0.45, 0.25, 0.30]
 
@@ -81,17 +91,44 @@ b365_present = False
 df_test_b365 = None
 try:
     raw = pd.read_csv(LEAGUE.raw_path, low_memory=False)
-    df_full = pd.read_csv(LEAGUE.features_path, parse_dates=['Date'])
-    df_full = df_full.reset_index(drop=True)
-    raw = raw.reset_index(drop=True)
     if 'B365H' in raw.columns:
-        df_full["B365H"] = pd.to_numeric(raw["B365H"], errors="coerce").values[:len(df_full)]
-        df_full["B365D"] = pd.to_numeric(raw["B365D"], errors="coerce").values[:len(df_full)]
-        df_full["B365A"] = pd.to_numeric(raw["B365A"], errors="coerce").values[:len(df_full)]
-        cutoff = '2022-08-01'
-        df_test_b365 = df_full[df_full['Date'] >= pd.Timestamp(cutoff)].copy().reset_index(drop=True)
+        # BUG CORRETTO (grave): le quote erano abbinate alle righe del
+        # dataset per POSIZIONE (.values[:len(df_full)]). Ma il raw
+        # concatenato da download_data.py contiene righe vuote che
+        # clean_data.py scarta: dal pezzo in cui si verifica la riga, ogni
+        # quote appartiene a una partita DIVERSA (misurato: 4997 righe su
+        # 6140 con quote sbagliate). Il cutoff era inoltre hardcoded a
+        # 2022-08-01, quindi le righe abbinate erano di un periodo che non
+        # coincideva con il test set.
+        #
+        # Risultato del bug: il report finale dichiarava
+        # rps_bookmaker=0.178 e accuracy_bookmaker=0.377, cioe' un
+        # bookmaker con le quote mescolate a caso, e 'beats_bookmaker_rps:
+        # True' perche' il modello batteva quel benchmark fasullo.
+        #
+        # Ora si abbina per CHIAVE (data, casa, fuori) con lo stesso
+        # helper di src/evaluate_market.py e lo stesso cutoff del training
+        # (2025-08-01), cosi' le quote sono delle STESSE partite del test
+        # set, nello stesso ordine.
+        from evaluate_market import _test_keys, load_odds_by_key
+        cutoff = '2025-08-01'
+        keys = _test_keys(LEAGUE, cutoff)
+        odds_by_key = load_odds_by_key(Path(LEAGUE.raw_path))
+        rows = []
+        n_with = 0
+        for k in keys:
+            o = odds_by_key.get(k, {}).get('b365_open')
+            if o and all(v is not None and float(v) > 1.0 for v in o):
+                rows.append((float(o[0]), float(o[1]), float(o[2])))
+                n_with += 1
+            else:
+                rows.append((np.nan, np.nan, np.nan))
+        df_test_b365 = pd.DataFrame(
+            rows, columns=['B365H', 'B365D', 'B365A'],
+            index=range(len(rows)))
         b365_present = True
-        print(f"[Data] Test set con quote B365: {len(df_test_b365)} righe")
+        print(f"[Data] Test set allineato per CHIAVE: {len(df_test_b365)} righe "
+              f"({n_with} con quote B365, cutoff {cutoff})")
 except Exception as e:
     print(f"[INFO] Quote B365 non disponibili (il raw non le include): {e}")
 

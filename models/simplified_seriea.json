@@ -1,0 +1,135 @@
+{
+  "selected": [
+    "pi_home_H",
+    "pi_away_H",
+    "home_form_5",
+    "away_form_5",
+    "home_shots_5",
+    "away_shots_5",
+    "elo_home",
+    "elo_away",
+    "mkt_b365_pH",
+    "mkt_b365_pD",
+    "mkt_b365_pA"
+  ],
+  "results": {
+    "completo": {
+      "n_features": 41,
+      "params": {
+        "iterations": 1500,
+        "lr": 0.02,
+        "depth": 6
+      },
+      "rps": 0.13078662231969684,
+      "log_loss": 0.9742463225517152,
+      "accuracy": 0.5513392857142857,
+      "f1_macro": 0.4986187578759265,
+      "brier": 0.1935565314747798,
+      "secondi": 30.3
+    },
+    "semplificato": {
+      "n_features": 11,
+      "params": {
+        "iterations": 200,
+        "lr": 0.05,
+        "depth": 4,
+        "rps_oof": 0.1927467082446413,
+        "ll_oof": 0.9696393052131592,
+        "acc": 0.5382797731568998,
+        "secondi": 3.2
+      },
+      "rps": 0.13143709582206972,
+      "log_loss": 0.977288257913914,
+      "accuracy": 0.5401785714285714,
+      "f1_macro": 0.4728657378115076,
+      "brier": 0.1934917934454645,
+      "secondi": 1.4,
+      "test_vs_completo": {
+        "bootstrap": {
+          "diff": 0.0009757102535594847,
+          "ci_low": -0.0024812472414257516,
+          "ci_high": 0.004454652283276121,
+          "p_bootstrap": 0.5924,
+          "n": 448
+        },
+        "wilcoxon": {
+          "stat": 49553.0,
+          "p": 0.7886519243487236
+        },
+        "dm": {
+          "stat": 0.6756611204122209,
+          "p": 0.49960521257027146,
+          "source": "DM (Harvey-Leybourne-Newbold 1997, t con df=T-1)"
+        }
+      }
+    },
+    "completo_con_parametri_semplici": {
+      "n_features": 41,
+      "params": {
+        "iterations": 200,
+        "lr": 0.05,
+        "depth": 4,
+        "rps_oof": 0.1927467082446413,
+        "ll_oof": 0.9696393052131592,
+        "acc": 0.5382797731568998,
+        "secondi": 3.2
+      },
+      "rps": 0.1307322193816388,
+      "log_loss": 0.9711114838463135,
+      "accuracy": 0.5491071428571429,
+      "f1_macro": 0.48016211128508374,
+      "brier": 0.192281383195696,
+      "secondi": 2.0,
+      "test_vs_completo": {
+        "bootstrap": {
+          "diff": -8.160440708693026e-05,
+          "ci_low": -0.0037533367818017934,
+          "ci_high": 0.0034818779205539616,
+          "p_bootstrap": 0.9708,
+          "n": 448
+        },
+        "wilcoxon": {
+          "stat": 47551.0,
+          "p": 0.318177423626569
+        },
+        "dm": {
+          "stat": null,
+          "p": null,
+          "source": "varianza long-run non positiva"
+        }
+      }
+    },
+    "semplificato_con_parametri_produzione": {
+      "n_features": 11,
+      "params": {
+        "iterations": 1500,
+        "lr": 0.02,
+        "depth": 6
+      },
+      "rps": 0.13344607258855434,
+      "log_loss": 0.9904861570827583,
+      "accuracy": 0.5334821428571429,
+      "f1_macro": 0.4819940320453629,
+      "brier": 0.19577619663117493,
+      "secondi": 20.8,
+      "test_vs_completo": {
+        "bootstrap": {
+          "diff": 0.003989175403286258,
+          "ci_low": -0.00039015358040849206,
+          "ci_high": 0.008420325190172814,
+          "p_bootstrap": 0.074,
+          "n": 448
+        },
+        "wilcoxon": {
+          "stat": 49479.0,
+          "p": 0.7679556198364151
+        },
+        "dm": {
+          "stat": 1.3264858191448434,
+          "p": 0.18535612708348936,
+          "source": "DM (Harvey-Leybourne-Newbold 1997, t con df=T-1)"
+        }
+      }
+    }
+  }
+}

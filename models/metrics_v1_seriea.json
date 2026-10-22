@@ -1,12 +1,12 @@
 {
-  "accuracy": 0.551339,
-  "rps": 0.130787,
+  "accuracy": 0.555804,
+  "rps": 0.13111,
   "calibration_alpha": [
-    0.04660230239919515,
-    -0.06046567070365507,
-    0.013862429488371814
+    0.051802259697804096,
+    -0.02682442351269544,
+    -0.02497793870341134
   ],
-  "calibration_w": 0.751868,
+  "calibration_w": 0.963076,
   "calibration_n_val": 2821,
   "features": [
     "pi_home_H",
@@ -40,16 +40,7 @@
     "elo_away_expect",
     "mkt_b365_pH",
     "mkt_b365_pD",
-    "mkt_b365_pA",
-    "mkt_b365_overround",
-    "mkt_pinnacle_pH",
-    "mkt_pinnacle_pD",
-    "mkt_pinnacle_pA",
-    "mkt_pinnacle_overround",
-    "mkt_avg_pH",
-    "mkt_avg_pD",
-    "mkt_avg_pA",
-    "mkt_avg_overround"
+    "mkt_b365_pA"
   ],
   "league": "seriea"
 }

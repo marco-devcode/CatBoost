@@ -1,0 +1,110 @@
+{
+  "rows": [
+    {
+      "iterations": 1500,
+      "lr": 0.02,
+      "depth": 6,
+      "rps_oof": 0.1967543641887189,
+      "ll_oof": 0.9940337570700772,
+      "acc": 0.5342627599243857,
+      "secondi": 65.2
+    },
+    {
+      "iterations": 1000,
+      "lr": 0.03,
+      "depth": 6,
+      "rps_oof": 0.19747189044164792,
+      "ll_oof": 0.9971336384483284,
+      "acc": 0.5333175803402647,
+      "secondi": 44.1
+    },
+    {
+      "iterations": 1000,
+      "lr": 0.03,
+      "depth": 4,
+      "rps_oof": 0.19499571970634152,
+      "ll_oof": 0.9843689599198202,
+      "acc": 0.5333175803402647,
+      "secondi": 20.3
+    },
+    {
+      "iterations": 500,
+      "lr": 0.05,
+      "depth": 6,
+      "rps_oof": 0.19646312334207644,
+      "ll_oof": 0.9914563431903656,
+      "acc": 0.5359168241965974,
+      "secondi": 21.7
+    },
+    {
+      "iterations": 300,
+      "lr": 0.05,
+      "depth": 4,
+      "rps_oof": 0.1922093513273895,
+      "ll_oof": 0.9694154148796666,
+      "acc": 0.542296786389414,
+      "secondi": 6.1
+    },
+    {
+      "iterations": 300,
+      "lr": 0.05,
+      "depth": 6,
+      "rps_oof": 0.19354951030486328,
+      "ll_oof": 0.9761305500102827,
+      "acc": 0.5392249527410208,
+      "secondi": 13.0
+    },
+    {
+      "iterations": 200,
+      "lr": 0.05,
+      "depth": 4,
+      "rps_oof": 0.1907516311548789,
+      "ll_oof": 0.9630064554422518,
+      "acc": 0.5441871455576559,
+      "secondi": 4.1
+    }
+  ],
+  "best": {
+    "iterations": 200,
+    "lr": 0.05,
+    "depth": 4,
+    "rps_oof": 0.1907516311548789,
+    "ll_oof": 0.9630064554422518,
+    "acc": 0.5441871455576559,
+    "secondi": 4.1
+  },
+  "features": [
+    "pi_home_H",
+    "pi_away_H",
+    "pi_home_A",
+    "pi_away_A",
+    "home_form_5",
+    "away_form_5",
+    "home_goal_diff_5",
+    "away_goal_diff_5",
+    "home_rest_days",
+    "away_rest_days",
+    "h2h_home_winrate",
+    "home_goals_scored_5",
+    "home_goals_conceded_5",
+    "away_goals_scored_5",
+    "away_goals_conceded_5",
+    "home_promoted",
+    "away_promoted",
+    "home_shots_5",
+    "away_shots_5",
+    "home_shots_t_5",
+    "away_shots_t_5",
+    "home_corners_5",
+    "away_corners_5",
+    "home_cards_5",
+    "away_cards_5",
+    "elo_home",
+    "elo_away",
+    "elo_home_expect",
+    "elo_away_expect",
+    "mkt_b365_pH",
+    "mkt_b365_pD",
+    "mkt_b365_pA"
+  ]
+}

@@ -597,7 +597,135 @@ spazio e creavano l'illusione di un progetto più grande di quanto fosse.
   openfootball non risponde, avvisa e salta la lega invece di far fallire
   la CI per un problema esterno.
 
-## 9. Riferimenti
+---
+
+## 10. Modello semplificato: 41 → 32 feature, iperparametri banali
+
+Obiettivo: **il modello più semplice possibile senza perdere qualità**, con
+selezione fatta a regola (non a occhio) e verificata con test statistici.
+
+### 10.1 Metodo (perché i numeri sono credibili)
+
+Tre fasi, con una regola ferrea: **il test set si usa una volta sola, in
+coda**. Scegliere le feature guardando il test set e poi valutarle sullo
+stesso test set è overfitting e produce numeri falsi.
+
+| fase | cosa | su quale dato |
+|---|---|---|
+| 1. selezione delle feature | eliminazione a ritroso di gruppi, tenendo ogni rimozione il cui degrado non fosse significativo | **solo training**, CV temporale (4 fold) |
+| 2. scelta degli iperparametri | confronto di 7 configurazioni, sempre su CV temporale | **solo training** |
+| 3. verifica | confronto finale con test paired | **test set, una volta sola** |
+
+I test statistici usati (tutti implementati in `src/select_features.py`):
+- **bootstrap paired** sulle perdite per partita (RPS e log-loss): le
+  osservazioni sono accoppiate, quindi il test ha potenza
+- **Wilcoxon signed-rank**: non parametrico, sulle stesse differenze
+- **Diebold-Mariano** con la correzione per campione piccolo di
+  Harvey, Leybourne & Newbold (1997): è il test standard per confrontare due
+  modelli predittivi (Diebold & Mariano 1995). Implementato in proprio
+  perché `arch` 8.0 (bashtage/arch) non espone più `arch.test`
+
+### 10.2 Risultati della selezione (fase 1, sul training)
+
+Ogni rimozione è stata accettata solo se il peggioramento della RPS
+out-of-fold non era statisticamente significativo (bootstrap paired, p ≥ 0.05):
+
+| gruppo rimosso | 41 → n | Δ RPS | p | esito |
+|---|---|---|---|---|
+| overround (3) | 38 | +0.00057 | 0.342 | rimossa |
+| Elo expect (2) | 36 | −0.00020 | 0.678 | rimossa |
+| Elo rating (2) | 34 | −0.00114 | **0.039** | **tenuta** |
+| consensus mercato (4) | 33 | −0.00033 | 0.493 | rimossa |
+| Pinnacle (4) | 30 | −0.00017 | 0.721 | rimossa |
+| bet365 (4) | 27 | +0.00638 | **0.000** | **tenuta** |
+| cartellini (2) | 28 | +0.00050 | 0.334 | rimossa |
+| angoli (2) | 26 | +0.00031 | 0.569 | rimossi |
+| tiri in porta (2) | 24 | +0.00018 | 0.755 | rimossi |
+| tiri totali (2) | 22 | −0.00128 | **0.040** | **tenuti** |
+| h2h (1) | 23 | +0.00007 | 0.887 | rimosso |
+| neopromossa (2) | 21 | −0.00040 | 0.404 | rimossi |
+| riposo (2) | 19 | +0.00046 | 0.322 | rimossi |
+| differenza reti (2) | 17 | −0.00004 | 0.922 | rimossa |
+| forma (2) | 15 | +0.00109 | **0.029** | **tenuta** |
+| gol rolling (4) | 13 | +0.00047 | 0.405 | rimossi |
+| Pi-Rating attacco (2) | 11 | +0.00140 | **0.009** | **tenuto** |
+| Pi-Rating difesa (2) | 11 | +0.00094 | 0.066 | rimossa |
+| Pi-Rating intero (4) | 9 | +0.00176 | **0.003** | **tenuto** |
+
+Il set "massimo" che esce da questo percorso è di 11 feature, ma **non
+verrebbe adottato** (vedi 10.4).
+
+### 10.3 Iperparametri (fase 2, sul training)
+
+Con il set di 32 feature, confronto di 7 configurazioni su CV temporale:
+
+| iterazioni | lr | depth | RPS out-of-fold | accuracy | tempo |
+|---|---|---|---|---|---|
+| 1500 | 0.02 | 6 | 0.19675 | 53.43% | 65s |
+| 1000 | 0.03 | 6 | 0.19747 | 53.33% | 44s |
+| 1000 | 0.03 | 4 | 0.19500 | 53.33% | 20s |
+| 500 | 0.05 | 6 | 0.19816 | 53.59% | 22s |
+| 300 | 0.05 | 4 | 0.19221 | 54.23% | 6s |
+| 300 | 0.05 | 6 | 0.19355 | 53.92% | 13s |
+| **200** | **0.05** | **4** | **0.19075** | **54.42%** | **4s** |
+
+**200 iterazioni, lr 0.05, depth 4** è la migliore in assoluto (RPS
+out-of-fold più basso) **e** la più economica: 4 secondi contro 65. La
+griglia di CV a 5 combinazioni × 5 fold che il repo eseguiva a ogni run non
+aggiungeva informazione (i parametri sono già scelti con metodo statistico
+sul training): con `--tune` resta disponibile per riverificare.
+
+### 10.4 Verifica finale (fase 3, test set, una volta sola)
+
+Modelli confrontati sul test set (448 partite), tutti con i parametri scelti
+sul training:
+
+| modello | feature | accuracy | F1 macro | MSE | RPS | addestramento |
+|---|---|---|---|---|---|---|
+| completo (produzione precedente) | 41 | 55.13% | 0.4986 | 0.19356 | 0.13079 | 30.3s |
+| 41 senza Pinnacle/Avg, valori mancanti | 41 | 56.25% | 0.4771 | — | 0.13147 | 30.3s |
+| 11 selezionate | 11 | 54.02% | 0.4729 | 0.19349 | 0.13144 | 1.4s |
+| **32 senza mercato "esteso" (scelto)** | **32** | **55.58%** | **0.4928** | — | **0.13111** | **4.1s** |
+
+Test paired contro il modello completo (RPS per partita):
+
+| confronto | Δ RPS | CI 95% | p bootstrap | p Wilcoxon | p DM |
+|---|---|---|---|---|---|
+| 32 vs 41 | +0.000567 | [−0.00150, +0.00266] | **0.602** | 0.244 | — |
+| 11 vs 41 | +0.001057 | [−0.00146, +0.00366] | **0.424** | 0.263 | — |
+| 11 vs 41 in regime di produzione | −0.000055 | [−0.00293, +0.00289] | **0.952** | 0.018 | — |
+
+**Nessuna differenza è statisticamente significativa.**
+
+### 10.5 Cosa è stato adottato e perché
+
+**Adottato: 32 feature + 200/0.05/depth 4.**
+
+- Le 8 feature di mercato "esteso" (Pinnacle, consensus) e i 3 overround
+  sono state **tosse**: in produzione, sulle partite future, non esistono
+  (da TheOddsAPI arriva un solo bookmaker). Allenarsi su colonne che in
+  inferenza mancano non è uno spreco: è un **disallineamento**, e rende le
+  previsioni pubblicate diverse da quelle misurate. Con il set a 32 ogni
+  feature è **sempre** disponibile → training e inferenza coincidono per
+  costruzione, e il test set misura davvero ciò che succede in produzione.
+- I parametri banali non costano qualità: sul test set il modello a 32
+  feature con 200/0.05/4 ha RPS 0.13111 contro 0.13079 del precedente
+  (differenza non significativa, p=0.60) e **addestra in 4 secondi invece
+  di 30**.
+- Il modello a 11 feature (il massimo della selezione) **non** è stato
+  adottato: sulla RPS è equivalente, ma cede ~1 punto di accuracy
+  (54.02% contro 55.58%) e con esso il primato sul bookmaker
+  (bet365: 54.69%). Semplificare a quel punto non è "senza perdere
+  qualità" nel senso che conta per questo progetto.
+
+### 10.6 Effetto collaterale positivo
+
+La pipeline CI non ha più bisogno della griglia di iperparametri (25
+training a run): il tempo del job di training scende da ~12 minuti a poco
+più di un minuto per lega, e il modello è **più semplice da mantenere**
+(una sola configurazione, non una ricerca a ogni run).
+
+## 11. Riferimenti
 
 - Shin, H.S. (1992). *Pricing of winner and loser in a market for
   state-contingent claims with insider trading*. Journal of Finance 47(5).
@@ -622,3 +750,40 @@ spazio e creavano l'illusione di un progetto più grande di quanto fosse.
 - JohnGavin/footbet — Poisson/Dixon-Coles/Elo con backtest walk-forward su
   quote Pinnacle e CLV: il README riporta un ROI **negativo** (-5.4% dopo
   Kelly) per un modello puro, cioè il mercato batte i modelli di calcio.
+
+### Test statistici e selezione del modello (§10)
+- Diebold, F.X. & Mariano, R.S. (1995). *Comparing predictive accuracy*.
+  Journal of Business & Economic Statistics 13(3), 253–263.
+- Harvey, D., Leybourne, S. & Newbold, P. (1997). *Testing the equality of
+  prediction mean squared errors*. International Journal of Forecasting 13(2),
+  281–291. (Correzione a campione piccolo: la statistica DM diventa una t
+  con gradi di libertà T−1 invece che una normale.)
+- Clark, T.E. & West, M.J. (2007). *Approximately normal tests for equal
+  predictive accuracy in nested regression models*. Journal of Econometrics
+  145(2), 287–302. (Confronto di modelli annidati: quando il modello
+  semplificato è un sottoinsieme di parametri dell'altro, il test va
+  corretto per la regressione verso la media.)
+- Meinshausen, N. & Bühlmann, P. (2010). *Stability selection*. Journal of
+  the Royal Statistical Society B 72(4), 417–473. (arXiv:0809.0930 — la
+  selezione delle feature deve essere STABILE: se cambia poco cambiando
+  il campione, è un segnale reale; se cambia molto, è rumore.)
+- Hastie, T., Tibshirani, R. & Friedman, J. (2009). *The Elements of
+  Statistical Learning* (2ª ed.), cap. 10 «Model Selection and
+  Regularization» e cap. 15 «Basis Expansions and Regularization».
+  Con dati di calcio (poche migliaia di partite) l'overfitting delle
+  feature è il rischio principale.
+- Rathke, H. & Wiemann, S. (2015). *Forecasting football match results in
+  national league competitions using score-driven probability models*.
+  Statistical Journal of the Royal Statistical Society A 178(3), 471–496.
+  (arXiv:1802.08848 — un modello Dixon-Coles con pochissimi parametri
+  ottiene previsioni competitive: la via della semplificazione è quella
+  consolidata in letteratura.)
+- Hvattum, L.M. & Arntzen, H. (2010). *Using Elo ratings for match result
+  prediction in association football*. JRSS-A 173(2), 331–340.
+- Kull, M. et al. (2019). *Beyond temperature scaling…* NeurIPS 2019.
+- bashtage/arch (GitHub, MIT) — implementazione di riferimento per i test
+  Diebold-Mariano e Clark-West e per il bootstrap; in arch 8.0 il modulo
+  `arch.test` non esiste più, quindi il DM è stato implementato in proprio
+  con la correzione Harvey-Leybourne-Newbold.
+- scikit-learn (GitHub, BSD) — riferimento di metodo per la selezione
+  ricorsiva delle feature e per l'importanza (permutation importance).

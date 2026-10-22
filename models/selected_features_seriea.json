@@ -1,0 +1,386 @@
+{
+  "selected": [
+    "pi_home_H",
+    "pi_away_H",
+    "home_form_5",
+    "away_form_5",
+    "home_shots_5",
+    "away_shots_5",
+    "elo_home",
+    "elo_away",
+    "mkt_b365_pH",
+    "mkt_b365_pD",
+    "mkt_b365_pA"
+  ],
+  "trace": [
+    {
+      "gruppo": "overround (4 variabili di mercato)",
+      "rimosse": [
+        "mkt_b365_overround",
+        "mkt_pinnacle_overround",
+        "mkt_avg_overround"
+      ],
+      "n_da": 41,
+      "n_a": 38,
+      "rps_base": 0.19286087664235108,
+      "rps_cand": 0.19342784221324463,
+      "diff_rps": 0.0005669655708935234,
+      "ci_low": -0.0005907955610887093,
+      "ci_high": 0.0017559279349110585,
+      "p_bootstrap": 0.3422,
+      "rimossa": true,
+      "secondi": 17.4
+    },
+    {
+      "gruppo": "Elo expect (2)",
+      "rimosse": [
+        "elo_home_expect",
+        "elo_away_expect"
+      ],
+      "n_da": 38,
+      "n_a": 36,
+      "rps_base": 0.19342784221324463,
+      "rps_cand": 0.19322511616581362,
+      "diff_rps": -0.00020272604743098654,
+      "ci_low": -0.0011572576144474656,
+      "ci_high": 0.0007463065761176176,
+      "p_bootstrap": 0.6776,
+      "rimossa": true,
+      "secondi": 17.7
+    },
+    {
+      "gruppo": "Elo rating (2)",
+      "rimosse": [
+        "elo_home",
+        "elo_away"
+      ],
+      "n_da": 36,
+      "n_a": 34,
+      "rps_base": 0.19322511616581362,
+      "rps_cand": 0.1920894686188347,
+      "diff_rps": -0.0011356475469789234,
+      "ci_low": -0.0022078958313866697,
+      "ci_high": -7.754983524206032e-05,
+      "p_bootstrap": 0.0394,
+      "rimossa": false,
+      "secondi": 16.3
+    },
+    {
+      "gruppo": "consensus mercato (4)",
+      "rimosse": [
+        "mkt_avg_pH",
+        "mkt_avg_pD",
+        "mkt_avg_pA"
+      ],
+      "n_da": 36,
+      "n_a": 33,
+      "rps_base": 0.19322511616581362,
+      "rps_cand": 0.1928961845216594,
+      "diff_rps": -0.0003289316441542192,
+      "ci_low": -0.001246727343498595,
+      "ci_high": 0.0006084370413793238,
+      "p_bootstrap": 0.4928,
+      "rimossa": true,
+      "secondi": 15.7
+    },
+    {
+      "gruppo": "Pinnacle (4)",
+      "rimosse": [
+        "mkt_pinnacle_pH",
+        "mkt_pinnacle_pD",
+        "mkt_pinnacle_pA"
+      ],
+      "n_da": 33,
+      "n_a": 30,
+      "rps_base": 0.1928961845216594,
+      "rps_cand": 0.19272355624509266,
+      "diff_rps": -0.00017262827656670942,
+      "ci_low": -0.0011400924226502185,
+      "ci_high": 0.0007782268287423608,
+      "p_bootstrap": 0.721,
+      "rimossa": true,
+      "secondi": 14.4
+    },
+    {
+      "gruppo": "bet365 (4)",
+      "rimosse": [
+        "mkt_b365_pH",
+        "mkt_b365_pD",
+        "mkt_b365_pA"
+      ],
+      "n_da": 30,
+      "n_a": 27,
+      "rps_base": 0.19272355624509266,
+      "rps_cand": 0.19910042740839526,
+      "diff_rps": 0.006376871163302574,
+      "ci_low": 0.004468198014562767,
+      "ci_high": 0.008248419463551248,
+      "p_bootstrap": 0.0,
+      "rimossa": false,
+      "secondi": 12.2
+    },
+    {
+      "gruppo": "mercato intero (12)",
+      "rimosse": [
+        "mkt_b365_pH",
+        "mkt_b365_pD",
+        "mkt_b365_pA"
+      ],
+      "n_da": 30,
+      "n_a": 27,
+      "rps_base": 0.19272355624509266,
+      "rps_cand": 0.19910042740839526,
+      "diff_rps": 0.006376871163302574,
+      "ci_low": 0.004468198014562767,
+      "ci_high": 0.008248419463551248,
+      "p_bootstrap": 0.0,
+      "rimossa": false,
+      "secondi": 12.7
+    },
+    {
+      "gruppo": "cartellini (2)",
+      "rimosse": [
+        "home_cards_5",
+        "away_cards_5"
+      ],
+      "n_da": 30,
+      "n_a": 28,
+      "rps_base": 0.19272355624509266,
+      "rps_cand": 0.19322452855645264,
+      "diff_rps": 0.000500972311359947,
+      "ci_low": -0.0005168581118863313,
+      "ci_high": 0.0015235219427718744,
+      "p_bootstrap": 0.3338,
+      "rimossa": true,
+      "secondi": 13.7
+    },
+    {
+      "gruppo": "angoli (2)",
+      "rimosse": [
+        "home_corners_5",
+        "away_corners_5"
+      ],
+      "n_da": 28,
+      "n_a": 26,
+      "rps_base": 0.19322452855645264,
+      "rps_cand": 0.19353571260580468,
+      "diff_rps": 0.00031118404935204875,
+      "ci_low": -0.0007307673664788401,
+      "ci_high": 0.0013349783919516527,
+      "p_bootstrap": 0.569,
+      "rimossa": true,
+      "secondi": 13.4
+    },
+    {
+      "gruppo": "tiri in porta (2)",
+      "rimosse": [
+        "home_shots_t_5",
+        "away_shots_t_5"
+      ],
+      "n_da": 26,
+      "n_a": 24,
+      "rps_base": 0.19353571260580468,
+      "rps_cand": 0.19371216943281616,
+      "diff_rps": 0.00017645682701145608,
+      "ci_low": -0.0008630401166418157,
+      "ci_high": 0.0012154539708147012,
+      "p_bootstrap": 0.7546,
+      "rimossa": true,
+      "secondi": 13.1
+    },
+    {
+      "gruppo": "tiri totali (2)",
+      "rimosse": [
+        "home_shots_5",
+        "away_shots_5"
+      ],
+      "n_da": 24,
+      "n_a": 22,
+      "rps_base": 0.19371216943281616,
+      "rps_cand": 0.19243601488350098,
+      "diff_rps": -0.0012761545493151405,
+      "ci_low": -0.0025192529962988733,
+      "ci_high": -5.498012388011827e-05,
+      "p_bootstrap": 0.0398,
+      "rimossa": false,
+      "secondi": 12.8
+    },
+    {
+      "gruppo": "prestazione intera (8)",
+      "rimosse": [
+        "home_shots_5",
+        "away_shots_5"
+      ],
+      "n_da": 24,
+      "n_a": 22,
+      "rps_base": 0.19371216943281616,
+      "rps_cand": 0.19243601488350098,
+      "diff_rps": -0.0012761545493151405,
+      "ci_low": -0.0025192529962988733,
+      "ci_high": -5.498012388011827e-05,
+      "p_bootstrap": 0.0398,
+      "rimossa": false,
+      "secondi": 12.4
+    },
+    {
+      "gruppo": "h2h (1)",
+      "rimosse": [
+        "h2h_home_winrate"
+      ],
+      "n_da": 24,
+      "n_a": 23,
+      "rps_base": 0.19371216943281616,
+      "rps_cand": 0.19378184494760037,
+      "diff_rps": 6.967551478422675e-05,
+      "ci_low": -0.00096942051212009,
+      "ci_high": 0.0010760878271067992,
+      "p_bootstrap": 0.8868,
+      "rimossa": true,
+      "secondi": 12.8
+    },
+    {
+      "gruppo": "neopromossa (2)",
+      "rimosse": [
+        "home_promoted",
+        "away_promoted"
+      ],
+      "n_da": 23,
+      "n_a": 21,
+      "rps_base": 0.19378184494760037,
+      "rps_cand": 0.1933780469503967,
+      "diff_rps": -0.00040379799720365137,
+      "ci_low": -0.0013410945051972544,
+      "ci_high": 0.0005173507047937309,
+      "p_bootstrap": 0.4038,
+      "rimossa": true,
+      "secondi": 12.8
+    },
+    {
+      "gruppo": "riposo (2)",
+      "rimosse": [
+        "home_rest_days",
+        "away_rest_days"
+      ],
+      "n_da": 21,
+      "n_a": 19,
+      "rps_base": 0.1933780469503967,
+      "rps_cand": 0.19383584923116406,
+      "diff_rps": 0.0004578022807673544,
+      "ci_low": -0.00043753414600578223,
+      "ci_high": 0.0013653780960990668,
+      "p_bootstrap": 0.3218,
+      "rimossa": true,
+      "secondi": 12.8
+    },
+    {
+      "gruppo": "differenza reti (2)",
+      "rimosse": [
+        "home_goal_diff_5",
+        "away_goal_diff_5"
+      ],
+      "n_da": 19,
+      "n_a": 17,
+      "rps_base": 0.19383584923116406,
+      "rps_cand": 0.19379220754560283,
+      "diff_rps": -4.364168556122479e-05,
+      "ci_low": -0.0009259414144642342,
+      "ci_high": 0.000842912793032667,
+      "p_bootstrap": 0.9216,
+      "rimossa": true,
+      "secondi": 12.5
+    },
+    {
+      "gruppo": "forma (2)",
+      "rimosse": [
+        "home_form_5",
+        "away_form_5"
+      ],
+      "n_da": 17,
+      "n_a": 15,
+      "rps_base": 0.19379220754560283,
+      "rps_cand": 0.19487857403123984,
+      "diff_rps": 0.0010863664856370075,
+      "ci_low": 0.00011336738886638084,
+      "ci_high": 0.0020431077766177763,
+      "p_bootstrap": 0.0286,
+      "rimossa": false,
+      "secondi": 12.4
+    },
+    {
+      "gruppo": "gol rolling (4)",
+      "rimosse": [
+        "home_goals_scored_5",
+        "home_goals_conceded_5",
+        "away_goals_scored_5",
+        "away_goals_conceded_5"
+      ],
+      "n_da": 17,
+      "n_a": 13,
+      "rps_base": 0.19379220754560283,
+      "rps_cand": 0.1942650441529547,
+      "diff_rps": 0.0004728366073518583,
+      "ci_low": -0.0006007597257907006,
+      "ci_high": 0.0015287140572899061,
+      "p_bootstrap": 0.4046,
+      "rimossa": true,
+      "secondi": 12.1
+    },
+    {
+      "gruppo": "Pi-Rating attacco (2)",
+      "rimosse": [
+        "pi_home_H",
+        "pi_away_H"
+      ],
+      "n_da": 13,
+      "n_a": 11,
+      "rps_base": 0.1942650441529547,
+      "rps_cand": 0.19566653420666888,
+      "diff_rps": 0.0014014900537141714,
+      "ci_low": 0.00035809164458849445,
+      "ci_high": 0.0024381758081311626,
+      "p_bootstrap": 0.0094,
+      "rimossa": false,
+      "secondi": 11.3
+    },
+    {
+      "gruppo": "Pi-Rating difesa (2)",
+      "rimosse": [
+        "pi_home_A",
+        "pi_away_A"
+      ],
+      "n_da": 13,
+      "n_a": 11,
+      "rps_base": 0.1942650441529547,
+      "rps_cand": 0.19520112922382063,
+      "diff_rps": 0.0009360850708659517,
+      "ci_low": -6.739099545344444e-05,
+      "ci_high": 0.0019469150012425738,
+      "p_bootstrap": 0.0664,
+      "rimossa": true,
+      "secondi": 11.9
+    },
+    {
+      "gruppo": "Pi-Rating intero (4)",
+      "rimosse": [
+        "pi_home_H",
+        "pi_away_H"
+      ],
+      "n_da": 11,
+      "n_a": 9,
+      "rps_base": 0.19520112922382063,
+      "rps_cand": 0.19696294130336947,
+      "diff_rps": 0.0017618120795488256,
+      "ci_low": 0.0005846527018429539,
+      "ci_high": 0.0029548344490450324,
+      "p_bootstrap": 0.0028,
+      "rimossa": false,
+      "secondi": 11.1
+    }
+  ],
+  "params": {
+    "iterations": 300,
+    "lr": 0.05,
+    "depth": 6
+  },
+  "folds": 4
+}

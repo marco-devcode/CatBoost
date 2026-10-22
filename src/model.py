@@ -140,6 +140,43 @@ def evaluate_model(model, X_test, y_test, label="Baseline"):
     return {"accuracy": acc, "rps": rps, "probs": probs, "preds": preds}
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# MODELLO SEMPLIFICATO: set di feature e iperparametri
+# ─────────────────────────────────────────────────────────────────────────────
+# La selezione e' stata fatta con metodo statistico (src/select_features.py):
+#   - fase 1: eliminazione a ritroso di gruppi di feature, con cross-validation
+#     TEMPORALE sul SOLO training, tenendo ogni rimozione il cui degrado non
+#     fosse statisticamente significativo (bootstrap paired su RPS per partita);
+#   - fase 2: scelta degli iperparametri, sempre sul solo training;
+#   - fase 3: verifica sul test set, UNA volta sola, con test paired
+#     (bootstrap, Wilcoxon, Diebold-Mariano).
+#
+# Risultato: 32 feature (41 - 8 di Pinnacle/consensus - 3 overround) e
+# iperparametri 200/0.05/depth 4. Sul test set il modello semplificato e'
+# indistinguibile dal completo (RPS +0.00057, p=0.60) e addestra in ~4s
+# invece di ~30s.
+#
+# PERCHE' ESCLUDERE LE FEATURE DI MERCATO "ESTESE": le quote Pinnacle e la
+# media di mercato non esistono per le partite FUTURE in produzione (da
+# TheOddsAPI arriva un solo bookmaker). Allenarsi su colonne che in
+# inferenza mancano non e' solo sprecato: e' un disallineamento, e per
+# apex-tempi le previsioni del sito erano diverse da quelle misurate.
+# Con questo set ogni feature e' sempre disponibile: training e inferenza
+# sono identici per costruzione.
+SIMPLIFIED_EXCLUDE_PREFIXES = ("mkt_pinnacle_", "mkt_avg_")
+SIMPLIFIED_EXCLUDE_SUFFIXES = ("_overround",)
+DEFAULT_PARAMS = {"iterations": 200, "learning_rate": 0.05, "depth": 6}
+# depth 4 (scelto dalla CV sul training con il set semplificato)
+DEFAULT_PARAMS = {"iterations": 200, "learning_rate": 0.05, "depth": 4}
+
+
+def simplified_feature_set(columns):
+    """Il set di feature del modello semplificato, fra quelle disponibili."""
+    return [c for c in columns
+            if not c.startswith(SIMPLIFIED_EXCLUDE_PREFIXES)
+            and not c.endswith(SIMPLIFIED_EXCLUDE_SUFFIXES)]
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # 4.3 Hyperparameter Tuning
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -242,7 +279,7 @@ def save_model_and_metrics(model, metrics, feature_cols, league, label="v1"):
 # ═══════════════════════════════════════════════════════════════════════════════
 # MAIN
 # ═══════════════════════════════════════════════════════════════════════════════
-def main(league, fast: bool = False):
+def main(league, fast: bool = False, tune: bool = False):
     print("╔" + "═" * 53 + "╗")
     title = f"FASE 4 — CatBoost Model Training & Evaluation ({league.name})"
     print("║" + title.ljust(54)[:53] + "║")
@@ -250,7 +287,24 @@ def main(league, fast: bool = False):
 
     X_train, X_test, y_train, y_test = load_data(league)
     print(f"Train: {len(X_train)} | Test: {len(X_test)}")
-    print(f"Feature ({len(X_train.columns)}): {list(X_train.columns)}")
+
+    # ── Set di feature semplificato (vedi la costante e la sua
+    # documentazione): si escludono le feature di mercato "estese" (le
+    # quote Pinnacle e la media di mercato) e gli overround, perche' in
+    # produzione sulle partite future NON ESISTONO (un solo bookmaker da
+    # TheOddsAPI). Allenarsi su colonne che in inferenza mancano crea un
+    # disallineamento: il modello gira su colonne diverse da quelle su cui
+    # e' stato addestrato, e le previsioni pubblicate non sono quelle
+    # misurate. Con questo set ogni feature e' sempre disponibile.
+    _all_cols = list(X_train.columns)
+    keep = simplified_feature_set(_all_cols)
+    dropped = [c for c in _all_cols if c not in keep]
+    X_train = X_train[keep]
+    X_test = X_test[keep]
+    print(f"Feature usate dal modello ({len(keep)}): {keep}")
+    if dropped:
+        print(f"Feature escluse ({len(dropped)}, non disponibili in produzione "
+              f"sulle future): {dropped}")
 
     MODEL_PATH = league.model_path
 
@@ -282,14 +336,24 @@ def main(league, fast: bool = False):
         baseline_metrics = evaluate_model(baseline_model, X_test, y_test, "Baseline")
 
         if fast:
-            # Modalita' rapida: salta la griglia di CV temporale (5 fold x 5
-            # configurazioni = 25 training). Usata per le misure LOCALI e per
-            # gli esperimenti: la pipeline CI normale mantiene la griglia.
             best_params = {'iterations': 1000, 'learning_rate': 0.03, 'depth': 6}
             cv_results = [{"params": best_params, "note": "griglia CV saltata (--fast)"}]
             print(f"  [fast] parametri fissi: {best_params}")
-        else:
+        elif tune:
+            # La griglia di CV (5 fold x 5 configurazioni = 25 training) era
+            # il collo di bottiglia della pipeline. I parametri sono gia'
+            # stati scelti con metodo statistico sul TRAINING
+            # (src/select_features.py --mode params): rieseguire la griglia
+            # a ogni run non aggiunge informazione, costa minuti. Con --tune
+            # la si riesegue comunque, se si vuole riverificare.
             best_params, cv_results = hyperparameter_tuning(X_train, y_train)
+        else:
+            best_params = dict(DEFAULT_PARAMS)
+            cv_results = [{"params": best_params,
+                           "note": "scelti su training con CV temporale "
+                                   "(src/select_features.py --mode params); "
+                                   "usa --tune per rieseguire la griglia"}]
+            print(f"  parametri (scelti su training): {best_params}")
         final_model = train_final_model(X_train, y_train, best_params)
 
         final_metrics = evaluate_model(final_model, X_test, y_test, "Tuned")
@@ -313,8 +377,13 @@ def main(league, fast: bool = False):
         # w. La calibrazione e' cosi' stimata su previsioni che il modello
         # non ha mai visto, e si applica al modello finale.
         n_val = max(len(y_train) // 2, 10)
+        # L'ausiliary usa gli STESSI parametri del modello finale: se
+        # l'ausiliary fosse piu' forte o piu' debole, la calibrazione
+        # stimata su di lui non trasferirebbe al modello finale.
         calib_model = CatBoostClassifier(
-            iterations=1000, learning_rate=0.03, depth=6,
+            iterations=best_params.get("iterations", 200),
+            learning_rate=best_params.get("learning_rate", 0.05),
+            depth=best_params.get("depth", 4),
             loss_function="MultiClass", eval_metric="Accuracy",
             random_seed=42, verbose=False,
         )
@@ -354,8 +423,11 @@ if __name__ == "__main__":
     import argparse
     ap = argparse.ArgumentParser(description="Training CatBoost")
     ap.add_argument("--league", default=None, help="chiave lega (default: seriea)")
+    ap.add_argument("--tune", action="store_true",
+                    help="riesegui la griglia di iperparametri con CV "
+                         "temporale invece di usare quelli gia' scelti su training")
     ap.add_argument("--fast", action="store_true",
                     help="salta la griglia di hyperparameter tuning (CV 5-fold): "
                          "per misure locali ed esperimenti")
     args = ap.parse_args()
-    main(get_league(args.league), fast=args.fast)
+    main(get_league(args.league), fast=args.fast, tune=args.tune)

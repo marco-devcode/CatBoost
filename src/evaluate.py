@@ -154,7 +154,14 @@ for key, info in models_info.items():
         continue
     model.load_model(str(info['path']))
 
-    X = info['X_test']
+    # Le colonne da usare sono quelle del MODELLO, non tutte quelle del
+    # dataset: il modello semplificato usa 32 feature su 41 disponibili
+    # (le 8 di Pinnacle/consensus e i 3 overround sono escluse perche' in
+    # produzione sulle future non esistono). Senza questo allineamento il
+    # report contava 41 feature su un modello a 32, e le previsioni
+    # passavano per colonne che il modello non conosce.
+    _feat = list(model.feature_names_)
+    X = info['X_test'][_feat]
     y = info['y_test']
 
     probs = model.predict_proba(X)

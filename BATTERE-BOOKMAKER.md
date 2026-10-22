@@ -236,6 +236,17 @@ reale del training, e de-vigga con il metodo `additive`. Risultato:
 Il Delta RPS del report è ora "⚠️ BM vince" (−0.0004): il report dice la
 verità, cioè che sul RPS il bookmaker è avanti di 0.0004.
 
+**Il fix vale per entrambe le leghe** (report rigenerati dalla CI):
+
+| lega | n test | feature | RPS modello | RPS bet365 | beats_bookmaker_rps |
+|---|---|---|---|---|---|
+| Serie A | 448 | 41 | 0.1308 | 0.1311 | True (+0.0003) |
+| Eredivisie | 385 | 41 | 0.1323 | 0.1306 | False (−0.0017) |
+
+Sull'Eredivisie il modello **non** batte il bookmaker sul RPS, e il report lo
+dice (`beats_bookmaker_rps: False`). Prima del fix entrambe le leghe
+dichiaravano la vittoria contro il benchmark fasullo.
+
 ### 5b.1 Early stopping sul test set
 `src/model.py::train_baseline` e `src/experiments.py::train_catboost` passavano
 `eval_set=(X_test, y_test)` con early stopping: il numero di iterazioni

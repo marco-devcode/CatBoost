@@ -1,6 +1,6 @@
 # 🏆 Report Finale — CatBoost Eredivisie Match Prediction
 
-**Data**: 2026-10-26 12:19
+**Data**: 2026-10-29 12:25
 **Modello migliore**: Baseline (Pi-Rating + FE) — Eredivisie (`v1_baseline`)
 
 ---
@@ -9,7 +9,7 @@
 
 | Modello | Feature | RPS ↓ | Accuracy |
 |---------|---------|-------|----------|
-| Baseline (Pi-Rating + FE) — Eredivisie | 32 | 0.1296 | 51.69% ◄ **BEST**|
+| Baseline (Pi-Rating + FE) — Eredivisie | 32 | 0.1293 | 52.03% ◄ **BEST**|
 
 ---
 
@@ -17,11 +17,11 @@
 
 | Metrica | Valore | Note |
 |---------|--------|------|
-| **Accuracy** | 0.5169 | Target > 0.52 |
-| **RPS** | 0.1296 | Più basso = meglio |
-| **Recall Home Win** | 77.02% | |
+| **Accuracy** | 0.5203 | Target > 0.52 |
+| **RPS** | 0.1293 | Più basso = meglio |
+| **Recall Home Win** | 79.14% | |
 | **Recall Draw** | 0.00% | Classe più difficile |
-| **Recall Away Win** | 61.98% | |
+| **Recall Away Win** | 60.80% | |
 
 ---
 
@@ -29,9 +29,9 @@
 
 | | RPS ↓ | Accuracy |
 |--|-------|----------|
-| **CatBoost (v1_baseline)** | 0.1296 | 51.69% |
-| **Bet365** | 0.1306 | 52.73% |
-| **Delta** | +0.0011 ✅ | -0.0104 ⚠️ |
+| **CatBoost (v1_baseline)** | 0.1293 | 52.03% |
+| **Bet365** | 0.1305 | 52.54% |
+| **Delta** | +0.0012 ✅ | -0.0051 ⚠️ |
 
 ---
 
@@ -45,12 +45,12 @@
 
 | Metrica | Valore |
 |---------|--------|
-| Scommesse piazzate | 385 |
+| Scommesse piazzate | 394 |
 | Bankroll iniziale | €1000 |
-| Bankroll finale | €1491.78 |
-| Profitto | €+491.78 |
-| ROI | +49.2% |
-| Stake totale | 362.7% del bankroll |
+| Bankroll finale | €1504.20 |
+| Profitto | €+504.20 |
+| ROI | +50.4% |
+| Stake totale | 336.5% del bankroll |
 
 ![Kelly Simulation](kelly_simulation.png)
 
@@ -64,8 +64,8 @@
 
 | Flag | mean |SHAP| | Rank su 32 feature |
 |------|-------------|------|
-| home_promoted | 0.003063 | 16/32 |
-| away_promoted | 0.022912 | 17/32 |
+| home_promoted | 0.003005 | 16/32 |
+| away_promoted | 0.021134 | 17/32 |
 
 ![SHAP Summary](shap_summary.png)
 
@@ -76,13 +76,13 @@
 ```
               precision    recall  f1-score   support
 
-           H     0.5322    0.7702    0.6294       161
-           D     0.0000    0.0000    0.0000       103
-           A     0.4934    0.6198    0.5495       121
+           H     0.5244    0.7914    0.6308       163
+           D     0.0000    0.0000    0.0000       106
+           A     0.5135    0.6080    0.5568       125
 
-    accuracy                         0.5169       385
-   macro avg     0.3419    0.4633    0.3930       385
-weighted avg     0.3776    0.5169    0.4359       385
+    accuracy                         0.5203       394
+   macro avg     0.3460    0.4665    0.3959       394
+weighted avg     0.3799    0.5203    0.4376       394
 
 ```
 

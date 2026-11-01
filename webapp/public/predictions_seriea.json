@@ -1,6 +1,6 @@
 {
   "meta": {
-    "last_update": "2026-10-31T02:53:16",
+    "last_update": "2026-11-01T02:46:38",
     "league": "seriea",
     "league_name": "Serie A",
     "stagione": "2627",
@@ -7427,11 +7427,11 @@
         "away": "Inter",
         "date": "2026-10-31",
         "prob": {
-          "H": 26.1,
-          "D": 25.9,
-          "A": 48.0
+          "H": 51.9,
+          "D": 24.7,
+          "A": 23.4
         },
-        "pred": "A",
+        "pred": "H",
         "features": {
           "pi_home_H": 0.235,
           "pi_away_H": 0.386,
@@ -7462,20 +7462,12 @@
           "elo_away": 378.142,
           "elo_home_expect": 0.468,
           "elo_away_expect": 0.532,
-          "mkt_b365_pH": 0.268,
-          "mkt_b365_pD": 0.259,
-          "mkt_b365_pA": 0.473
+          "mkt_b365_pH": null,
+          "mkt_b365_pD": null,
+          "mkt_b365_pA": null
         },
-        "bm": {
-          "H": 3.59,
-          "D": 3.71,
-          "A": 2.07
-        },
-        "bm_prob": {
-          "H": 26.8,
-          "D": 25.9,
-          "A": 47.3
-        },
+        "bm": null,
+        "bm_prob": null,
         "kelly": null
       },
       {
@@ -7483,11 +7475,11 @@
         "away": "Roma",
         "date": "2026-10-31",
         "prob": {
-          "H": 14.9,
-          "D": 25.2,
-          "A": 60.0
+          "H": 44.2,
+          "D": 28.2,
+          "A": 27.5
         },
-        "pred": "A",
+        "pred": "H",
         "features": {
           "pi_home_H": -0.067,
           "pi_away_H": 0.374,
@@ -7518,35 +7510,22 @@
           "elo_away": 161.746,
           "elo_home_expect": 0.541,
           "elo_away_expect": 0.459,
-          "mkt_b365_pH": 0.167,
-          "mkt_b365_pD": 0.207,
-          "mkt_b365_pA": 0.626
+          "mkt_b365_pH": null,
+          "mkt_b365_pD": null,
+          "mkt_b365_pA": null
         },
-        "bm": {
-          "H": 5.61,
-          "D": 4.58,
-          "A": 1.57
-        },
-        "bm_prob": {
-          "H": 16.7,
-          "D": 20.7,
-          "A": 62.6
-        },
-        "kelly": {
-          "pick": "D",
-          "model_p": 0.252,
-          "odd": 4.58,
-          "stake_pct": 0.86
-        }
+        "bm": null,
+        "bm_prob": null,
+        "kelly": null
       },
       {
         "home": "Bologna",
         "away": "Monza",
         "date": "2026-10-31",
         "prob": {
-          "H": 56.7,
-          "D": 24.9,
-          "A": 18.5
+          "H": 49.2,
+          "D": 25.2,
+          "A": 25.6
         },
         "pred": "H",
         "features": {
@@ -7579,26 +7558,13 @@
           "elo_away": 283.741,
           "elo_home_expect": 0.603,
           "elo_away_expect": 0.397,
-          "mkt_b365_pH": 0.574,
-          "mkt_b365_pD": 0.238,
-          "mkt_b365_pA": 0.189
+          "mkt_b365_pH": null,
+          "mkt_b365_pD": null,
+          "mkt_b365_pA": null
         },
-        "bm": {
-          "H": 1.71,
-          "D": 4.02,
-          "A": 5.0
-        },
-        "bm_prob": {
-          "H": 57.4,
-          "D": 23.8,
-          "A": 18.9
-        },
-        "kelly": {
-          "pick": "D",
-          "model_p": 0.249,
-          "odd": 4.02,
-          "stake_pct": 0.01
-        }
+        "bm": null,
+        "bm_prob": null,
+        "kelly": null
       },
       {
         "home": "Como",
@@ -7640,25 +7606,25 @@
           "elo_away": 378.142,
           "elo_home_expect": 0.312,
           "elo_away_expect": 0.688,
-          "mkt_b365_pH": 0.757,
+          "mkt_b365_pH": 0.758,
           "mkt_b365_pD": 0.146,
-          "mkt_b365_pA": 0.097
+          "mkt_b365_pA": 0.096
         },
         "bm": {
           "H": 1.3,
-          "D": 6.32,
-          "A": 9.2
+          "D": 6.39,
+          "A": 9.36
         },
         "bm_prob": {
-          "H": 75.7,
+          "H": 75.8,
           "D": 14.6,
-          "A": 9.7
+          "A": 9.6
         },
         "kelly": {
           "pick": "D",
           "model_p": 0.164,
-          "odd": 6.32,
-          "stake_pct": 0.07
+          "odd": 6.39,
+          "stake_pct": 0.09
         }
       },
       {
@@ -7701,25 +7667,25 @@
           "elo_away": 489.65,
           "elo_home_expect": 0.216,
           "elo_away_expect": 0.784,
-          "mkt_b365_pH": 0.453,
-          "mkt_b365_pD": 0.242,
-          "mkt_b365_pA": 0.305
+          "mkt_b365_pH": 0.451,
+          "mkt_b365_pD": 0.243,
+          "mkt_b365_pA": 0.306
         },
         "bm": {
-          "H": 2.16,
-          "D": 3.96,
-          "A": 3.17
+          "H": 2.17,
+          "D": 3.95,
+          "A": 3.16
         },
         "bm_prob": {
-          "H": 45.3,
-          "D": 24.2,
-          "A": 30.5
+          "H": 45.1,
+          "D": 24.3,
+          "A": 30.6
         },
         "kelly": {
           "pick": "H",
           "model_p": 0.512,
-          "odd": 2.16,
-          "stake_pct": 3.2
+          "odd": 2.17,
+          "stake_pct": 3.32
         }
       },
       {
@@ -7762,19 +7728,19 @@
           "elo_away": 161.746,
           "elo_home_expect": 0.577,
           "elo_away_expect": 0.423,
-          "mkt_b365_pH": 0.674,
-          "mkt_b365_pD": 0.201,
-          "mkt_b365_pA": 0.126
+          "mkt_b365_pH": 0.678,
+          "mkt_b365_pD": 0.199,
+          "mkt_b365_pA": 0.124
         },
         "bm": {
-          "H": 1.46,
-          "D": 4.72,
-          "A": 7.29
+          "H": 1.45,
+          "D": 4.75,
+          "A": 7.38
         },
         "bm_prob": {
-          "H": 67.4,
-          "D": 20.1,
-          "A": 12.6
+          "H": 67.8,
+          "D": 19.9,
+          "A": 12.4
         },
         "kelly": null
       },
@@ -7783,9 +7749,9 @@
         "away": "Genoa",
         "date": "2026-11-01",
         "prob": {
-          "H": 22.0,
-          "D": 38.0,
-          "A": 40.0
+          "H": 21.8,
+          "D": 37.8,
+          "A": 40.4
         },
         "pred": "A",
         "features": {
@@ -7818,25 +7784,25 @@
           "elo_away": 275.051,
           "elo_home_expect": 0.487,
           "elo_away_expect": 0.513,
-          "mkt_b365_pH": 0.282,
+          "mkt_b365_pH": 0.273,
           "mkt_b365_pD": 0.317,
-          "mkt_b365_pA": 0.401
+          "mkt_b365_pA": 0.41
         },
         "bm": {
-          "H": 3.42,
-          "D": 3.06,
-          "A": 2.43
+          "H": 3.53,
+          "D": 3.05,
+          "A": 2.38
         },
         "bm_prob": {
-          "H": 28.2,
+          "H": 27.3,
           "D": 31.7,
-          "A": 40.1
+          "A": 41.0
         },
         "kelly": {
           "pick": "D",
-          "model_p": 0.38,
-          "odd": 3.06,
-          "stake_pct": 1.58
+          "model_p": 0.378,
+          "odd": 3.05,
+          "stake_pct": 1.49
         }
       },
       {
@@ -7844,9 +7810,9 @@
         "away": "Napoli",
         "date": "2026-11-01",
         "prob": {
-          "H": 47.0,
+          "H": 46.7,
           "D": 28.7,
-          "A": 24.3
+          "A": 24.6
         },
         "pred": "H",
         "features": {
@@ -7879,25 +7845,25 @@
           "elo_away": 283.741,
           "elo_home_expect": 0.392,
           "elo_away_expect": 0.608,
-          "mkt_b365_pH": 0.426,
-          "mkt_b365_pD": 0.292,
-          "mkt_b365_pA": 0.282
+          "mkt_b365_pH": 0.41,
+          "mkt_b365_pD": 0.294,
+          "mkt_b365_pA": 0.296
         },
         "bm": {
-          "H": 2.29,
-          "D": 3.31,
-          "A": 3.42
+          "H": 2.38,
+          "D": 3.29,
+          "A": 3.27
         },
         "bm_prob": {
-          "H": 42.6,
-          "D": 29.2,
-          "A": 28.2
+          "H": 41.0,
+          "D": 29.4,
+          "A": 29.6
         },
         "kelly": {
           "pick": "H",
-          "model_p": 0.47,
-          "odd": 2.29,
-          "stake_pct": 2.07
+          "model_p": 0.467,
+          "odd": 2.38,
+          "stake_pct": 2.83
         }
       },
       {
@@ -7905,9 +7871,9 @@
         "away": "Fiorentina",
         "date": "2026-11-02",
         "prob": {
-          "H": 30.9,
-          "D": 33.3,
-          "A": 35.7
+          "H": 30.8,
+          "D": 33.4,
+          "A": 35.8
         },
         "pred": "A",
         "features": {
@@ -7940,25 +7906,25 @@
           "elo_away": 221.825,
           "elo_home_expect": 0.491,
           "elo_away_expect": 0.509,
-          "mkt_b365_pH": 0.337,
-          "mkt_b365_pD": 0.251,
-          "mkt_b365_pA": 0.412
+          "mkt_b365_pH": 0.335,
+          "mkt_b365_pD": 0.252,
+          "mkt_b365_pA": 0.414
         },
         "bm": {
-          "H": 2.88,
+          "H": 2.9,
           "D": 3.82,
-          "A": 2.37
+          "A": 2.36
         },
         "bm_prob": {
-          "H": 33.7,
-          "D": 25.1,
-          "A": 41.2
+          "H": 33.5,
+          "D": 25.2,
+          "A": 41.4
         },
         "kelly": {
           "pick": "D",
-          "model_p": 0.333,
+          "model_p": 0.334,
           "odd": 3.82,
-          "stake_pct": 1.93
+          "stake_pct": 1.96
         }
       },
       {

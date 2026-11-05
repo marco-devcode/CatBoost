@@ -1,29 +1,29 @@
 {
   "best_model": "v1_baseline",
   "best_model_desc": "Baseline (Pi-Rating + FE) — Serie A",
-  "accuracy": 0.563,
-  "rps_model": 0.1293,
-  "f1_macro": 0.4908,
-  "f1_weighted": 0.5321,
+  "accuracy": 0.5607,
+  "rps_model": 0.1304,
+  "f1_macro": 0.4867,
+  "f1_weighted": 0.5292,
   "f1_per_class": {
-    "H": 0.6608,
-    "D": 0.2099,
-    "A": 0.6018
+    "H": 0.6578,
+    "D": 0.1975,
+    "A": 0.6047
   },
   "precision_per_class": {
-    "H": 0.582,
-    "D": 0.3542,
-    "A": 0.593
+    "H": 0.5804,
+    "D": 0.3333,
+    "A": 0.5943
   },
-  "recall_home": 0.7641,
-  "recall_draw": 0.1491,
-  "recall_away": 0.6108,
+  "recall_home": 0.759,
+  "recall_draw": 0.1404,
+  "recall_away": 0.6154,
   "recall_per_class": {
-    "H": 0.7641,
-    "D": 0.1491,
-    "A": 0.6108
+    "H": 0.759,
+    "D": 0.1404,
+    "A": 0.6154
   },
-  "n_test": 476,
+  "n_test": 478,
   "n_features": 32,
   "features": [
     "pi_home_H",
@@ -59,16 +59,16 @@
     "mkt_b365_pD",
     "mkt_b365_pA"
   ],
-  "rps_bookmaker": 0.1296,
-  "accuracy_bookmaker": 0.5588,
-  "beats_bookmaker_rps": true,
+  "rps_bookmaker": 0.1301,
+  "accuracy_bookmaker": 0.5586,
+  "beats_bookmaker_rps": false,
   "kelly": {
     "bankroll_iniziale": 1000.0,
-    "bankroll_finale": 740.51,
-    "profitto": -259.49,
-    "roi_pct": -25.95,
-    "scommesse": 476,
-    "stake_totale_pct": 684.7,
+    "bankroll_finale": 625.56,
+    "profitto": -374.44,
+    "roi_pct": -37.44,
+    "scommesse": 478,
+    "stake_totale_pct": 646.5,
     "mode": "dinamico",
     "odds_thresholds": [
       1.8,
@@ -86,24 +86,24 @@
       5.0,
       2.5
     ],
-    "n_troncate_al_cap": 42
+    "n_troncate_al_cap": 44
   },
   "shap_neopromossa": {
     "home_promoted": {
-      "mean_abs_shap": 0.0028057730271345764,
+      "mean_abs_shap": 0.0022897850609581417,
       "rank": 16,
       "n_features_total": 32,
-      "shap_feature1_classH": -0.0016414696285811776,
-      "shap_feature0_classH": 0.0009961255185029225,
-      "delta_classH": -0.0026375951470841
+      "shap_feature1_classH": -0.0011890332575184744,
+      "shap_feature0_classH": 0.0006055099460635219,
+      "delta_classH": -0.0017945432035819963
     },
     "away_promoted": {
-      "mean_abs_shap": 0.011891015047995687,
+      "mean_abs_shap": 0.01441545773916534,
       "rank": 17,
       "n_features_total": 32,
-      "shap_feature1_classH": 0.02431485535502442,
-      "shap_feature0_classH": -0.011827873450116416,
-      "delta_classH": 0.036142728805140835
+      "shap_feature1_classH": 0.029615263480411918,
+      "shap_feature0_classH": -0.013769680209555964,
+      "delta_classH": 0.043384943689967884
     }
   }
 }

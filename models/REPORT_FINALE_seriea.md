@@ -1,6 +1,6 @@
 # 🏆 Report Finale — CatBoost Serie A Match Prediction
 
-**Data**: 2026-11-09 15:04
+**Data**: 2026-11-12 14:39
 **Modello migliore**: Baseline (Pi-Rating + FE) — Serie A (`v1_baseline`)
 
 ---
@@ -9,7 +9,7 @@
 
 | Modello | Feature | RPS ↓ | Accuracy |
 |---------|---------|-------|----------|
-| Baseline (Pi-Rating + FE) — Serie A | 32 | 0.1293 | 56.56% ◄ **BEST**|
+| Baseline (Pi-Rating + FE) — Serie A | 32 | 0.1293 | 56.35% ◄ **BEST**|
 
 ---
 
@@ -17,11 +17,11 @@
 
 | Metrica | Valore | Note |
 |---------|--------|------|
-| **Accuracy** | 0.5656 | Target > 0.52 |
+| **Accuracy** | 0.5635 | Target > 0.52 |
 | **RPS** | 0.1293 | Più basso = meglio |
-| **Recall Home Win** | 75.88% | |
-| **Recall Draw** | 15.38% | Classe più difficile |
-| **Recall Away Win** | 62.21% | |
+| **Recall Home Win** | 77.89% | |
+| **Recall Draw** | 11.97% | Classe più difficile |
+| **Recall Away Win** | 61.63% | |
 
 ---
 
@@ -29,9 +29,9 @@
 
 | | RPS ↓ | Accuracy |
 |--|-------|----------|
-| **CatBoost (v1_baseline)** | 0.1293 | 56.56% |
+| **CatBoost (v1_baseline)** | 0.1293 | 56.35% |
 | **Bet365** | 0.1296 | 55.94% |
-| **Delta** | +0.0004 ✅ | +0.0061 ✅ |
+| **Delta** | +0.0003 ✅ | +0.0041 ✅ |
 
 ---
 
@@ -47,10 +47,10 @@
 |---------|--------|
 | Scommesse piazzate | 488 |
 | Bankroll iniziale | €1000 |
-| Bankroll finale | €782.95 |
-| Profitto | €-217.05 |
-| ROI | -21.7% |
-| Stake totale | 729.8% del bankroll |
+| Bankroll finale | €725.69 |
+| Profitto | €-274.31 |
+| ROI | -27.4% |
+| Stake totale | 704.1% del bankroll |
 
 ![Kelly Simulation](kelly_simulation.png)
 
@@ -64,8 +64,8 @@
 
 | Flag | mean |SHAP| | Rank su 32 feature |
 |------|-------------|------|
-| home_promoted | 0.002978 | 16/32 |
-| away_promoted | 0.013291 | 17/32 |
+| home_promoted | 0.003366 | 16/32 |
+| away_promoted | 0.018668 | 17/32 |
 
 ![SHAP Summary](shap_summary.png)
 
@@ -76,13 +76,13 @@
 ```
               precision    recall  f1-score   support
 
-           H     0.5853    0.7588    0.6608       199
-           D     0.3600    0.1538    0.2156       117
-           A     0.5944    0.6221    0.6080       172
+           H     0.5805    0.7789    0.6652       199
+           D     0.3182    0.1197    0.1739       117
+           A     0.5989    0.6163    0.6074       172
 
-    accuracy                         0.5656       488
-   macro avg     0.5132    0.5116    0.4948       488
-weighted avg     0.5345    0.5656    0.5354       488
+    accuracy                         0.5635       488
+   macro avg     0.4992    0.5049    0.4822       488
+weighted avg     0.5241    0.5635    0.5271       488
 
 ```
 

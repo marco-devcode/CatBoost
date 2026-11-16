@@ -28,3 +28,4 @@ credentials.json
 service-account*.json
 # Artefatti di training CatBoost (log di fold per iterazione): rumore.
 catboost_info/
+.taste-skill/

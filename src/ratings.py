@@ -39,45 +39,77 @@ DECAY_HALF_LIFE_YEARS = 2.0
 
 
 def fit_dixon_coles(home, away, hg, ag, teams, x0=None, weights=None):
-    """Stima attack/defence/home_adv via MLE (Poisson con fattore Dixon-Coles tau).
+    """Stima attack/defence/home_adv/rho via MLE (Dixon-Coles con fattore tau).
     x0: punto iniziale per warm-start (velocizza i fit successivi).
     weights: array di peso per partita (decay temporale; None = peso 1)."""
     n_teams = len(teams)
     team_idx = {t: i for i, t in enumerate(teams)}
 
     if weights is None:
-        weights = np.ones(len(hg))
+        weights = np.ones(len(hg), dtype=float)
     else:
         weights = np.asarray(weights, dtype=float)
 
-    # Parametri: attack[0..n-2], defence[0..n-2], home_adv  (attack ultima squadra = 0 per identificabilita')
-    n_params = 2 * (n_teams - 1) + 1
+    hi = np.array([team_idx[h] for h in home], dtype=int)
+    ai = np.array([team_idx[a] for a in away], dtype=int)
+    hg = np.asarray(hg, dtype=float)
+    ag = np.asarray(ag, dtype=float)
+
+    m00 = (hg == 0) & (ag == 0)
+    m01 = (hg == 0) & (ag == 1)
+    m10 = (hg == 1) & (ag == 0)
+    m11 = (hg == 1) & (ag == 1)
+
+    # Parametri: attack[0..n-2], defence[0..n-2], home_adv, rho_raw
+    # (ultima squadra: attack=0, defence=0 per identificabilita')
+    n_params = 2 * (n_teams - 1) + 2
 
     def unpack(p):
         attack = np.zeros(n_teams)
         defence = np.zeros(n_teams)
-        for i in range(n_teams - 1):
-            attack[i] = p[i]
-            defence[i] = p[n_teams - 1 + i]
-        # ultima squadra: attack=0, defence=0 (somma a zero)
-        home_adv = p[-1]
-        return attack, defence, home_adv
+        attack[:n_teams - 1] = p[:n_teams - 1]
+        defence[:n_teams - 1] = p[n_teams - 1:2 * (n_teams - 1)]
+        home_adv = p[-2]
+        rho = 0.20 * np.tanh(p[-1])
+        return attack, defence, home_adv, rho
 
     def neg_log_likelihood(p):
-        attack, defence, home_adv = unpack(p)
-        hi = np.array([team_idx[h] for h in home])
-        ai = np.array([team_idx[a] for a in away])
-        lam_h = np.exp(attack[hi] - defence[ai] + home_adv)
-        lam_a = np.exp(attack[ai] - defence[hi])
-        # log-likelihood Poisson pesata (decay temporale)
-        ll = -np.sum(weights * (lam_h + lam_a)) + np.sum(weights * (hg * np.log(lam_h + 1e-10) + ag * np.log(lam_a + 1e-10)))
+        attack, defence, home_adv, rho = unpack(p)
+        lam_h = np.exp(np.clip(attack[hi] - defence[ai] + home_adv, -10.0, 10.0))
+        lam_a = np.exp(np.clip(attack[ai] - defence[hi], -10.0, 10.0))
+
+        # Fattore di correlazione Dixon-Coles tau sui punteggi bassi (0-0, 0-1, 1-0, 1-1)
+        tau = np.ones(len(hg), dtype=float)
+        if rho != 0.0:
+            tau[m00] = 1.0 - lam_h[m00] * lam_a[m00] * rho
+            tau[m01] = 1.0 + lam_h[m01] * rho
+            tau[m10] = 1.0 + lam_a[m10] * rho
+            tau[m11] = 1.0 - rho
+        tau = np.clip(tau, 1e-6, None)
+
+        # log-likelihood Dixon-Coles pesata (decay temporale)
+        ll = (
+            -np.sum(weights * (lam_h + lam_a))
+            + np.sum(weights * (hg * np.log(lam_h + 1e-10) + ag * np.log(lam_a + 1e-10)))
+            + np.sum(weights * np.log(tau))
+        )
         # vincolo somma attack = 0, somma defence = 0 (per identificabilita')
-        ll += -1000 * (np.sum(attack)**2 + np.sum(defence)**2)
+        ll += -1000.0 * (np.sum(attack) ** 2 + np.sum(defence) ** 2)
         return -ll
 
-    x0 = x0 if x0 is not None else np.zeros(n_params)
-    res = minimize(neg_log_likelihood, x0, method='L-BFGS-B', options={'maxiter': 500})
-    attack, defence, home_adv = unpack(res.x)
+    if x0 is None:
+        x0_use = np.zeros(n_params)
+    else:
+        x0_arr = np.asarray(x0, dtype=float)
+        if len(x0_arr) == n_params:
+            x0_use = x0_arr
+        elif len(x0_arr) == n_params - 1:
+            x0_use = np.append(x0_arr, 0.0)
+        else:
+            x0_use = np.zeros(n_params)
+
+    res = minimize(neg_log_likelihood, x0_use, method='L-BFGS-B', options={'maxiter': 500})
+    attack, defence, home_adv, _ = unpack(res.x)
     return {teams[i]: {"attack": float(attack[i]), "defence": float(defence[i])} for i in range(n_teams)}, float(home_adv), res.x
 
 
@@ -91,37 +123,44 @@ def get_season_endpoints(df):
     return endpoints
 
 
-def compute_pi_ratings(df: pd.DataFrame):
-    """Calcola i Pi-Rating con UN fit MLE globale + DECAY TEMPORALE.
+def compute_pi_ratings(df: pd.DataFrame, cutoff: str = '2025-08-01'):
+    """Calcola i Pi-Rating con fit Dixon-Coles sul SOLO training (< cutoff) + DECAY TEMPORALE.
 
-    Ogni partita ha peso w = 0.5 ** (eta / mezza_vita), dove eta e' l'eta'
-    della partita in anni rispetto alla piu' recente del dataset.
-    Con HALF_LIFE_YEARS=2: una partita di 2 anni fa pesa meta', di 4 anni fa 1/4.
-    Le stagioni precedenti CONTANO sulle nuove, ma le recenti contano di piu'.
+    Nessuna partita >= cutoff entra nella stima MLE (nessun data leakage dal
+    test set o dalla stagione corrente). I pesi temporali w = 0.5**(eta/half_life)
+    sono calcolati rispetto alla data piu' recente del solo training fit.
     """
     df = df.copy().reset_index(drop=True)
     n = len(df)
 
+    dates_all = pd.to_datetime(df['Date'])
+    df_fit = df[dates_all < pd.Timestamp(cutoff)].copy()
+    if len(df_fit) < 20:
+        df_fit = df.copy()
+        print(f"  [fallback fit] < 20 righe pre-{cutoff}: fit su {len(df_fit)} righe")
+
+    teams_fit = sorted(set(df_fit['HomeTeam'].unique()) | set(df_fit['AwayTeam'].unique()))
     teams_all = sorted(set(df['HomeTeam'].unique()) | set(df['AwayTeam'].unique()))
 
-    # Pesi di decay temporale
-    dates = pd.to_datetime(df['Date'])
-    age_days = (dates.max() - dates).dt.days.values.astype(float)
+    # Pesi di decay temporale (calcolati solo su df_fit -> nessun leakage dal futuro)
+    dates_fit = pd.to_datetime(df_fit['Date'])
+    age_days = (dates_fit.max() - dates_fit).dt.days.values.astype(float)
     age_years = np.maximum(age_days / 365.25, 0.0)
     weights = 0.5 ** (age_years / DECAY_HALF_LIFE_YEARS)
 
-    print(f"  Fit Dixon-Coles globale su {n} partite, {len(teams_all)} squadre "
+    print(f"  Fit Dixon-Coles su {len(df_fit)}/{n} partite (< {cutoff}), {len(teams_fit)} squadre "
           f"(decay mezza vita {DECAY_HALF_LIFE_YEARS} anni)...")
-    ratings, home_adv, _ = fit_dixon_coles(
-        df['HomeTeam'].values, df['AwayTeam'].values,
-        df['FTHG'].values.astype(float), df['FTAG'].values.astype(float),
-        teams_all, None, weights,
+    ratings, home_adv, res_x = fit_dixon_coles(
+        df_fit['HomeTeam'].values, df_fit['AwayTeam'].values,
+        df_fit['FTHG'].values.astype(float), df_fit['FTAG'].values.astype(float),
+        teams_fit, None, weights,
     )
-    print(f"  Fit completato. home_adv={home_adv:.3f}, "
-          f"peso partita recente={weights.max():.2f}, piu vecchia={weights.min():.3f}")
+    rho = 0.20 * float(np.tanh(res_x[-1])) if len(res_x) else 0.0
+    print(f"  Fit completato. home_adv={home_adv:.3f}, rho={rho:+.4f}, "
+          f"peso recente={weights.max():.2f}, piu vecchia={weights.min():.3f}")
 
-    attack = {t: ratings[t]['attack'] for t in teams_all}
-    defence = {t: ratings[t]['defence'] for t in teams_all}
+    attack = {t: ratings.get(t, {}).get('attack', 0.0) for t in teams_all}
+    defence = {t: ratings.get(t, {}).get('defence', 0.0) for t in teams_all}
 
     pi_cols = ('pi_home_H', 'pi_away_H', 'pi_home_A', 'pi_away_A')
     result = np.zeros((n, 4))
@@ -142,7 +181,11 @@ def compute_pi_ratings(df: pd.DataFrame):
         t: {"attack": round(attack[t], 4), "defence": round(defence[t], 4)}
         for t in teams_all
     }
-    final_ratings["_global"] = {"home_advantage": round(home_adv, 4)}
+    final_ratings["_global"] = {
+        "home_advantage": round(home_adv, 4),
+        "rho": round(rho, 4),
+        "cutoff": cutoff,
+    }
 
     return df, final_ratings
 

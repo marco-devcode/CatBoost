@@ -77,10 +77,11 @@ import pandas as pd
 SHOT_WINDOW = 5
 # Scala Elo: K=20 (standard, Hvattum & Arntzen 2010), home advantage 65 punti
 # Elo (media dei campionati europei, Hvattum & Arntzen 2010).
+ELO_INIT = 1500.0
 ELO_K = 20.0
 ELO_HOME_ADV = 65.0
-# Decadimento del rating Elo per stagione: le squadre che rientrano
-# dopo un anno di B non devono portarsi dietro il rating di due anni fa.
+# Mean-reversion del rating Elo verso ELO_INIT tra una stagione e l'altra:
+# trattiene il 75% dello scarto rispetto a 1500.0.
 ELO_SEASON_DECAY = 0.75
 
 
@@ -129,44 +130,32 @@ def _rolling_mean(df: pd.DataFrame, team_col: str, stat_col: str, window: int) -
 def add_performance_features(df: pd.DataFrame, window: int = SHOT_WINDOW) -> pd.DataFrame:
     """Tiri, tiri in porta, angoli, cartellini: rolling per squadra, casa/trasferta.
 
-    Per ogni statistica si calcolano i due lati (casa della squadra di casa,
-    trasferta della squadra ospite) cosi' come le altre feature del repo:
-    il modello distingue "bene in casa" da "bene in trasferta".
+    Per ogni statistica si calcolano i due lati usando le colonne proprie della
+    squadra in quel ruolo: HS/HST/HC/HY per la squadra di casa, AS/AST/AC/AY per
+    la squadra in trasferta (coerente con _rolling_future in predict.py).
     """
     df = df.copy()
     stats = [
-        ("HS", "shots"),        # tiri totali
-        ("HST", "shots_t"),     # tiri in porta (proxy xG)
-        ("HC", "corners"),      # angoli
-        ("HY", "cards"),        # cartellini
+        ("HS", "AS", "shots"),        # tiri totali
+        ("HST", "AST", "shots_t"),    # tiri in porta (proxy xG)
+        ("HC", "AC", "corners"),      # angoli
+        ("HY", "AY", "cards"),        # cartellini
     ]
-    for col, label in stats:
-        if col not in df.columns:
-            continue
+    for h_src, a_src, label in stats:
         home_col = f"home_{label}_{window}"
         away_col = f"away_{label}_{window}"
-        # Lato CASA: statistiche della squadra che gioca in casa.
-        df[home_col] = _rolling_mean(df, "HomeTeam", col, window)
-        # Lato TRASFERTA: la stessa statistica ma misurata nelle partite in
-        # trasferta della squadra (per l'ospite) e in casa (per illocale).
-        df[away_col] = _rolling_mean(df, "AwayTeam", col, window)
+        if h_src in df.columns:
+            df[home_col] = _rolling_mean(df, "HomeTeam", h_src, window)
+        if a_src in df.columns:
+            df[away_col] = _rolling_mean(df, "AwayTeam", a_src, window)
     return df
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 3. Elo con decadimento
+# 3. Elo con decadimento (mean-reversion verso ELO_INIT tra stagioni)
 # ─────────────────────────────────────────────────────────────────────────────
-def add_elo_features(df: pd.DataFrame) -> pd.DataFrame:
-    """Rating Elo delle due squadre PRIMA di ogni match (no leakage).
-
-    Il rating e' aggiornato in ordine cronologico: alla partita i, il rating
-    di entrambe le squadre e' quello successivo all'ultima partita giocata
-    PRIMA di i. Quindi la feature non contiene il risultato della partita
-    stessa.
-
-    Elo: E' = E_home + home_adv, con E = 1 / (1 + 10^((E_away - E')/400)).
-    L'aggiornamento usa il risultato effettivo (1 / 0.5 / 0).
-    """
+def _run_elo_loop(df: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, float], dict[str, str]]:
+    """Esegue il calcolo Elo cronologico e restituisce (df_arricchito, elo_finale, last_season)."""
     df = df.copy().reset_index(drop=True)
     df = df.sort_values("Date", kind="mergesort").reset_index(drop=True)
 
@@ -182,17 +171,16 @@ def add_elo_features(df: pd.DataFrame) -> pd.DataFrame:
         h, a = row.HomeTeam, row.AwayTeam
         season = str(getattr(row, "season", ""))
 
-        # Decadimento: se la squadra non giocava nella stagione precedente,
-        # il suo rating decade.
+        # Mean-reversion verso 1500 al cambio di stagione (senza far collassare a 0).
         for t in (h, a):
             if t not in elo:
-                elo[t] = 1500.0
+                elo[t] = ELO_INIT
             prev = last_season.get(t)
             if prev is not None and season and prev != season:
-                elo[t] *= ELO_SEASON_DECAY
+                elo[t] = ELO_INIT + ELO_SEASON_DECAY * (elo[t] - ELO_INIT)
 
-        rh = elo.get(h, 1500.0)
-        ra = elo.get(a, 1500.0)
+        rh = elo.get(h, ELO_INIT)
+        ra = elo.get(a, ELO_INIT)
 
         exp_h = 1.0 / (1.0 + 10.0 ** ((ra - (rh + ELO_HOME_ADV)) / 400.0))
         exp_a = 1.0 - exp_h
@@ -207,10 +195,8 @@ def add_elo_features(df: pd.DataFrame) -> pd.DataFrame:
         if ftr in ("H", "D", "A"):
             score_h = 1.0 if ftr == "H" else (0.5 if ftr == "D" else 0.0)
             score_a = 1.0 - score_h
-            new_h = rh + ELO_K * (score_h - exp_h)
-            new_a = ra + ELO_K * (score_a - exp_a)
-            elo[h] = new_h
-            elo[a] = new_a
+            elo[h] = rh + ELO_K * (score_h - exp_h)
+            elo[a] = ra + ELO_K * (score_a - exp_a)
         last_season[h] = season
         last_season[a] = season
 
@@ -218,7 +204,36 @@ def add_elo_features(df: pd.DataFrame) -> pd.DataFrame:
     df["elo_away"] = away_rating
     df["elo_home_expect"] = home_expect
     df["elo_away_expect"] = away_expect
-    return df
+    return df, elo, last_season
+
+
+def add_elo_features(df: pd.DataFrame) -> pd.DataFrame:
+    """Rating Elo delle due squadre PRIMA di ogni match (no leakage)."""
+    out, _, _ = _run_elo_loop(df)
+    return out
+
+
+def compute_team_elo_state(
+    df: pd.DataFrame,
+    target_season: str | None = None,
+) -> tuple[dict[str, float], dict[str, str]]:
+    """Restituisce i rating Elo post-match di tutte le squadre in `df`.
+
+    Se `target_season` e' fornito, applica l'eventuale mean-reversion di cambio
+    stagione alle squadre la cui `last_season` differisce da `target_season`.
+    """
+    _, elo, last_season = _run_elo_loop(df)
+    if target_season:
+        ts = str(target_season)
+        adjusted = {}
+        for t, val in elo.items():
+            prev = last_season.get(t)
+            if prev is not None and prev != ts:
+                adjusted[t] = ELO_INIT + ELO_SEASON_DECAY * (val - ELO_INIT)
+            else:
+                adjusted[t] = val
+        return adjusted, last_season
+    return elo, last_season
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -270,19 +285,6 @@ def add_market_features(df: pd.DataFrame, devig_method: str = "additive") -> pd.
         df[f"mkt_{label}_pD"] = p_d
         df[f"mkt_{label}_pA"] = p_a
         df[f"mkt_{label}_overround"] = over
-
-    # Log-odds dei log-odds: piu' informativi delle probabilita' grezze per
-    # un modello a tree (la trasformazione e' monotona e stabilizza la scala).
-    for label in ("b365", "pinnacle", "avg"):
-        for side in ("pH", "pD", "pA"):
-            col = f"mkt_{label}_{side}"
-            if col not in df.columns:
-                continue
-            v = df[col].to_numpy(dtype=float)
-            with np.errstate(divide="ignore", invalid="ignore"):
-                lo = np.log(v / (1.0 - v))
-            df[f"mkt_{label}_{side}_logodds"] = np.where(
-                (v > 0) & (v < 1) & np.isfinite(lo), lo, np.nan)
 
     return df
 

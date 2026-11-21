@@ -187,7 +187,7 @@ def main(league):
     model_trained_at = pd.Timestamp(MODEL_PATH.stat().st_mtime).isoformat(timespec="seconds")
 
     from predict import (load_history, compute_features_for_match, is_promoted)
-    from predict import _build_feature_order, apply_saved_calibration
+    from predict import _build_feature_order, apply_saved_calibration, predict_proba_with_prior
 
     history = load_history(league)
 
@@ -525,7 +525,7 @@ def main(league):
         # segnale falso su 8-12 colonne di mercato.
         X = pd.DataFrame([{c: (feats.get(c, np.nan) if c.startswith("mkt_")
                                 else feats.get(c, 0.0)) for c in FEATURE_ORDER}])
-        probs = model.predict_proba(X)[0]
+        probs = predict_proba_with_prior(model, X, feats, league=league)
         # Calibrazione Dirichlet: le percentuali pubblicate devono essere
         # quelle CALIBRATE, altrimenti il sito mostrerebbe valori diversi da
         # quelli misurati in evaluate (RPS 0.13044 grezze vs 0.12953 calibrate).
@@ -556,76 +556,14 @@ def main(league):
             m["esito"] = ftr
             m["ok"] = bool(m["pred"] == ftr)
 
-        # Assegnazione quote (indipendente da `played`): senza il gate, le
-        # partite future — le uniche con quote prepartita da TheOddsAPI —
-        # finivano con bm=None.
-        # `_bm_valid` e' indispensabile: openfootball non ha le colonne B365,
-        # quindi per le partite senza quote arriva bm_odds = [nan, nan, nan].
-        # NaN non e' None: il dict verrebbe costruito, _json_safe lo
-        # convertirebbe in null e il frontend farebbe toFixed(0) su None.
+        # Assegnazione quote + miglior giocata Kelly (indipendente da `played`).
+        best_info = None
         if _bm_valid({"H": bm_odds[0], "D": bm_odds[1], "A": bm_odds[2]}) if bm_odds else False:
-            m["bm"] = {"H": round(bm_odds[0], 2), "D": round(bm_odds[1], 2),
-                       "A": round(bm_odds[2], 2)}
-            m["bm_prob"] = {LABELS[i]: round(bm_prob[i] * 100, 1) for i in range(3)}
-        else:
-            m["bm"] = None
-            m["bm_prob"] = None
-
-        # Confronto bookmaker e Kelly: servono il risultato reale, quindi
-        # solo sulle giocate.
-        if bm_odds is not None and played:
             assert bm_prob is not None
-            y_idx = {'H': 0, 'D': 1, 'A': 2}[ftr]
-            bm_rows.append((y_idx, bm_prob))
-            model_rows.append((y_idx, [m["prob"][l] / 100 for l in LABELS]))
-            # Kelly retrospettivo: punta sull'esito con edge positivo
-            # (p_model > p_bookmaker) usando la quota reale.
-            best_k = -1
-            best_info = None
-            for i, lab in enumerate(LABELS):
-                pk = m["prob"][lab] / 100.0
-                pb = bm_prob[i]
-                if pk > pb:
-                    kf = calculate_dynamic_kelly_stake(pk, bm_odds[i])
-                    if kf > 0 and kf > best_k:
-                        best_k = kf
-                        best_info = (lab, pk, bm_odds[i], kf)
-            if best_info is not None:
-                lab, pk, odd, kf = best_info
-                m["kelly"] = {"pick": lab, "model_p": round(pk, 3),
-                              "odd": round(odd, 2), "stake_pct": round(kf * 100, 2)}
-                _bm_p = bm_prob[LABELS.index(lab)] if bm_prob is not None else 0.0
-                kelly_log.append({
-                    "home": m["home"], "away": m["away"], "date": m["date"],
-                    "giornata": g, "esito": ftr,
-                    "pick": lab, "model_p": round(pk, 3), "odd": round(odd, 2),
-                    "bm_p": round(_bm_p, 4),
-                    "kelly": round(kf, 4), "win": (ftr == lab),
-                })
-
-        # Partita futura: bookmaker + Kelly.
-        #
-        # La condizione era `bm_odds is not None and played`, e questo
-        # scartava TUTTE le quote prepartita: le uniche partite con quote
-        # sono le future (TheOddsAPI non dà lo storico), quindi played
-        # era False e le 8 quote finivano nel `else` che le azzerava.
-        # `played` serve solo al confronto RPS e al Kelly retrospettivo,
-        # che hanno bisogno del risultato reale: non deve governare
-        # l'assegnazione delle quote.
-        # Secondo gate sulle quote (suggerimento Kelly sulle future). Aveva
-        # ancora `bm_odds is not None`, quindi ricostruiva il dict anche
-        # per openfootball, dove bm_odds = [nan, nan, nan]: NaN non e'
-        # None, il gate passa, e i 310 dict-vuoto tornavano QUI dopo che
-        # il gate di sopra li aveva correttamente rifiutati.
-        # Per questo i due gate vanno controllati insieme: correggere
-        # solo il primo non serve a nulla.
-        if _bm_valid({"H": bm_odds[0], "D": bm_odds[1], "A": bm_odds[2]}) if bm_odds else False:
             m["bm"] = {"H": round(bm_odds[0], 2), "D": round(bm_odds[1], 2),
                        "A": round(bm_odds[2], 2)}
             m["bm_prob"] = {LABELS[i]: round(bm_prob[i] * 100, 1) for i in range(3)}
-            # Suggerimento Kelly sulle future: giocata con edge migliore
             best_k = -1
-            best_info = None
             for i, lab in enumerate(LABELS):
                 pk = m["prob"][lab] / 100.0
                 pb = bm_prob[i]
@@ -644,6 +582,23 @@ def main(league):
             m["bm"] = None
             m["bm_prob"] = None
             m["kelly"] = None
+
+        # Confronto bookmaker (RPS) e Kelly retrospettivo: richiedono `played`.
+        if bm_odds is not None and played:
+            assert bm_prob is not None
+            y_idx = {'H': 0, 'D': 1, 'A': 2}[ftr]
+            bm_rows.append((y_idx, bm_prob))
+            model_rows.append((y_idx, [m["prob"][l] / 100 for l in LABELS]))
+            if best_info is not None:
+                lab, pk, odd, kf = best_info
+                _bm_p = bm_prob[LABELS.index(lab)]
+                kelly_log.append({
+                    "home": m["home"], "away": m["away"], "date": m["date"],
+                    "giornata": g, "esito": ftr,
+                    "pick": lab, "model_p": round(pk, 3), "odd": round(odd, 2),
+                    "bm_p": round(_bm_p, 4),
+                    "kelly": round(kf, 4), "win": (ftr == lab),
+                })
 
         giornate.setdefault(g, []).append(m)
 

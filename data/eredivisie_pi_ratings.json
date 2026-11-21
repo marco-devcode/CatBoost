@@ -1,121 +1,123 @@
 {
   "AZ Alkmaar": {
-    "attack": 0.4791,
-    "defence": 0.2048
+    "attack": 0.4941,
+    "defence": 0.2807
   },
   "Ajax": {
-    "attack": 0.6691,
-    "defence": 0.2936
+    "attack": 0.7158,
+    "defence": 0.3184
   },
   "Almere City": {
-    "attack": -0.4173,
-    "defence": -0.1223
+    "attack": -0.342,
+    "defence": -0.129
   },
   "Cambuur": {
-    "attack": 0.2655,
-    "defence": -0.2861
+    "attack": -0.0711,
+    "defence": -0.2554
   },
   "Den Haag": {
-    "attack": 0.0744,
-    "defence": -0.2383
+    "attack": -0.0393,
+    "defence": -0.2169
   },
   "Dordrecht": {
-    "attack": -4.7381,
-    "defence": 1.8156
+    "attack": -3.5995,
+    "defence": 1.2079
   },
   "Excelsior": {
-    "attack": 0.1216,
-    "defence": -0.215
+    "attack": 0.0732,
+    "defence": -0.2936
   },
   "FC Emmen": {
-    "attack": -0.079,
-    "defence": -0.2033
+    "attack": -0.0889,
+    "defence": -0.2144
   },
   "Feyenoord": {
-    "attack": 0.6888,
-    "defence": 0.3036
+    "attack": 0.674,
+    "defence": 0.4003
   },
   "For Sittard": {
-    "attack": 0.1165,
-    "defence": -0.1032
+    "attack": -0.0072,
+    "defence": -0.1037
   },
   "Go Ahead Eagles": {
-    "attack": 0.3009,
-    "defence": -0.0539
+    "attack": 0.2192,
+    "defence": -0.001
   },
   "Graafschap": {
-    "attack": -0.5231,
-    "defence": -0.3097
+    "attack": -0.1276,
+    "defence": -0.2696
   },
   "Groningen": {
-    "attack": 0.2148,
-    "defence": -0.0268
+    "attack": 0.0001,
+    "defence": -0.0294
   },
   "Heerenveen": {
-    "attack": 0.2874,
-    "defence": -0.0304
+    "attack": 0.1777,
+    "defence": -0.0999
   },
   "Heracles": {
-    "attack": 0.0428,
-    "defence": -0.2666
+    "attack": 0.1002,
+    "defence": -0.1649
   },
   "NAC Breda": {
-    "attack": -0.1354,
-    "defence": -0.0883
-  },
-  "Nijmegen": {
-    "attack": 0.4197,
-    "defence": 0.0301
-  },
-  "PSV Eindhoven": {
-    "attack": 0.9165,
-    "defence": 0.2782
-  },
-  "Roda": {
-    "attack": -0.0206,
+    "attack": -0.1321,
     "defence": -0.1166
   },
+  "Nijmegen": {
+    "attack": 0.2764,
+    "defence": 0.0775
+  },
+  "PSV Eindhoven": {
+    "attack": 0.8667,
+    "defence": 0.3671
+  },
+  "Roda": {
+    "attack": -0.1897,
+    "defence": -0.1086
+  },
   "Sparta Rotterdam": {
-    "attack": 0.1679,
-    "defence": -0.0229
+    "attack": 0.1584,
+    "defence": 0.139
   },
   "Telstar": {
-    "attack": 0.2816,
-    "defence": -0.0955
+    "attack": 0.0,
+    "defence": 0.0
   },
   "Twente": {
-    "attack": 0.4788,
-    "defence": 0.2543
+    "attack": 0.4253,
+    "defence": 0.1954
   },
   "Utrecht": {
-    "attack": 0.3683,
-    "defence": 0.0379
+    "attack": 0.3463,
+    "defence": 0.1104
   },
   "VVV Venlo": {
-    "attack": -0.0033,
-    "defence": -0.3514
+    "attack": -0.05,
+    "defence": -0.3507
   },
   "Vitesse": {
-    "attack": 0.1304,
-    "defence": -0.0319
+    "attack": 0.1227,
+    "defence": -0.0429
   },
   "Volendam": {
-    "attack": -0.0843,
-    "defence": -0.2014
+    "attack": -0.0407,
+    "defence": -0.4091
   },
   "Waalwijk": {
-    "attack": 0.0725,
-    "defence": -0.1743
+    "attack": 0.0859,
+    "defence": -0.1892
   },
   "Willem II": {
-    "attack": -0.0969,
-    "defence": -0.2792
+    "attack": -0.0479,
+    "defence": -0.102
   },
   "Zwolle": {
     "attack": 0.0,
     "defence": 0.0
   },
   "_global": {
-    "home_advantage": 0.2305
+    "home_advantage": 0.2729,
+    "rho": -0.0886,
+    "cutoff": "2025-08-01"
   }
 }

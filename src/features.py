@@ -183,40 +183,32 @@ def add_rest_days(df):
 # 5.4 Head-to-Head Storico
 # ═══════════════════════════════════════════════════════════════════════════════
 def add_h2h(df, window=5):
-    """Win rate della squadra di casa negli ultimi N scontri diretti."""
+    """Win rate della squadra di casa negli ultimi N scontri diretti tra le due squadre."""
     df = df.copy()
     results = []
     h2h_cache = {}
 
-    for idx in range(len(df)):
-        row = df.iloc[idx]
-        h, a = row['HomeTeam'], row['AwayTeam']
+    for row in df.itertuples():
+        h, a = row.HomeTeam, row.AwayTeam
         key = (min(h, a), max(h, a))
 
-        if key in h2h_cache:
-            past_matches = h2h_cache[key]
-            past_matches = [m for m in past_matches if m['idx'] < idx]
-        else:
-            past_matches = []
-
-        if len(past_matches) == 0:
+        past_matches = h2h_cache.get(key, [])
+        if not past_matches:
             results.append(0.4)  # prior neutro (leggero vantaggio casa)
         else:
             recent = past_matches[-window:]
-            home_wins = sum(1 for m in recent if m['winner'] == 'home')
+            home_wins = sum(1 for winner in recent if winner == h)
             results.append(home_wins / len(recent))
 
-        if key not in h2h_cache:
-            h2h_cache[key] = []
-
-        if row['FTR'] == 'H':
-            winner = 'home'
-        elif row['FTR'] == 'A':
-            winner = 'away'
+        ftr = row.FTR
+        if ftr == 'H':
+            winner = h
+        elif ftr == 'A':
+            winner = a
         else:
-            winner = 'draw'
+            winner = None
 
-        h2h_cache[key].append({'idx': idx, 'winner': winner})
+        h2h_cache.setdefault(key, []).append(winner)
 
     df['h2h_home_winrate'] = results
     return df
@@ -300,18 +292,14 @@ def build_feature_list(available_cols=None) -> list:
 
 
 def add_promotion_flags(df, current_season_teams=None):
-    """Flag neopromozione.
+    """Flag neopromozione storica + supporto squadre stagione corrente.
 
-    Logica storica: una squadra presente in una stagione ma ASSENTE da quella
-    precedente -> neopromossa per TUTTA quella stagione. Il modello impara da
-    solo lo sconto di rating da applicare (pattern sistematico, non hardcoded).
+    Logica storica: per ogni stagione s successiva alla prima dello storico,
+    una squadra presente in s ma ASSENTE dalla stagione immediatamente precedente
+    (seasons[i - 1]) viene marcata come neopromossa=1 per tutta la stagione s.
 
-    Se si passa `current_season_teams` (insieme delle squadre della stagione
-    CORRENTE di inferenza, es. 26/27), qualsiasi squadra NON presente in quell'
-    insieme viene forzata a neopromossa=1. Questo copre il caso in cui la
-    stagione corrente non e' ancora nel dataset storico (inizio campionato): il
-    Venezia appena promosso non ha Pi-Rating freschi e, senza il flag, verrebbe
-    trattato da squadra Serie A "normale", generando stime sballate.
+    `current_season_teams` (opzionale) estende l'elenco squadre solo dell'ultima
+    stagione nello storico: NON altera le stagioni storiche gia' giocate.
     """
     df = df.copy()
     seasons = sorted(df['season'].unique())
@@ -323,11 +311,11 @@ def add_promotion_flags(df, current_season_teams=None):
     promoted = {}
     for i, s in enumerate(seasons):
         prev = season_teams[seasons[i - 1]] if i > 0 else None
-        for t in season_teams[s]:
-            if current_season_teams is not None and (t not in current_season_teams):
-                promoted[(s, t)] = 1  # stagione corrente ma assente dallo storico
-            else:
-                promoted[(s, t)] = 0 if (prev is None or t in prev) else 1
+        teams_in_s = set(season_teams[s])
+        if i == len(seasons) - 1 and current_season_teams is not None:
+            teams_in_s |= set(current_season_teams)
+        for t in teams_in_s:
+            promoted[(s, t)] = 0 if (prev is None or t in prev) else 1
     df['home_promoted'] = [promoted[(r.season, r.HomeTeam)] for r in df.itertuples()]
     df['away_promoted'] = [promoted[(r.season, r.AwayTeam)] for r in df.itertuples()]
     n = int((df['home_promoted'] == 1).sum() + (df['away_promoted'] == 1).sum())
@@ -488,13 +476,15 @@ def main(league):
         print(f"  (modello non leggibile: {exc})")
 
     if model_feature_names is not None:
-        if model_feature_names != feature_cols:
+        from model import simplified_feature_set as _model_feature_set
+        expected_model_cols = _model_feature_set(feature_cols)
+        if model_feature_names != expected_model_cols and model_feature_names != feature_cols:
             print("\nERRORE: le feature del TRAINING divergono da quelle del MODELO!")
-            print(f"  solo in training: {[c for c in feature_cols if c not in model_feature_names]}")
-            print(f"  solo nel modello: {[c for c in model_feature_names if c not in feature_cols]}")
+            print(f"  solo in training: {[c for c in expected_model_cols if c not in model_feature_names]}")
+            print(f"  solo nel modello: {[c for c in model_feature_names if c not in expected_model_cols]}")
             raise SystemExit(1)
-        print(f"Allineamento OK: {len(feature_cols)} feature, "
-              f"training == modello == inferenza")
+        print(f"Allineamento OK: {len(model_feature_names)} feature nel modello, "
+              f"{len(feature_cols)} nel dataset (training == modello == inferenza)")
     else:
         # Nessun modello allenato (fresh runner): si confronta con l'elenco
         # che predict.py costruisce sugli stessi dati.

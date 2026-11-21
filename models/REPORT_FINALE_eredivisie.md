@@ -1,6 +1,6 @@
 # 🏆 Report Finale — CatBoost Eredivisie Match Prediction
 
-**Data**: 2026-11-19 15:21
+**Data**: 2026-11-21 00:44
 **Modello migliore**: Baseline (Pi-Rating + FE) — Eredivisie (`v1_baseline`)
 
 ---
@@ -9,7 +9,7 @@
 
 | Modello | Feature | RPS ↓ | Accuracy |
 |---------|---------|-------|----------|
-| Baseline (Pi-Rating + FE) — Eredivisie | 32 | 0.1301 | 51.94% ◄ **BEST**|
+| Baseline (Pi-Rating + FE) — Eredivisie | 29 | 0.1309 | 51.94% ◄ **BEST**|
 
 ---
 
@@ -18,10 +18,10 @@
 | Metrica | Valore | Note |
 |---------|--------|------|
 | **Accuracy** | 0.5194 | Target > 0.52 |
-| **RPS** | 0.1301 | Più basso = meglio |
-| **Recall Home Win** | 76.74% | |
+| **RPS** | 0.1309 | Più basso = meglio |
+| **Recall Home Win** | 77.91% | |
 | **Recall Draw** | 0.00% | Classe più difficile |
-| **Recall Away Win** | 63.08% | |
+| **Recall Away Win** | 61.54% | |
 
 ---
 
@@ -29,9 +29,9 @@
 
 | | RPS ↓ | Accuracy |
 |--|-------|----------|
-| **CatBoost (v1_baseline)** | 0.1301 | 51.94% |
+| **CatBoost (v1_baseline)** | 0.1309 | 51.94% |
 | **Bet365** | 0.1310 | 52.43% |
-| **Delta** | +0.0009 ✅ | -0.0049 ⚠️ |
+| **Delta** | +0.0001 ✅ | -0.0049 ⚠️ |
 
 ---
 
@@ -45,12 +45,12 @@
 
 | Metrica | Valore |
 |---------|--------|
-| Scommesse piazzate | 412 |
+| Scommesse piazzate | 188 |
 | Bankroll iniziale | €1000 |
-| Bankroll finale | €1401.49 |
-| Profitto | €+401.49 |
-| ROI | +40.1% |
-| Stake totale | 362.0% del bankroll |
+| Bankroll finale | €1075.57 |
+| Profitto | €+75.57 |
+| ROI | +7.6% |
+| Stake totale | 66.6% del bankroll |
 
 ![Kelly Simulation](kelly_simulation.png)
 
@@ -62,10 +62,10 @@
 > Se ≈ 0 → il flag non porta segnale e può essere rimosso. Se `home_promoted`
 > e `away_promoted` hanno valori simili → erano ridondanti, conviene unificarli.
 
-| Flag | mean |SHAP| | Rank su 32 feature |
+| Flag | mean |SHAP| | Rank su 29 feature |
 |------|-------------|------|
-| home_promoted | 0.002234 | 16/32 |
-| away_promoted | 0.021497 | 17/32 |
+| home_promoted | 0.003049 | 16/29 |
+| away_promoted | 0.001833 | 17/29 |
 
 ![SHAP Summary](shap_summary.png)
 
@@ -76,13 +76,13 @@
 ```
               precision    recall  f1-score   support
 
-           H     0.5238    0.7674    0.6226       172
+           H     0.5174    0.7791    0.6218       172
            D     0.0000    0.0000    0.0000       110
-           A     0.5125    0.6308    0.5655       130
+           A     0.5229    0.6154    0.5654       130
 
     accuracy                         0.5194       412
-   macro avg     0.3454    0.4661    0.3961       412
-weighted avg     0.3804    0.5194    0.4384       412
+   macro avg     0.3468    0.4648    0.3957       412
+weighted avg     0.3810    0.5194    0.4380       412
 
 ```
 

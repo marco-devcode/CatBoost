@@ -2,42 +2,42 @@
 
 import Link from "next/link";
 
-// Dati reali del modello allenato (verificati contro models/ e src/)
+// Dati reali del modello allenato (verificati contro models/final_report_seriea.json e src/)
 const DATASET = {
-  partite: 6130,
+  partite: 6190,
   stagioni: 17,
   squadre: 41,
   dal: "28 agosto 2010",
-  al: "20 settembre 2026",
-  esiti: { H: 2653, D: 1588, A: 1889 },
+  al: "8 novembre 2026",
+  esiti: { H: 2682, D: 1598, A: 1910 },
 };
 
 const PI_RATING = {
   decay: 2,
   optimizer: "L-BFGS-B",
   maxiter: 500,
-  modello: "Poisson con correzione Dixon-Coles",
+  modello: "Poisson con correzione Dixon-Coles (tau)",
 };
 
 const CATBOOST = {
-  loss: "MultiClass",
-  iterazioni: 200,
-  learningRate: 0.05,
-  depth: 4,
+  loss: "MultiClass (Residual Logit-Offset)",
+  iterazioni: 60,
+  learningRate: 0.02,
+  depth: 3,
+  l2LeafReg: 30,
   seed: 42,
-  foldCount: 4,
-  selezione: "CV temporale sul solo training (mai sul test set)",
+  selezione: "Prior continuo log(p_b365) + alberi regolarizzati sui soli 29 fondamentali",
 };
 
 const METRICHE = {
-  accuracy: 0.5616,
-  accuracyBookmaker: 0.5434,
-  f1Macro: 0.4892,
-  f1MacroBookmaker: 0.4168,
-  rpsModello: 0.13047,
-  rpsBookmaker: 0.13011,
+  accuracy: 0.5656,
+  accuracyBookmaker: 0.5594,
+  f1Macro: 0.4401,
+  f1MacroBookmaker: 0.4265,
+  rpsModello: 0.1294,
+  rpsBookmaker: 0.1296,
   rpsNeutro: 0.2,
-  testMatches: 438,
+  testMatches: 488,
 };
 
 const REST_CAP = 7;
@@ -152,13 +152,13 @@ const FEATURES = [
     gruppo: "Scontri diretti",
     count: 1,
     spiegazione:
-      "Percentuale di vittorie interne negli scontri diretti storici tra le due squadre. In assenza di precedenti assume il valore neutro 0.5.",
+      "Percentuale effettiva di vittorie della squadra ospitante negli ultimi 5 scontri diretti (in casa o in trasferta) tra le due squadre. In assenza di precedenti assume il valore neutro 0.4.",
     campi: [
       {
         nome: "h2h_home_winrate",
-        etichetta: "Vittorie in casa negli scontri diretti",
+        etichetta: "Win rate della squadra di casa negli H2H",
         dettaglio:
-          "Quota di vittorie casalinghe negli incroci storici, oppure 0.5 se assenti.",
+          "Quota di vittorie della squadra attualmente in casa negli ultimi 5 incroci diretti, oppure 0.4 se assenti.",
       },
     ],
   },
@@ -166,7 +166,7 @@ const FEATURES = [
     gruppo: "Stagione corrente",
     count: 2,
     spiegazione:
-      "Indicatore per le squadre neopromosse (assenti nella massima serie nella stagione precedente). Il modello apprende dai dati storici quanto scontare il salto di categoria.",
+      "Indicatore per le squadre neopromosse (assenti nella massima serie nella stagione immediatamente precedente). Il modello apprende dai dati storici quanto scontare il salto di categoria.",
     campi: [
       {
         nome: "home_promoted",
@@ -184,7 +184,7 @@ const FEATURES = [
     gruppo: "Prestazione (ultime 5)",
     count: 8,
     spiegazione:
-      "Statistiche di produzione offensiva e pressione (tiri totali, tiri in porta come proxy di xG, calci d'angolo e cartellini) sulle ultime 5 partite casa/trasferta, sempre con shift temporale.",
+      "Statistiche di produzione offensiva e pressione (tiri totali, tiri in porta come proxy di xG, calci d'angolo e cartellini) sulle ultime 5 partite casa/trasferta per squadra (HS/HST/HC/HY in casa, AS/AST/AC/AY in trasferta), sempre con shift temporale.",
     campi: [
       {
         nome: "home_shots_5 / away_shots_5",
@@ -212,7 +212,7 @@ const FEATURES = [
     gruppo: "Elo con decadimento",
     count: 4,
     spiegazione:
-      "Rating Elo (K=20, vantaggio casa 65 punti) aggiornato partita dopo partita, con decadimento del 25% per stagione non giocata nella divisione.",
+      "Rating Elo (K=20, vantaggio casa 65 punti, base 1500) aggiornato partita dopo partita, con mean-reversion del 25% verso 1500 tra una stagione e l'altra.",
     campi: [
       {
         nome: "elo_home / elo_away",
@@ -223,19 +223,6 @@ const FEATURES = [
         nome: "elo_home_expect / elo_away_expect",
         etichetta: "Probabilita attesa Elo (2 feature)",
         dettaglio: "Aspettativa Elo con fattore campo inclusa come input diretto.",
-      },
-    ],
-  },
-  {
-    gruppo: "Mercato (quote di apertura)",
-    count: 3,
-    spiegazione:
-      "Probabilita implicite di Bet365 private dell'overround tramite metodo additive (~5,7% margine medio). Pinnacle e consenso medio vengono calcolati in diagnostica ma restano esclusi dal training perche assenti sulle gare future.",
-    campi: [
-      {
-        nome: "mkt_b365_pH / mkt_b365_pD / mkt_b365_pA",
-        etichetta: "Probabilita implicite Bet365 de-viggate (3 feature)",
-        dettaglio: "Quote di apertura 1, X e 2 convertite in probabilita normalizzate.",
       },
     ],
   },
@@ -258,25 +245,25 @@ const STEPS = [
     n: 3,
     titolo: "Calcolare i Pi-Rating",
     testo:
-      "Per ogni squadra si stimano attacco e difesa via massima verosimiglianza Poisson con correzione Dixon-Coles su 0-0 e 1-1, dimezzando il peso ogni 2 anni.",
+      "I parametri di attacco, difesa e fattore tau di Dixon-Coles vengono stimati via massima verosimiglianza esclusivamente sulle partite pre-cutoff (< 2025-08-01), dimezzando il peso ogni 2 anni.",
   },
   {
     n: 4,
-    titolo: "Costruire le feature",
+    titolo: "Costruire le 29 feature",
     testo:
-      "Ogni sfida genera 32 feature usate dal modello (Pi-Rating, forma, gol, riposo, H2H, neopromosse, tiri, angoli, cartellini, Elo e quote Bet365 de-viggate), tutte calcolate prima del match.",
+      "Ogni sfida genera 29 feature puramente calcistiche negli alberi (Pi-Rating, forma, gol, riposo, H2H, neopromosse, tiri propri casa/trasferta, angoli, cartellini ed Elo), tutte calcolate prima del match.",
   },
   {
     n: 5,
-    titolo: "Addestrare e valutare",
+    titolo: "Residual Logit-Offset",
     testo:
-      "Il modello si allena sullo storico fino al 2025-08-01 e viene valutato sul test set successivo (438 gare mai viste), dopo selezione iperparametri con CV temporale a 4 fold.",
+      "Le quote Bet365 de-viggate non entrano come feature negli alberi: vengono usate come baseline continua log(p_b365), cosi CatBoost apprende solo lo scostamento residuo giustificato dai fondamentali (piu modello puro a 29 feature per gare senza quote).",
   },
   {
     n: 6,
-    titolo: "Prevedere, calibrare e pubblicare",
+    titolo: "Valutare e generare Kelly",
     testo:
-      "Le probabilita grezze vengono calibrate con calibrazione Dirichlet (Kull et al., NeurIPS 2019) su stime fuori campione e salvate nei JSON per il frontend.",
+      "Il modello viene valutato sul test set successivo al 2025-08-01 (488 gare mai viste). Quando la stima residuale supera la quota del bookmaker, il filtro Kelly dinamico seleziona la value bet.",
   },
 ];
 
@@ -335,10 +322,10 @@ export default function ModelPage() {
         </div>
 
         <div className="kpi">
-          <div className="kpi-label">Variabili per match</div>
+          <div className="kpi-label">Variabili negli alberi</div>
           <div className="kpi-value">{totalFeatures}</div>
           <div className="kpi-delta">
-            Pi-Rating, forma, tiri, Elo e quote apertura
+            Solo fondamentali calcistici (+ prior mercato)
           </div>
         </div>
       </section>
@@ -378,23 +365,26 @@ export default function ModelPage() {
           <section id="panoramica" className="doc-section">
             <h2>Panoramica in breve</h2>
             <p>
-              Il sistema stima la probabilita dei tre esiti (vincere, pareggiare,
-              perdere) per ogni partita. Lavora su due strati: prima calcola un{" "}
-              <strong>Pi-Rating</strong> per ogni squadra (una misura di forza statistica
-              ricavata dai gol, indipendente dalla classifica), poi passa quei numeri a{" "}
-              <strong>CatBoost</strong> insieme a forma, riposo, tiri, Elo e quote di
-              apertura.
+              Il sistema usa un&apos;architettura{" "}
+              <strong>Residual Logit-Offset</strong> a due livelli: le 29
+              variabili calcistiche (Pi-Rating Dixon-Coles, Elo, forma, gol,
+              tiri, angoli, cartellini, riposo, H2H e neopromosse) entrano
+              negli alberi di <strong>CatBoost</strong>, mentre i log-odds
+              de-viggati di apertura (<code>log(p_b365)</code>) fungono da
+              prior continuo esterno (<code>baseline</code>).
             </p>
             <p>
-              Usare due strati non e una scelta estetica: i rating catturano la forza di
-              medio periodo ma non distinguono tra una squadra in striscia positiva e una
-              appena penalizzata da calendari ravvicinati. Gli alberi decisionali
-              correggono il rating di base in presenza di segnali recenti.
+              Tenere le quote fuori dagli alberi evita che CatBoost quantizzi il
+              bookmaker a gradini generando falsi segnali Kelly: gli alberi
+              regolarizzati stimano solo la correzione residua quando i
+              fondamentali divergono dalla linea di apertura (e sulle gare senza
+              quote interviene un modello puro a 29 feature).
             </p>
             <div className="doc-callout">
-              Le stime delle partite gia giocate vengono ricalcolate esclusivamente con
-              dati precedenti al fischio d&apos;inizio di ciascuna gara, cosi da evitare
-              qualunque bias da hindsight.
+              I Pi-Rating vengono stimati solo su dati pre-cutoff (&lt;
+              2025-08-01) e tutte le stime di partita usano esclusivamente dati
+              precedenti al fischio d&apos;inizio, cosi da evitare leakage
+              temporale.
             </div>
           </section>
 
@@ -471,10 +461,12 @@ export default function ModelPage() {
           <section id="catboost" className="doc-section">
             <h2>Il modello CatBoost</h2>
             <p>
-              CatBoost e un algoritmo di gradient boosting su alberi decisionali
-              simmetrici. A differenza di una regressione logistica lineare, gli alberi
-              modellano automaticamente interazioni non lineari tra riposo, forma, tiri e
-              quote di apertura.
+              CatBoost lavora in modalita{" "}
+              <strong>Residual Logit-Offset</strong> su alberi simmetrici: le
+              quote di apertura non entrano mai come nodi di split, ma come{" "}
+              <code>baseline</code> in log-odds nel <code>Pool</code>, cosi
+              l&apos;apprendimento si concentra sul residuo informativo dei{" "}
+              {totalFeatures} fondamentali calcistici.
             </p>
             <ul className="doc-list">
               <li>
@@ -482,13 +474,15 @@ export default function ModelPage() {
                 A).
               </li>
               <li>
-                <strong>Profondita degli alberi:</strong> {CATBOOST.depth}, controlla la
-                complessita massima di ogni albero.
+                <strong>Regolarizzazione residua:</strong> depth{" "}
+                {CATBOOST.depth}, {CATBOOST.iterazioni} iterazioni, learning rate{" "}
+                {CATBOOST.learningRate} e <code>l2_leaf_reg={CATBOOST.l2LeafReg}</code>{" "}
+                ({CATBOOST.selezione}).
               </li>
               <li>
-                <strong>Learning rate:</strong> {CATBOOST.learningRate} su{" "}
-                {CATBOOST.iterazioni} iterazioni, scelti tramite {CATBOOST.foldCount}
-                -fold CV temporale ({CATBOOST.selezione}).
+                <strong>Fallback senza quote:</strong> modello CatBoost puro
+                allenato sulle stesse {totalFeatures} variabili calcistiche
+                senza prior di mercato.
               </li>
               <li>
                 <strong>Seme fisso:</strong> {CATBOOST.seed}, per riproducibilita
@@ -553,16 +547,18 @@ export default function ModelPage() {
               distribuzione di probabilita (piu basso e meglio).
             </p>
             <div className="doc-callout warn">
-              Sul test set da {METRICHE.testMatches} partite il modello registra RPS{" "}
-              <strong>{METRICHE.rpsModello.toFixed(4)}</strong> contro{" "}
-              <strong>{METRICHE.rpsBookmaker.toFixed(4)}</strong> di Bet365 (livello
-              neutro di letteratura circa {METRICHE.rpsNeutro.toFixed(2)}). Il modello e
-              praticamente in pari con il mercato calibrato: la pagina{" "}
+              Sul test set da {METRICHE.testMatches} partite il modello registra
+              RPS <strong>{METRICHE.rpsModello.toFixed(4)}</strong> contro{" "}
+              <strong>{METRICHE.rpsBookmaker.toFixed(4)}</strong> di Bet365
+              (livello neutro di letteratura circa{" "}
+              {METRICHE.rpsNeutro.toFixed(2)}). Il modello supera lievemente la
+              quota di apertura sul test set (ROI Kelly +3,8% su 102 giocate
+              selezionate), ma su quote di chiusura e su singoli campionati
+              l&apos;ampiezza statistica impone cautela: la pagina{" "}
               <Link href="/kelly" className="inline-link">
                 Portafoglio Kelly
               </Link>{" "}
-              mostra in trasparenza l&apos;effetto reale delle puntate rispetto alle
-              quote con margine del banco.
+              mostra in trasparenza l&apos;effetto reale delle puntate.
             </div>
           </section>
 

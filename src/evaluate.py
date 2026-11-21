@@ -13,7 +13,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 from pathlib import Path
-from catboost import CatBoostClassifier
+from catboost import CatBoostClassifier, Pool
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.calibration import calibration_curve
 
@@ -21,6 +21,7 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from leagues import get_league  # noqa: E402
+from model import compute_market_baseline  # noqa: E402
 from kelly_dynamic import (  # noqa: E402
     KELLY_DYNAMIC_CONFIG,
     calculate_dynamic_kelly_stake,
@@ -143,6 +144,12 @@ models_info = {
 }
 
 # ── Valuta tutti i modelli ──────────────────────────────────────────────
+pure_path = MODELS_DIR / f"{LEAGUE.model_name}_pure.cbm"
+pure_model = None
+if pure_path.exists():
+    pure_model = CatBoostClassifier()
+    pure_model.load_model(str(pure_path))
+
 results = {}
 for key, info in models_info.items():
     print(f"\n{'─'*55}")
@@ -154,18 +161,21 @@ for key, info in models_info.items():
         continue
     model.load_model(str(info['path']))
 
-    # Le colonne da usare sono quelle del MODELLO, non tutte quelle del
-    # dataset: il modello semplificato usa 32 feature su 41 disponibili
-    # (le 8 di Pinnacle/consensus e i 3 overround sono escluse perche' in
-    # produzione sulle future non esistono). Senza questo allineamento il
-    # report contava 41 feature su un modello a 32, e le previsioni
-    # passavano per colonne che il modello non conosce.
     _feat = list(model.feature_names_)
     X = info['X_test'][_feat]
     y = info['y_test']
 
-    probs = model.predict_proba(X)
-    preds = model.predict(X).flatten()
+    if any(c.startswith("mkt_") for c in _feat):
+        eval_pool = Pool(X)
+        probs = model.predict_proba(X)
+        preds = model.predict(X).flatten()
+    else:
+        base_test, _ = compute_market_baseline(
+            info['X_test'], pure_model=pure_model, fund_cols=_feat
+        )
+        eval_pool = Pool(X, baseline=base_test)
+        probs = model.predict_proba(eval_pool)
+        preds = np.argmax(probs, axis=1)
 
     acc = (preds == y.values).mean()
     rps = ranked_probability_score(y.values, probs)
@@ -181,6 +191,7 @@ for key, info in models_info.items():
         'rps': rps,
         'X_test': X,
         'y_test': y,
+        'eval_pool': eval_pool,
         'desc': info['desc'],
     }
 
@@ -263,14 +274,14 @@ if b365_present and df_test_b365 is not None and len(bm_probs_list) > 0:
             continue
         pm = probs_best[vi]
         pb = bm_probs_valid[i]
-        best_k = -1.0
+        best_k = 0.0
         best_pick = None
         for c in range(3):
             if pm[c] > pb[c]:
                 # c_dynamic per scaglioni di quota + hard cap: la quota decide
                 # quanto Kelly pieno si prende, non una frazione unica.
                 k = calculate_dynamic_kelly_stake(pm[c], odds[c])
-                if k > best_k:
+                if k > 0.0 and k > best_k:
                     best_k = k
                     best_pick = c
         if best_pick is not None:
@@ -278,7 +289,7 @@ if b365_present and df_test_b365 is not None and len(bm_probs_list) > 0:
                 pm[best_pick], odds[best_pick])["capped"])
             stake = bankroll * best_k
             stakes_total += stake
-            outcome = y_valid[vi]
+            outcome = y_best.values[vi]
             win = (outcome == best_pick)
             bankroll += stake * (odds[best_pick] - 1.0) if win else -stake
             n_bets += 1
@@ -353,9 +364,9 @@ try:
 
     # CatBoost restituisce (n_samples, n_features+1, n_classes); l'ultima
     # colonna per classe e' il base value. Togliamola.
-    from catboost import Pool
+    eval_pool = best.get('eval_pool') if best.get('eval_pool') is not None else Pool(best['X_test'])
     sv_all = best['model'].get_feature_importance(
-        data=Pool(best['X_test']), type='ShapValues')
+        data=eval_pool, type='ShapValues')
     feature_names = list(best['X_test'].columns)
     n_feat = len(feature_names)
     # CatBoost per multiclasse restituisce (n_samples, A, B) dove {A,B} =

@@ -66,7 +66,10 @@ if st.button("🔮 Predici risultato", use_container_width=True):
 
         st.divider()
         with st.expander("Feature usate (debug)"):
-            st.json({k: round(float(v), 3) for k, v in feats.items()})
+            st.json({
+                k: (None if (v is None or pd.isna(v)) else round(float(v), 3))
+                for k, v in feats.items()
+            })
 
 st.divider()
 st.caption("Le percentuali sono stime statistiche, non certezze. Usa il modello solo a scopo informativo.")

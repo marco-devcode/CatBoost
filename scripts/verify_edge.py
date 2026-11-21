@@ -197,9 +197,23 @@ def main():
               "(nessuna quota offre EV positivo con la sua stessa stima)")
 
     # ── Il modello ─────────────────────────────────────────────────────────
+    from catboost import Pool
     model = CatBoostClassifier()
     model.load_model(str(league.model_path))
-    probs = model.predict_proba(X_test)
+    feat_names = list(model.feature_names_)
+    if any(c.startswith("mkt_") for c in feat_names):
+        probs = model.predict_proba(X_test[feat_names])
+    else:
+        from model import compute_market_baseline
+        pure_path = league.model_path.parent / f"{league.model_name}_pure.cbm"
+        pure_model = None
+        if pure_path.exists():
+            pure_model = CatBoostClassifier()
+            pure_model.load_model(str(pure_path))
+        base_test, _ = compute_market_baseline(
+            X_test, pure_model=pure_model, fund_cols=feat_names
+        )
+        probs = model.predict_proba(Pool(X_test[feat_names], baseline=base_test))
     from predict import apply_saved_calibration
     probs = np.array([apply_saved_calibration(league, p) for p in probs])
 

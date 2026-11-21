@@ -100,9 +100,6 @@ const CORE_FEATURE_KEYS = [
   "elo_away",
   "elo_home_expect",
   "elo_away_expect",
-  "mkt_b365_pH",
-  "mkt_b365_pD",
-  "mkt_b365_pA",
 ];
 
 function fmtVal(v: number | null | undefined): string {

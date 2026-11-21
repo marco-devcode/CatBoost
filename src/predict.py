@@ -21,6 +21,10 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from catboost import CatBoostClassifier
+try:
+    from catboost import Pool
+except ImportError:
+    Pool = None
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -36,16 +40,105 @@ WINDOW = 5
 # Vedi la nota lunga su REST_CAP in features.add_rest_days.
 from leagues import REST_CAP, get_league  # noqa: E402
 from advanced_features import (  # noqa: E402
-    add_elo_features,
+    ELO_INIT,
+    ELO_HOME_ADV,
+    ELO_SEASON_DECAY,
+    _run_elo_loop,
     add_market_features,
     add_performance_features,
-    advanced_feature_cols,
+    compute_team_elo_state,
 )
 
+# Cache per evitare di ricalcolare lo storico ad ogni match in predict_fixtures.
+_HISTORY_CACHE: dict = {}
+_PURE_MODEL_CACHE: dict = {}
 
-def load_history(league):
+
+def _load_pure_model(league):
+    if league is None:
+        return None
+    pure_path = Path(league.model_path).parent / f"{league.model_name}_pure.cbm"
+    if not pure_path.exists():
+        return None
+    key = str(pure_path)
+    cached = _PURE_MODEL_CACHE.get(key)
+    if cached is not None:
+        return cached
+    m = CatBoostClassifier()
+    m.load_model(key)
+    _PURE_MODEL_CACHE[key] = m
+    return m
+
+
+def predict_proba_with_prior(model, X_row: pd.DataFrame, feats: dict, league=None) -> np.ndarray:
+    """Predice le probabilita' 1X2: usa log(p_b365) come baseline continua se
+    disponibile, altrimenti ripiega sul modello puro (solo 29 fondamentali)."""
+    model_feats = list(model.feature_names_) if hasattr(model, "feature_names_") else list(X_row.columns)
+    if any(c.startswith("mkt_") for c in model_feats):
+        return model.predict_proba(X_row[model_feats])[0]
+
+    mkt_vals = [feats.get("mkt_b365_pH"), feats.get("mkt_b365_pD"), feats.get("mkt_b365_pA")]
+    mkt_valid = all(
+        v is not None and isinstance(v, (int, float)) and np.isfinite(float(v)) and float(v) > 0.0
+        for v in mkt_vals
+    )
+    if mkt_valid:
+        base = np.log(np.clip([[float(v) for v in mkt_vals]], 1e-6, 1.0))
+        return model.predict_proba(Pool(X_row[model_feats], baseline=base))[0]
+
+    pure_model = _load_pure_model(league)
+    if pure_model is not None:
+        pure_feats = list(pure_model.feature_names_) if hasattr(pure_model, "feature_names_") else model_feats
+        return pure_model.predict_proba(X_row[pure_feats])[0]
+
+    return model.predict_proba(X_row[model_feats])[0]
+
+
+def load_history(league=None):
     """Carica il dataset pulito + Pi-Rating di una lega."""
+    if league is None:
+        league = get_league(None)
     return pd.read_csv(league.ratings_path, parse_dates=['Date'])
+
+
+def _get_history_cache(df: pd.DataFrame) -> dict:
+    """Precalcola una sola volta Pi-Rating, rolling prestazione ed Elo su `df`."""
+    min_d = str(df['Date'].min()) if len(df) else ""
+    max_d = str(df['Date'].max()) if len(df) else ""
+    key = (id(df), len(df), min_d, max_d)
+    cached = _HISTORY_CACHE.get(key)
+    if cached is not None:
+        return cached
+
+    attack, defence, home_adv = ratings_from_history(df)
+    perf = add_performance_features(df, window=WINDOW)
+    elo, end_elo, end_last_season = _run_elo_loop(df)
+
+    perf_idx = {
+        (pd.Timestamp(r.Date), str(r.HomeTeam), str(r.AwayTeam)): pos
+        for pos, r in enumerate(perf.itertuples(index=False))
+    }
+    elo_idx = {
+        (pd.Timestamp(r.Date), str(r.HomeTeam), str(r.AwayTeam)): pos
+        for pos, r in enumerate(elo.itertuples(index=False))
+    }
+
+    cached = {
+        "attack": attack,
+        "defence": defence,
+        "home_adv": home_adv,
+        "perf": perf,
+        "perf_idx": perf_idx,
+        "elo": elo,
+        "elo_idx": elo_idx,
+        "end_elo": end_elo,
+        "end_last_season": end_last_season,
+        "max_date": pd.Timestamp(df['Date'].max()) if len(df) else None,
+    }
+    if len(_HISTORY_CACHE) >= 8:
+        _HISTORY_CACHE.clear()
+    _HISTORY_CACHE[key] = cached
+    return cached
 
 
 # ── Ricostruzione di attack/d defence/home_adv dal dataset ──────────────
@@ -104,39 +197,38 @@ def pi_features_from_ratings(attack, defence, home_adv, home, away):
     }
 
 
-def _last_complete_season_teams(history):
-    """Insieme delle squadre nell'ULTIMA stagione presente nello storico."""
-    if len(history) == 0:
-        return set()
-    last_season = sorted(history['season'].unique())[-1]
-    sub = history[history['season'] == last_season]
-    return (set(sub['HomeTeam']) | set(sub['AwayTeam']))
+def _season_from_date(match_date) -> int:
+    """Converte una data nel codice stagione integer (es. 2026-09-20 -> 2627)."""
+    dt = pd.Timestamp(match_date)
+    start = dt.year if dt.month >= 7 else dt.year - 1
+    return int(f"{start % 100:02d}{(start + 1) % 100:02d}")
 
 
 def is_promoted(history, team, match_date, current_season_teams=None):
-    """True se `team` e' neopromossa rispetto alla stagione di match_date.
+    """True se `team` e' neopromossa nella stagione di match_date.
 
-    Senza `current_season_teams`: logica storica pura (assente nella stagione
-    immediatamente precedente a match_date).
-    Con `current_season_teams` (insieme delle squadre della Serie A corrente,
-    es. derivato dal calendario): neopromossa = presente in current ma ASSENTE
-    dall'ultima stagione COMPLETA nello storico. Questo gestisce correttamente
-    il caso inizio 26/27, dove lo storico si ferma al 25/26 e il Venezia appena
-    promosso non ha Pi-Rating freschi.
+    Replica esattamente la logica di features.add_promotion_flags: una squadra
+    e' neopromossa nella stagione `target_s` se e' assente dalla stagione
+    immediatamente precedente presente nello storico (< target_s).
     """
-    last_teams = _last_complete_season_teams(history)
-    if current_season_teams is not None:
-        if team not in current_season_teams:
-            return 0  # non e' in Serie A quest'anno -> non marcare
-        return 0 if team in last_teams else 1
-    # fallback: logica stagione-precedente
-    if match_date is None:
+    if len(history) == 0:
         return 0
-    prev_year = match_date.year - 1
-    prev_season = int(f"{prev_year % 100:02d}{(prev_year + 1) % 100:02d}") \
-        if match_date.month < 7 else \
-        int(f"{(match_date.year - 1) % 100:02d}{match_date.year % 100:02d}")
-    past = history[history['season'] == prev_season]
+    seasons = sorted(int(s) for s in history['season'].unique())
+    if match_date is not None:
+        target_s = _season_from_date(match_date)
+        prev_seasons = [s for s in seasons if s < target_s]
+        if not prev_seasons:
+            return 0  # prima stagione storica: nessuna precedente -> 0
+        prev_s = prev_seasons[-1]
+    else:
+        if current_season_teams is not None and len(seasons) >= 2:
+            last_sub = history[history['season'] == seasons[-1]]
+            last_set = set(last_sub['HomeTeam']) | set(last_sub['AwayTeam'])
+            prev_s = seasons[-2] if last_set <= set(current_season_teams) else seasons[-1]
+        else:
+            prev_s = seasons[-1]
+
+    past = history[history['season'] == prev_s]
     seen = len(past[(past['HomeTeam'] == team) | (past['AwayTeam'] == team)]) > 0
     return 0 if seen else 1
 
@@ -180,19 +272,16 @@ def compute_features_for_match(df, home, away, match_date, h2h_cache=None,
     in inferenza da TheOddsAPI. Se assenti, le feature di mercato valgono NaN
     (il modello le tratta come mancanti, esattamente come i debut).
     """
-    past = df[df['Date'] < match_date].copy() if match_date else df.copy()
-
-    if len(past) == 0:
-        past = df.copy()
+    match_ts = pd.Timestamp(match_date) if match_date is not None else None
+    past = df[df['Date'] < match_ts] if match_ts is not None else df
 
     feats = {}
+    cache = _get_history_cache(df)
 
     # Pi-Rating: STESSA formula del training (ratings.compute_pi_ratings).
-    # Vedi la nota lunga su ratings_from_history: leggere pi_* dall'ultima
-    # riga storica della squadra attribuiva alla partita corrente il rating
-    # calcolato per una COPPIA DIVERSA (l'ultima avversaria incontrata).
-    attack, defence, home_adv = ratings_from_history(df)
-    feats.update(pi_features_from_ratings(attack, defence, home_adv, home, away))
+    feats.update(pi_features_from_ratings(
+        cache["attack"], cache["defence"], cache["home_adv"], home, away
+    ))
 
     # Forma recente (ultimi WINDOW match della squadra, casa o trasferta)
     def team_form(team, is_home):
@@ -267,31 +356,31 @@ def compute_features_for_match(df, home, away, match_date, h2h_cache=None,
     feats['away_goals_scored_5'] = as_
     feats['away_goals_conceded_5'] = ac_
 
-    # H2H: win rate CASA negli ultimi WINDOW scontri diretti.
-    # Deve replicare features.add_h2h, che conta le partite CONCLUSE DA 'H'
-    # (vittoria della squadra di casa di QUELLA partita), non le vittorie
-    # della squadra nominata home in questo match. Le due definizioni
-    # divergono: su 37 righe su 50 della 26/27 la versione qui sotto dava
-    # un numero diverso dal training, quindi il modello vedeva una feature
-    # h2h che non aveva mai visto addestrata.
-    key = (min(home, away), max(home, away))
-    if h2h_cache is not None and key in h2h_cache:
-        feats['h2h_home_winrate'] = h2h_cache[key]
+    # H2H: win rate della squadra `home` negli ultimi WINDOW scontri diretti
+    # con `away` (replica features.add_h2h). La chiave di cache include home,
+    # away e data per evitare riutilizzi errati tra andata e ritorno.
+    cache_key = (home, away, str(match_ts)) if match_ts is not None else (home, away, None)
+    if h2h_cache is not None and cache_key in h2h_cache:
+        feats['h2h_home_winrate'] = h2h_cache[cache_key]
     else:
         sub = past[((past['HomeTeam'] == home) & (past['AwayTeam'] == away)) |
                    ((past['HomeTeam'] == away) & (past['AwayTeam'] == home))].tail(WINDOW)
         if len(sub) == 0:
             feats['h2h_home_winrate'] = 0.4
         else:
-            feats['h2h_home_winrate'] = float((sub['FTR'] == 'H').mean())
+            home_wins = (
+                ((sub['HomeTeam'] == home) & (sub['FTR'] == 'H'))
+                | ((sub['AwayTeam'] == home) & (sub['FTR'] == 'A'))
+            )
+            feats['h2h_home_winrate'] = float(home_wins.mean())
         if h2h_cache is not None:
-            h2h_cache[key] = feats['h2h_home_winrate']
+            h2h_cache[cache_key] = feats['h2h_home_winrate']
 
     # Flag neopromossa: il modello impara lo sconto da solo. Squadre appena
-    # promosse (presenti nella stagione corrente ma assenti dall'ultima stagione
-    # storica completa, es. Venezia 26/27) -> 1.
-    feats['home_promoted'] = is_promoted(df, home, match_date, current_season_teams)
-    feats['away_promoted'] = is_promoted(df, away, match_date, current_season_teams)
+    # promosse (presenti nella stagione corrente ma assenti dalla stagione
+    # precedente dello storico) -> 1.
+    feats['home_promoted'] = is_promoted(df, home, match_ts, current_season_teams)
+    feats['away_promoted'] = is_promoted(df, away, match_ts, current_season_teams)
 
     # ── Mercato: quote del match de-viggate ─────────────────────────────
     # Stessa formula del training (advanced_features.add_market_features),
@@ -338,68 +427,76 @@ def compute_features_for_match(df, home, away, match_date, h2h_cache=None,
     # Il trucco e' ricostruire il "passato" della squadra come se fosse una
     # riga del dataset: si aggiungono le colonne di prestazione ed Elo sul
     # dataframe storico, poi si prende la riga della partita da predire.
-    feats.update(_advanced_features_for_match(df, home, away, match_date, odds))
+    feats.update(_advanced_features_for_match(df, home, away, match_ts, cache=cache))
 
     return feats
 
 
-def _advanced_features_for_match(df, home, away, match_date, odds=None):
+def _adjust_elo_for_season(team: str, elo_map: dict, last_season_map: dict,
+                           target_season: str | None) -> float:
+    val = elo_map.get(team, ELO_INIT)
+    prev = last_season_map.get(team)
+    if target_season and prev is not None and str(prev) != str(target_season):
+        return ELO_INIT + ELO_SEASON_DECAY * (val - ELO_INIT)
+    return val
+
+
+def _advanced_features_for_match(df, home, away, match_date, odds=None, cache=None):
     """Feature avanzate per un singolo match, calcolate sulle stesse formule
     del training (advanced_features.add_*).
-
-    Per la prestazione e l'Elo si ricostruisce il dataset storico con le
-    colonne avanzate e si prende il valore alla riga del match: i rolling e
-    l'Elo sono gia' calcolati con shift(1), quindi il valore alla riga del
-    match usa solo il passato.
     """
     out = {}
+    if cache is None:
+        cache = _get_history_cache(df)
+
+    match_ts = pd.Timestamp(match_date) if match_date is not None else None
+    mkey = (match_ts, str(home), str(away)) if match_ts is not None else None
 
     # ── Prestazione (tiri, tiri in porta, angoli, cartellini) ───────────
-    perf = add_performance_features(df, window=5)
+    perf = cache["perf"]
+    ppos = cache["perf_idx"].get(mkey) if mkey is not None else None
     for col in ("home_shots_5", "away_shots_5", "home_shots_t_5", "away_shots_t_5",
                 "home_corners_5", "away_corners_5", "home_cards_5", "away_cards_5"):
         if col not in perf.columns:
             continue
-        # La riga del match: se il match e' gia' nel dataset (partita gia'
-        # giocata), la sua riga ha gia' i rolling corretti; se e' futuro, si
-        # calcola il rolling come se il match fosse l'ultimo.
-        if match_date is not None:
-            mask = (perf["Date"] == match_date) & (perf["HomeTeam"] == home) & (perf["AwayTeam"] == away)
-            if mask.any():
-                out[col] = float(perf.loc[mask, col].iloc[0])
-                continue
-        out[col] = _rolling_future(perf, df, home, away, match_date, col)
+        if ppos is not None:
+            out[col] = float(perf[col].iloc[ppos])
+        else:
+            out[col] = _rolling_future(perf, df, home, away, match_ts, col)
 
     # ── Elo ──────────────────────────────────────────────────────────────
-    elo = add_elo_features(df)
-    if match_date is not None:
-        mask = (elo["Date"] == match_date) & (elo["HomeTeam"] == home) & (elo["AwayTeam"] == away)
-        if mask.any():
-            row = elo.loc[mask].iloc[0]
-            for col in ("elo_home", "elo_away", "elo_home_expect", "elo_away_expect"):
-                if col in elo.columns:
-                    out[col] = float(row[col])
-            return out
-    # Match futuro: Elo calcolato sullo storico fino a match_date.
-    past = df[df["Date"] < match_date].copy() if match_date is not None else df.copy()
-    if len(past) == 0:
-        past = df.copy()
-    elo_past = add_elo_features(past)
-    if len(elo_past):
-        last = elo_past.iloc[-1]
-        ratings = {}
-        for t in set(elo_past["HomeTeam"]) | set(elo_past["AwayTeam"]):
-            sub = elo_past[(elo_past["HomeTeam"] == t) | (elo_past["AwayTeam"] == t)]
-            if len(sub):
-                ratings[t] = sub.iloc[-1]
-        rh = float(ratings.get(home, {"elo_home": 1500.0})["elo_home"]) if home in ratings else 1500.0
-        ra = float(ratings.get(away, {"elo_away": 1500.0})["elo_away"]) if away in ratings else 1500.0
-        from advanced_features import ELO_HOME_ADV
-        exp_h = 1.0 / (1.0 + 10.0 ** ((ra - (rh + ELO_HOME_ADV)) / 400.0))
-        out["elo_home"] = rh
-        out["elo_away"] = ra
-        out["elo_home_expect"] = exp_h
-        out["elo_away_expect"] = 1.0 - exp_h
+    elo = cache["elo"]
+    epos = cache["elo_idx"].get(mkey) if mkey is not None else None
+    if epos is not None:
+        row = elo.iloc[epos]
+        for col in ("elo_home", "elo_away", "elo_home_expect", "elo_away_expect"):
+            if col in elo.columns:
+                out[col] = float(row[col])
+        return out
+
+    # Match futuro o non presente in df: usa il vero rating post-partita fino a match_date.
+    target_season = str(_season_from_date(match_ts)) if match_ts is not None else None
+    max_date = cache["max_date"]
+    if match_ts is None or (max_date is not None and match_ts > max_date):
+        elo_map = cache["end_elo"]
+        last_season_map = cache["end_last_season"]
+        rh = _adjust_elo_for_season(home, elo_map, last_season_map, target_season)
+        ra = _adjust_elo_for_season(away, elo_map, last_season_map, target_season)
+    else:
+        past = df[df["Date"] < match_ts]
+        if len(past) == 0:
+            rh = ELO_INIT
+            ra = ELO_INIT
+        else:
+            elo_map, _ = compute_team_elo_state(past, target_season=target_season)
+            rh = float(elo_map.get(home, ELO_INIT))
+            ra = float(elo_map.get(away, ELO_INIT))
+
+    exp_h = 1.0 / (1.0 + 10.0 ** ((ra - (rh + ELO_HOME_ADV)) / 400.0))
+    out["elo_home"] = rh
+    out["elo_away"] = ra
+    out["elo_home_expect"] = exp_h
+    out["elo_away_expect"] = 1.0 - exp_h
 
     return out
 
@@ -408,9 +505,7 @@ def _rolling_future(perf, df, home, away, match_date, col):
     """Rolling di prestazione per un match FUTURO: media delle ultime N
     partite della squadra in quel ruolo (casa per il locale, trasferta per
     l'ospite), replicando il shift(1) del training."""
-    if match_date is None:
-        return np.nan
-    past = perf[perf["Date"] < match_date]
+    past = perf[perf["Date"] < match_date] if match_date is not None else perf
     if col.startswith("home_"):
         sub = past[past["HomeTeam"] == home].tail(5)
         stat = col.replace("home_", "").rsplit("_", 1)[0]
@@ -475,7 +570,9 @@ def apply_saved_calibration(league, probs):
 def predict_match(home, away, match_date=None, league=None,
                   current_season_teams=None):
     if league is None:
-        raise ValueError("predict_match richiede un league")
+        league = get_league(None)
+    elif isinstance(league, str):
+        league = get_league(league)
     model_path = league.model_path
     if not model_path.exists():
         raise FileNotFoundError(
@@ -490,15 +587,14 @@ def predict_match(home, away, match_date=None, league=None,
     feats = compute_features_for_match(df, home, away, match_date,
                                         current_season_teams=current_season_teams)
 
-    # L'elenco viene dal MODELO (stessa fonte di predict_fixtures): se il
-    # training e l'inferenza divergessero, il modello riceverebbe colonne
-    # diverse da quelle su cui e' stato addestrato.
-    feature_order = list(model.feature_names_) if hasattr(model, "feature_names_") else FEATURE_ORDER
-    X = pd.DataFrame([{c: feats.get(c, 0.0) for c in feature_order}])
-
+    # Carica il modello PRIMA di leggere feature_names_.
     model = CatBoostClassifier()
     model.load_model(str(model_path))
-    probs = model.predict_proba(X)[0]
+    feature_order = list(model.feature_names_) if hasattr(model, "feature_names_") else FEATURE_ORDER
+    X = pd.DataFrame([{c: (feats.get(c, np.nan) if c.startswith("mkt_")
+                           else feats.get(c, 0.0)) for c in feature_order}])
+
+    probs = predict_proba_with_prior(model, X, feats, league=league)
 
     # Calibrazione Dirichlet (se presente): e' un post-processing delle
     # probabilita' che riduce l'overconfidence del modello. Va applicata

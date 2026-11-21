@@ -1,30 +1,30 @@
 {
   "best_model": "v1_baseline",
   "best_model_desc": "Baseline (Pi-Rating + FE) — Serie A",
-  "accuracy": 0.5635,
-  "rps_model": 0.1293,
-  "f1_macro": 0.4822,
-  "f1_weighted": 0.5271,
+  "accuracy": 0.5656,
+  "rps_model": 0.1294,
+  "f1_macro": 0.4401,
+  "f1_weighted": 0.4961,
   "f1_per_class": {
-    "H": 0.6652,
-    "D": 0.1739,
-    "A": 0.6074
+    "H": 0.6559,
+    "D": 0.0496,
+    "A": 0.615
   },
   "precision_per_class": {
-    "H": 0.5805,
-    "D": 0.3182,
-    "A": 0.5989
+    "H": 0.5492,
+    "D": 0.75,
+    "A": 0.5873
   },
-  "recall_home": 0.7789,
-  "recall_draw": 0.1197,
-  "recall_away": 0.6163,
+  "recall_home": 0.8141,
+  "recall_draw": 0.0256,
+  "recall_away": 0.6453,
   "recall_per_class": {
-    "H": 0.7789,
-    "D": 0.1197,
-    "A": 0.6163
+    "H": 0.8141,
+    "D": 0.0256,
+    "A": 0.6453
   },
   "n_test": 488,
-  "n_features": 32,
+  "n_features": 29,
   "features": [
     "pi_home_H",
     "pi_away_H",
@@ -54,21 +54,18 @@
     "elo_home",
     "elo_away",
     "elo_home_expect",
-    "elo_away_expect",
-    "mkt_b365_pH",
-    "mkt_b365_pD",
-    "mkt_b365_pA"
+    "elo_away_expect"
   ],
   "rps_bookmaker": 0.1296,
   "accuracy_bookmaker": 0.5594,
   "beats_bookmaker_rps": true,
   "kelly": {
     "bankroll_iniziale": 1000.0,
-    "bankroll_finale": 725.69,
-    "profitto": -274.31,
-    "roi_pct": -27.43,
-    "scommesse": 488,
-    "stake_totale_pct": 704.1,
+    "bankroll_finale": 1037.83,
+    "profitto": 37.83,
+    "roi_pct": 3.78,
+    "scommesse": 102,
+    "stake_totale_pct": 23.4,
     "mode": "dinamico",
     "odds_thresholds": [
       1.8,
@@ -86,24 +83,24 @@
       5.0,
       2.5
     ],
-    "n_troncate_al_cap": 48
+    "n_troncate_al_cap": 0
   },
   "shap_neopromossa": {
     "home_promoted": {
-      "mean_abs_shap": 0.00336580309465702,
+      "mean_abs_shap": 0.00017947080713970505,
       "rank": 16,
-      "n_features_total": 32,
-      "shap_feature1_classH": -0.002953905217278144,
-      "shap_feature0_classH": 0.001319176078721813,
-      "delta_classH": -0.004273081295999957
+      "n_features_total": 29,
+      "shap_feature1_classH": -0.0002754623896429741,
+      "shap_feature0_classH": 7.365496030391046e-05,
+      "delta_classH": -0.00034911734994688454
     },
     "away_promoted": {
-      "mean_abs_shap": 0.018668170594989344,
+      "mean_abs_shap": 0.0002210760021382898,
       "rank": 17,
-      "n_features_total": 32,
-      "shap_feature1_classH": 0.03728176717052621,
-      "shap_feature0_classH": -0.01853437637304712,
-      "delta_classH": 0.05581614354357333
+      "n_features_total": 29,
+      "shap_feature1_classH": -4.866683235850774e-05,
+      "shap_feature0_classH": 7.104162798840402e-05,
+      "delta_classH": -0.00011970846034691177
     }
   }
 }

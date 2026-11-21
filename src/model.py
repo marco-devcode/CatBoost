@@ -61,7 +61,7 @@ def ranked_probability_score(y_true, y_proba):
 # ═══════════════════════════════════════════════════════════════════════════════
 # 4.1 Training Baseline
 # ═══════════════════════════════════════════════════════════════════════════════
-def train_baseline(X_train, X_test, y_train, y_test):
+def train_baseline(X_train, X_test, y_train, y_test, base_train=None):
     """Addestra il modello baseline CatBoost."""
     print("=" * 55)
     print("4.1 — Training Baseline")
@@ -77,20 +77,25 @@ def train_baseline(X_train, X_test, y_train, y_test):
         verbose=100
     )
 
-    # L'early stopping NON deve guardare il test set: scegliere il numero
-    # di iterazioni sulle prestazioni sul test e' leakage (i numeri riportati
-    # diventano ottimisticamente falsati). Uso una fetta temporale del
-    # training. Il modello finale (train_final_model) non usa eval_set.
     n = len(y_train)
     n_es = max(int(n * 0.15), 20)
     if n - n_es >= 50:
-        model.fit(
+        tr_pool = Pool(
             X_train.iloc[:n - n_es], list(y_train[:n - n_es]),
-            eval_set=(X_train.iloc[n - n_es:], list(y_train[n - n_es:])),
+            baseline=(base_train[:n - n_es] if base_train is not None else None),
+        )
+        val_pool = Pool(
+            X_train.iloc[n - n_es:], list(y_train[n - n_es:]),
+            baseline=(base_train[n - n_es:] if base_train is not None else None),
+        )
+        model.fit(
+            tr_pool,
+            eval_set=val_pool,
             early_stopping_rounds=50,
         )
     else:
-        model.fit(X_train, list(y_train))
+        tr_pool = Pool(X_train, list(y_train), baseline=base_train)
+        model.fit(tr_pool)
 
     return model
 
@@ -98,14 +103,18 @@ def train_baseline(X_train, X_test, y_train, y_test):
 # ═══════════════════════════════════════════════════════════════════════════════
 # 4.2 Valutazione
 # ═══════════════════════════════════════════════════════════════════════════════
-def evaluate_model(model, X_test, y_test, label="Baseline"):
+def evaluate_model(model, X_test, y_test, label="Baseline", base_test=None):
     """Valuta il modello e stampa metriche."""
     print(f"\n{'='*55}")
     print(f"4.2 — Valutazione {label}")
     print(f"{'='*55}")
 
-    probs = model.predict_proba(X_test)
-    preds = model.predict(X_test).flatten()
+    if base_test is not None:
+        probs = model.predict_proba(Pool(X_test, baseline=base_test))
+        preds = np.argmax(probs, axis=1)
+    else:
+        probs = model.predict_proba(X_test)
+        preds = model.predict(X_test).flatten()
 
     rps = ranked_probability_score(y_test.values, probs)
     acc = (preds == y_test.values).mean()
@@ -141,52 +150,69 @@ def evaluate_model(model, X_test, y_test, label="Baseline"):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# MODELLO SEMPLIFICATO: set di feature e iperparametri
+# ARCHITETTURA RESIDUAL LOGIT-OFFSET (Mercato come Prior + Fondamentali)
 # ─────────────────────────────────────────────────────────────────────────────
-# La selezione e' stata fatta con metodo statistico (src/select_features.py):
-#   - fase 1: eliminazione a ritroso di gruppi di feature, con cross-validation
-#     TEMPORALE sul SOLO training, tenendo ogni rimozione il cui degrado non
-#     fosse statisticamente significativo (bootstrap paired su RPS per partita);
-#   - fase 2: scelta degli iperparametri, sempre sul solo training;
-#   - fase 3: verifica sul test set, UNA volta sola, con test paired
-#     (bootstrap, Wilcoxon, Diebold-Mariano).
-#
-# Risultato: 32 feature (41 - 8 di Pinnacle/consensus - 3 overround) e
-# iperparametri 200/0.05/depth 4. Sul test set il modello semplificato e'
-# indistinguibile dal completo (RPS +0.00057, p=0.60) e addestra in ~4s
-# invece di ~30s.
-#
-# PERCHE' ESCLUDERE LE FEATURE DI MERCATO "ESTESE": le quote Pinnacle e la
-# media di mercato non esistono per le partite FUTURE in produzione (da
-# TheOddsAPI arriva un solo bookmaker). Allenarsi su colonne che in
-# inferenza mancano non e' solo sprecato: e' un disallineamento, e per
-# apex-tempi le previsioni del sito erano diverse da quelle misurate.
-# Con questo set ogni feature e' sempre disponibile: training e inferenza
-# sono identici per costruzione.
-SIMPLIFIED_EXCLUDE_PREFIXES = ("mkt_pinnacle_", "mkt_avg_")
+# Negli alberi entrano SOLO le 29 feature fondamentali calcistiche (zero `mkt_*`).
+# Quando le quote Bet365 sono presenti, log(p_b365) viene passato come baseline
+# continua al Pool CatBoost: gli alberi stimano soltanto lo scostamento residuo
+# rispetto alla linea di mercato, evitando che Kelly punti sull'errore di
+# quantizzazione degli split sulle quote.
+SIMPLIFIED_EXCLUDE_PREFIXES = ("mkt_",)
 SIMPLIFIED_EXCLUDE_SUFFIXES = ("_overround",)
-DEFAULT_PARAMS = {"iterations": 200, "learning_rate": 0.05, "depth": 6}
-# depth 4 (scelto dalla CV sul training con il set semplificato)
-DEFAULT_PARAMS = {"iterations": 200, "learning_rate": 0.05, "depth": 4}
+RESIDUAL_PARAMS_BY_LEAGUE = {
+    "seriea": {"iterations": 60, "learning_rate": 0.02, "depth": 3, "l2_leaf_reg": 30},
+    "eredivisie": {"iterations": 160, "learning_rate": 0.04, "depth": 4, "l2_leaf_reg": 10},
+}
+DEFAULT_PARAMS = {"iterations": 80, "learning_rate": 0.02, "depth": 3, "l2_leaf_reg": 30}
+PURE_PARAMS = {"iterations": 250, "learning_rate": 0.03, "depth": 4, "l2_leaf_reg": 15}
 
 
 def simplified_feature_set(columns):
-    """Il set di feature del modello semplificato, fra quelle disponibili."""
+    """Le 29 feature fondamentali calcistiche (esclude tutte le colonne `mkt_*`)."""
     return [c for c in columns
             if not c.startswith(SIMPLIFIED_EXCLUDE_PREFIXES)
             and not c.endswith(SIMPLIFIED_EXCLUDE_SUFFIXES)]
 
 
+def compute_market_baseline(
+    df_with_mkt: pd.DataFrame,
+    pure_model=None,
+    fund_cols=None,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Estrae log(p_b365) come baseline continua (fallback al modello puro se mancano quote)."""
+    mkt_cols = ("mkt_b365_pH", "mkt_b365_pD", "mkt_b365_pA")
+    n = len(df_with_mkt)
+    if not all(c in df_with_mkt.columns for c in mkt_cols):
+        has_mkt = np.zeros(n, dtype=bool)
+        p_raw = np.full((n, 3), np.nan)
+    else:
+        p_raw = df_with_mkt[list(mkt_cols)].to_numpy(dtype=float)
+        has_mkt = np.all(np.isfinite(p_raw) & (p_raw > 0.0), axis=1)
+
+    if pure_model is not None and fund_cols is not None and (~has_mkt).any():
+        p_pure = pure_model.predict_proba(df_with_mkt[list(fund_cols)])
+        p_safe = np.where(has_mkt[:, None], p_raw, 1.0 / 3.0)
+        base = np.where(
+            has_mkt[:, None],
+            np.log(np.clip(p_safe, 1e-6, 1.0)),
+            np.log(np.clip(p_pure, 1e-6, 1.0)),
+        )
+    else:
+        p_safe = np.where(has_mkt[:, None], p_raw, 1.0 / 3.0)
+        base = np.where(has_mkt[:, None], np.log(np.clip(p_safe, 1e-6, 1.0)), 0.0)
+    return base, has_mkt
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # 4.3 Hyperparameter Tuning
 # ═══════════════════════════════════════════════════════════════════════════════
-def hyperparameter_tuning(X_train, y_train):
+def hyperparameter_tuning(X_train, y_train, base_train=None):
     """Cross-validation temporale per trovare i migliori iperparametri."""
     print(f"\n{'='*55}")
     print("4.3 — Hyperparameter Tuning (CV temporale)")
     print(f"{'='*55}")
 
-    train_pool = Pool(X_train, y_train)
+    train_pool = Pool(X_train, y_train, baseline=base_train)
 
     param_grid = [
         {'iterations': 1000, 'learning_rate': 0.03, 'depth': 6},
@@ -230,8 +256,8 @@ def hyperparameter_tuning(X_train, y_train):
     return best_params, all_results
 
 
-def train_final_model(X_train, y_train, best_params):
-    """Riaddestra il modello finale con i migliori parametri su tutto il training set."""
+def train_final_model(X_train, y_train, best_params, base_train=None):
+    """Riaddestra il modello finale con i migliori parametri sul training set."""
     print(f"\nTraining finale con best params...")
     final_model = CatBoostClassifier(
         **best_params,
@@ -240,7 +266,7 @@ def train_final_model(X_train, y_train, best_params):
         random_seed=42,
         verbose=200
     )
-    final_model.fit(X_train, y_train)
+    final_model.fit(Pool(X_train, y_train, baseline=base_train))
     return final_model
 
 
@@ -285,28 +311,20 @@ def main(league, fast: bool = False, tune: bool = False):
     print("║" + title.ljust(54)[:53] + "║")
     print("╚" + "═" * 53 + "╝")
 
-    X_train, X_test, y_train, y_test = load_data(league)
-    print(f"Train: {len(X_train)} | Test: {len(X_test)}")
+    X_train_full, X_test_full, y_train, y_test = load_data(league)
+    print(f"Train: {len(X_train_full)} | Test: {len(X_test_full)}")
 
-    # ── Set di feature semplificato (vedi la costante e la sua
-    # documentazione): si escludono le feature di mercato "estese" (le
-    # quote Pinnacle e la media di mercato) e gli overround, perche' in
-    # produzione sulle partite future NON ESISTONO (un solo bookmaker da
-    # TheOddsAPI). Allenarsi su colonne che in inferenza mancano crea un
-    # disallineamento: il modello gira su colonne diverse da quelle su cui
-    # e' stato addestrato, e le previsioni pubblicate non sono quelle
-    # misurate. Con questo set ogni feature e' sempre disponibile.
-    _all_cols = list(X_train.columns)
+    _all_cols = list(X_train_full.columns)
     keep = simplified_feature_set(_all_cols)
     dropped = [c for c in _all_cols if c not in keep]
-    X_train = X_train[keep]
-    X_test = X_test[keep]
-    print(f"Feature usate dal modello ({len(keep)}): {keep}")
+    X_train = X_train_full[keep]
+    X_test = X_test_full[keep]
+    print(f"Feature fondamentali negli alberi ({len(keep)}): {keep}")
     if dropped:
-        print(f"Feature escluse ({len(dropped)}, non disponibili in produzione "
-              f"sulle future): {dropped}")
+        print(f"Feature di mercato escluse dagli alberi ({len(dropped)}, usate solo come prior baseline)")
 
     MODEL_PATH = league.model_path
+    PURE_PATH = MODELS_DIR / f"{league.model_name}_pure.cbm"
 
     if len(X_train) == 0:
         print("\nAVVERTENZA: X_train vuoto (dataset parziale < cutoff).")
@@ -321,9 +339,18 @@ def main(league, fast: bool = False, tune: bool = False):
         final_model.load_model(str(MODEL_PATH))
         print(f"Modello caricato da {MODEL_PATH}")
 
-        # Valutazione sul test set disponibile
+        pure_model = None
+        if PURE_PATH.exists():
+            pure_model = CatBoostClassifier()
+            pure_model.load_model(str(PURE_PATH))
+
         if len(X_test) > 0:
-            final_metrics = evaluate_model(final_model, X_test, y_test, "Loaded")
+            _feat = list(final_model.feature_names_)
+            if any(c.startswith("mkt_") for c in _feat):
+                final_metrics = evaluate_model(final_model, X_test_full[_feat], y_test, "Loaded")
+            else:
+                base_test, _ = compute_market_baseline(X_test_full, pure_model=pure_model, fund_cols=_feat)
+                final_metrics = evaluate_model(final_model, X_test_full[_feat], y_test, "Loaded", base_test=base_test)
         else:
             print("Nessun dato di test disponibile per la valutazione.")
             final_metrics = {"accuracy": 0.0, "rps": 0.0}
@@ -332,78 +359,66 @@ def main(league, fast: bool = False, tune: bool = False):
         best_params = {}
         cv_results = []
     else:
-        baseline_model = train_baseline(X_train, X_test, y_train, y_test)
-        baseline_metrics = evaluate_model(baseline_model, X_test, y_test, "Baseline")
+        # 1. Modello Puro di fallback (solo 29 fondamentali, senza quote di mercato)
+        pure_model = CatBoostClassifier(
+            **PURE_PARAMS,
+            loss_function='MultiClass',
+            eval_metric='Accuracy',
+            random_seed=42,
+            verbose=False,
+        )
+        pure_model.fit(X_train, y_train)
+        pure_model.save_model(str(PURE_PATH))
+        print(f"Modello puro di fallback salvato in {PURE_PATH}")
+
+        # 2. Prior continuo di mercato log(p_b365) per training/test residuale
+        base_train_all, has_mkt_train = compute_market_baseline(
+            X_train_full, pure_model=pure_model, fund_cols=keep
+        )
+        base_test, _ = compute_market_baseline(
+            X_test_full, pure_model=pure_model, fund_cols=keep
+        )
+
+        if has_mkt_train.sum() >= 20:
+            X_res_tr = X_train.loc[has_mkt_train].reset_index(drop=True)
+            y_res_tr = y_train.loc[has_mkt_train].reset_index(drop=True)
+            base_res_tr = base_train_all[has_mkt_train]
+        else:
+            X_res_tr = X_train.reset_index(drop=True)
+            y_res_tr = y_train.reset_index(drop=True)
+            base_res_tr = base_train_all
+
+        baseline_model = train_baseline(X_res_tr, X_test, y_res_tr, y_test, base_train=base_res_tr)
+        baseline_metrics = evaluate_model(baseline_model, X_test, y_test, "Baseline", base_test=base_test)
 
         if fast:
-            best_params = {'iterations': 1000, 'learning_rate': 0.03, 'depth': 6}
-            cv_results = [{"params": best_params, "note": "griglia CV saltata (--fast)"}]
-            print(f"  [fast] parametri fissi: {best_params}")
+            best_params = dict(RESIDUAL_PARAMS_BY_LEAGUE.get(league.key, DEFAULT_PARAMS))
+            cv_results = [{"params": best_params, "note": "parametri residuali (--fast)"}]
+            print(f"  [fast] parametri residuali: {best_params}")
         elif tune:
-            # La griglia di CV (5 fold x 5 configurazioni = 25 training) era
-            # il collo di bottiglia della pipeline. I parametri sono gia'
-            # stati scelti con metodo statistico sul TRAINING
-            # (src/select_features.py --mode params): rieseguire la griglia
-            # a ogni run non aggiunge informazione, costa minuti. Con --tune
-            # la si riesegue comunque, se si vuole riverificare.
-            best_params, cv_results = hyperparameter_tuning(X_train, y_train)
+            best_params, cv_results = hyperparameter_tuning(X_res_tr, y_res_tr, base_train=base_res_tr)
         else:
-            best_params = dict(DEFAULT_PARAMS)
+            best_params = dict(RESIDUAL_PARAMS_BY_LEAGUE.get(league.key, DEFAULT_PARAMS))
             cv_results = [{"params": best_params,
-                           "note": "scelti su training con CV temporale "
-                                   "(src/select_features.py --mode params); "
-                                   "usa --tune per rieseguire la griglia"}]
-            print(f"  parametri (scelti su training): {best_params}")
-        final_model = train_final_model(X_train, y_train, best_params)
+                           "note": "parametri residuali per value betting su baseline log(p_b365)"}]
+            print(f"  parametri residuali ({league.key}): {best_params}")
 
-        final_metrics = evaluate_model(final_model, X_test, y_test, "Tuned")
+        final_model = train_final_model(X_res_tr, y_res_tr, best_params, base_train=base_res_tr)
+        final_metrics = evaluate_model(final_model, X_test, y_test, "Residual", base_test=base_test)
 
-        # ── Calibrazione Dirichlet (Kull et al., NeurIPS 2019) ────────────
-        # Su 3 classi la calibrazione e' 3 parametri + 1 temperatura, adattati
-        # su un set di VALIDAZIONE.
-        #
-        # ATTENZIONE (bug corretto): la validazione NON puo' essere una
-        # parte del training usata anche per addestrare il modello finale.
-        # Il modello finale e' allenato su TUTTO il training, quindi le sue
-        # previsioni sulle righe di validazione sono IN-SAMPLE (gonfiate) e
-        # la calibrazione che ne deriva e' sbagliata: sul test set il RPS
-        # pegliorava di 0.02 e poi peggiorava di 0.02 applicata al modello
-        # vero. Misurato: con validazione in-sample il RPS test andava da
-        # 0.13019 a 0.15068.
-        #
-        # Soluzione: calibrazione CROSS-FITTED. Si allena un modello
-        # ausiliario solo sulla seconda meta' del training e si usano le sue
-        # previsioni sulla prima meta' (out-of-sample) per adattare alpha e
-        # w. La calibrazione e' cosi' stimata su previsioni che il modello
-        # non ha mai visto, e si applica al modello finale.
-        n_val = max(len(y_train) // 2, 10)
-        # L'ausiliary usa gli STESSI parametri del modello finale: se
-        # l'ausiliary fosse piu' forte o piu' debole, la calibrazione
-        # stimata su di lui non trasferirebbe al modello finale.
-        calib_model = CatBoostClassifier(
-            iterations=best_params.get("iterations", 200),
-            learning_rate=best_params.get("learning_rate", 0.05),
-            depth=best_params.get("depth", 4),
-            loss_function="MultiClass", eval_metric="Accuracy",
-            random_seed=42, verbose=False,
-        )
-        calib_model.fit(X_train.iloc[n_val:], list(y_train[n_val:]))
-        probs_val = calib_model.predict_proba(X_train.iloc[:n_val])
-        alpha, w = fit_dirichlet_calibration(list(y_train[:n_val]), probs_val)
-        final_metrics["calibration_alpha"] = [float(a) for a in alpha]
-        final_metrics["calibration_w"] = float(w)
-        final_metrics["calibration_n_val"] = int(n_val)
-        print(f"\n  Calibrazione Dirichlet: alpha={np.round(alpha, 4).tolist()} w={w:.4f} "
-              f"(validation = prime {n_val} righe del training)")
+        # Il prior di mercato B365 de-viggato e' gia' calibrato sul log-loss;
+        # la calibrazione post-processing resta identita' per non spostare l'offset.
+        alpha = [0.0, 0.0, 0.0]
+        w = 1.0
+        n_val = int(len(y_res_tr))
+        final_metrics["calibration_alpha"] = alpha
+        final_metrics["calibration_w"] = w
+        final_metrics["calibration_n_val"] = n_val
+        print(f"\n  Calibrazione residuale: identita' alpha={alpha}, w={w} (prior mercato log(p_b365))")
 
-        # La calibrazione va salvata SEPARATAMENTE dal .cbm: e' una funzione
-        # post-processing delle probabilita', non parte del modello CatBoost.
-        # predict_fixtures e predict_match la caricano da qui.
         cal_path = MODELS_DIR / f"calibration_{league.key}.json"
         with open(cal_path, "w") as f:
-            json.dump({"alpha": [float(a) for a in alpha], "w": float(w),
-                       "n_val": int(n_val), "method": "dirichlet"},
-                      f, indent=2)
+            json.dump({"alpha": alpha, "w": w, "n_val": n_val, "method": "residual_logit_offset"}, f, indent=2)
         print(f"  Calibrazione salvata in {cal_path}")
 
         save_model_and_metrics(final_model, final_metrics,

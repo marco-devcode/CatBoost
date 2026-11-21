@@ -1,13 +1,13 @@
 {
-  "accuracy": 0.563525,
-  "rps": 0.129339,
+  "accuracy": 0.565574,
+  "rps": 0.129439,
   "calibration_alpha": [
-    0.049209964126186403,
-    -0.029197234057727287,
-    -0.020012869190002364
+    0.0,
+    0.0,
+    0.0
   ],
-  "calibration_w": 0.960023,
-  "calibration_n_val": 2821,
+  "calibration_w": 1.0,
+  "calibration_n_val": 5637,
   "features": [
     "pi_home_H",
     "pi_away_H",
@@ -37,10 +37,7 @@
     "elo_home",
     "elo_away",
     "elo_home_expect",
-    "elo_away_expect",
-    "mkt_b365_pH",
-    "mkt_b365_pD",
-    "mkt_b365_pA"
+    "elo_away_expect"
   ],
   "league": "seriea"
 }

@@ -1,0 +1,5 @@
+webapp/public/predictions_*.json merge=ours-generated
+models/REPORT_FINALE_*.md merge=ours-generated
+models/*.json merge=ours-generated
+data/*.csv merge=ours-generated
+data/*_pi_ratings.json merge=ours-generated

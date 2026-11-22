@@ -49,35 +49,56 @@ RESULTS_DIR = ROOT / "results"
 # 5.1 Rolling Points Form (ultimi N match, home/away separati)
 # ═══════════════════════════════════════════════════════════════════════════════
 def add_rolling_form(df, window=5):
-    """Calcola i punti medi negli ultimi N match per ogni squadra."""
+    """Forma ibrida: 60% punti nel ruolo (casa/trasferta) + 40% forma globale ultime N gare."""
     df = df.copy()
 
-    # Punti per ogni partita (prospetta home)
+    # Punti per ogni partita
     df['points_home'] = np.where(
-        df['FTHG'] > df['FTAG'], 3,
-        np.where(df['FTHG'] == df['FTAG'], 1, 0)
+        df['FTHG'] > df['FTAG'], 3.0,
+        np.where(df['FTHG'] == df['FTAG'], 1.0, 0.0)
     )
     df['points_away'] = np.where(
-        df['FTAG'] > df['FTHG'], 3,
-        np.where(df['FTAG'] == df['FTHG'], 1, 0)
+        df['FTAG'] > df['FTHG'], 3.0,
+        np.where(df['FTAG'] == df['FTHG'], 1.0, 0.0)
     )
 
-    # Rolling per squadra di casa (performance in casa)
-    form_home = (
+    # Forma specifica per ruolo (solo casa / solo trasferta)
+    venue_home = (
         df.groupby('HomeTeam')['points_home']
         .transform(lambda x: x.shift(1).rolling(window, min_periods=1).mean())
     )
-
-    # Rolling per squadra ospite (performance in trasferta)
-    form_away = (
+    venue_away = (
         df.groupby('AwayTeam')['points_away']
         .transform(lambda x: x.shift(1).rolling(window, min_periods=1).mean())
     )
 
-    df[f'home_form_{window}'] = form_home
-    df[f'away_form_{window}'] = form_away
+    # Forma globale (ultime N partite complessive casa + trasferta in ordine cronologico)
+    h_apps = pd.DataFrame({
+        'row_idx': df.index, 'Date': df['Date'],
+        'team': df['HomeTeam'], 'pts': df['points_home'], 'is_home': True,
+    })
+    a_apps = pd.DataFrame({
+        'row_idx': df.index, 'Date': df['Date'],
+        'team': df['AwayTeam'], 'pts': df['points_away'], 'is_home': False,
+    })
+    apps = pd.concat([h_apps, a_apps], ignore_index=True).sort_values(
+        ['Date', 'row_idx'], kind='mergesort'
+    )
+    apps['all_form'] = (
+        apps.groupby('team')['pts']
+        .transform(lambda x: x.shift(1).rolling(window, min_periods=1).mean())
+    )
+    all_home = apps[apps['is_home']].set_index('row_idx')['all_form'].reindex(df.index)
+    all_away = apps[~apps['is_home']].set_index('row_idx')['all_form'].reindex(df.index)
 
-    df.drop(columns=['points_home', 'points_away'], inplace=True)
+    df[f'home_form_{window}'] = np.where(
+        venue_home.isna(), np.nan, 0.60 * venue_home + 0.40 * all_home
+    )
+    df[f'away_form_{window}'] = np.where(
+        venue_away.isna(), np.nan, 0.60 * venue_away + 0.40 * all_away
+    )
+
+    df = df.drop(columns=['points_home', 'points_away'])
 
     return df
 

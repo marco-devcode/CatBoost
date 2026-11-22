@@ -30,11 +30,11 @@ const CATBOOST = {
 };
 
 const METRICHE = {
-  accuracy: 0.5656,
+  accuracy: 0.5635,
   accuracyBookmaker: 0.5594,
-  f1Macro: 0.4401,
+  f1Macro: 0.4392,
   f1MacroBookmaker: 0.4265,
-  rpsModello: 0.1294,
+  rpsModello: 0.1295,
   rpsBookmaker: 0.1296,
   rpsNeutro: 0.2,
   testMatches: 488,
@@ -77,18 +77,19 @@ const FEATURES = [
     gruppo: "Forma recente (ultime 5)",
     count: 4,
     spiegazione:
-      "Media dei punti nelle ultime 5 partite, calcolata separatamente per casa e trasferta con shift di una gara: la media include solo partite gia giocate prima del match previsto.",
+      "Forma ibrida sui punti (60% ultime 5 partite nel ruolo casa/trasferta + 40% ultime 5 partite complessive) piu differenza reti nel ruolo, sempre con shift causale.",
     campi: [
       {
         nome: "home_form_5",
-        etichetta: "Punti medi in casa (ult. 5)",
+        etichetta: "Forma ibrida casa (ult. 5)",
         dettaglio:
-          "3 punti per vittoria, 1 per pareggio, 0 per sconfitta sulle ultime 5 gare interne disponibili.",
+          "60% media punti nelle ultime 5 gare in casa + 40% media punti nelle ultime 5 gare assolute.",
       },
       {
         nome: "away_form_5",
-        etichetta: "Punti medi in trasferta (ult. 5)",
-        dettaglio: "Stesso calcolo sulle ultime 5 trasferte.",
+        etichetta: "Forma ibrida trasferta (ult. 5)",
+        dettaglio:
+          "60% media punti nelle ultime 5 trasferte + 40% media punti nelle ultime 5 gare assolute.",
       },
       {
         nome: "home_goal_diff_5",
@@ -212,7 +213,7 @@ const FEATURES = [
     gruppo: "Elo con decadimento",
     count: 4,
     spiegazione:
-      "Rating Elo (K=20, vantaggio casa 65 punti, base 1500) aggiornato partita dopo partita, con mean-reversion del 25% verso 1500 tra una stagione e l'altra.",
+      "Rating Elo (K=20 pesato per scarto reti, vantaggio casa 65 punti, base 1500) aggiornato partita dopo partita, con mean-reversion del 25% verso 1500 tra una stagione e l'altra.",
     campi: [
       {
         nome: "elo_home / elo_away",
@@ -243,27 +244,27 @@ const STEPS = [
   },
   {
     n: 3,
-    titolo: "Calcolare i Pi-Rating",
+    titolo: "Pi-Rating Walk-Forward",
     testo:
-      "I parametri di attacco, difesa e fattore tau di Dixon-Coles vengono stimati via massima verosimiglianza esclusivamente sulle partite pre-cutoff (< 2025-08-01), dimezzando il peso ogni 2 anni.",
+      "Stima Dixon-Coles (con fattore tau e decay ogni 2 anni) fino al cutoff 2025-08-01, poi ri-stima walk-forward mensile causale su partite gia concluse con warm-start.",
   },
   {
     n: 4,
     titolo: "Costruire le 29 feature",
     testo:
-      "Ogni sfida genera 29 feature puramente calcistiche negli alberi (Pi-Rating, forma, gol, riposo, H2H, neopromosse, tiri propri casa/trasferta, angoli, cartellini ed Elo), tutte calcolate prima del match.",
+      "Ogni sfida genera 29 feature puramente calcistiche negli alberi (Pi-Rating, forma ibrida 60/40, gol, riposo, H2H, neopromosse, tiri propri casa/trasferta, angoli, cartellini ed Elo pesato sui gol).",
   },
   {
     n: 5,
-    titolo: "Residual Logit-Offset",
+    titolo: "Prior Sharp + Residual Offset",
     testo:
-      "Le quote Bet365 de-viggate non entrano come feature negli alberi: vengono usate come baseline continua log(p_b365), cosi CatBoost apprende solo lo scostamento residuo giustificato dai fondamentali (piu modello puro a 29 feature per gare senza quote).",
+      "Le quote non entrano negli alberi: in valutazione/inferenza si usa il consenso sharp (65% Pinnacle + 35% media mercato, fallback Bet365/modello puro) come baseline continua su cui CatBoost applica il residuo fondamentale.",
   },
   {
     n: 6,
-    titolo: "Valutare e generare Kelly",
+    titolo: "Filtri EV e Portafoglio Kelly",
     testo:
-      "Il modello viene valutato sul test set successivo al 2025-08-01 (488 gare mai viste). Quando la stima residuale supera la quota del bookmaker, il filtro Kelly dinamico seleziona la value bet.",
+      "Sul test set successivo al 2025-08-01 (488 gare), il filtro seleziona solo vere value bet contro Bet365 con EV > 0,5% e quota <= 4,50, dimensionate con Kelly dinamico.",
   },
 ];
 
@@ -550,15 +551,22 @@ export default function ModelPage() {
               Sul test set da {METRICHE.testMatches} partite il modello registra
               RPS <strong>{METRICHE.rpsModello.toFixed(4)}</strong> contro{" "}
               <strong>{METRICHE.rpsBookmaker.toFixed(4)}</strong> di Bet365
-              (livello neutro di letteratura circa{" "}
-              {METRICHE.rpsNeutro.toFixed(2)}). Il modello supera lievemente la
-              quota di apertura sul test set (ROI Kelly +3,8% su 102 giocate
-              selezionate), ma su quote di chiusura e su singoli campionati
-              l&apos;ampiezza statistica impone cautela: la pagina{" "}
+              (Accuracy{" "}
+              <strong>
+                {(METRICHE.accuracy * 100).toFixed(2)}%
+              </strong>{" "}
+              vs{" "}
+              <strong>
+                {(METRICHE.accuracyBookmaker * 100).toFixed(2)}%
+              </strong>
+              ). Combinando il prior sharp Pinnacle+Avg con il residuo
+              fondamentale e i filtri di qualità (EV &gt; 0,5%, quota &le;
+              4,50), il test set genera Kelly ROI +3,2% su 72 giocate
+              (Flat ROI +18,7% su apertura senza filtro quota) — resta aperta la{" "}
               <Link href="/kelly" className="inline-link">
-                Portafoglio Kelly
+                pagina Portafoglio Kelly
               </Link>{" "}
-              mostra in trasparenza l&apos;effetto reale delle puntate.
+              per verificare i dettagli partita per partita.
             </div>
           </section>
 

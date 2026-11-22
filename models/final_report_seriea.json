@@ -1,27 +1,27 @@
 {
   "best_model": "v1_baseline",
   "best_model_desc": "Baseline (Pi-Rating + FE) — Serie A",
-  "accuracy": 0.5656,
-  "rps_model": 0.1294,
-  "f1_macro": 0.4401,
-  "f1_weighted": 0.4961,
+  "accuracy": 0.5635,
+  "rps_model": 0.1295,
+  "f1_macro": 0.4392,
+  "f1_weighted": 0.4951,
   "f1_per_class": {
     "H": 0.6559,
-    "D": 0.0496,
-    "A": 0.615
+    "D": 0.0488,
+    "A": 0.6128
   },
   "precision_per_class": {
     "H": 0.5492,
-    "D": 0.75,
-    "A": 0.5873
+    "D": 0.5,
+    "A": 0.5882
   },
   "recall_home": 0.8141,
   "recall_draw": 0.0256,
-  "recall_away": 0.6453,
+  "recall_away": 0.6395,
   "recall_per_class": {
     "H": 0.8141,
     "D": 0.0256,
-    "A": 0.6453
+    "A": 0.6395
   },
   "n_test": 488,
   "n_features": 29,
@@ -61,11 +61,11 @@
   "beats_bookmaker_rps": true,
   "kelly": {
     "bankroll_iniziale": 1000.0,
-    "bankroll_finale": 1037.83,
-    "profitto": 37.83,
-    "roi_pct": 3.78,
-    "scommesse": 102,
-    "stake_totale_pct": 23.4,
+    "bankroll_finale": 1031.53,
+    "profitto": 31.53,
+    "roi_pct": 3.15,
+    "scommesse": 72,
+    "stake_totale_pct": 30.8,
     "mode": "dinamico",
     "odds_thresholds": [
       1.8,
@@ -87,20 +87,20 @@
   },
   "shap_neopromossa": {
     "home_promoted": {
-      "mean_abs_shap": 0.00017947080713970505,
+      "mean_abs_shap": 0.0,
       "rank": 16,
       "n_features_total": 29,
-      "shap_feature1_classH": -0.0002754623896429741,
-      "shap_feature0_classH": 7.365496030391046e-05,
-      "delta_classH": -0.00034911734994688454
+      "shap_feature1_classH": 0.0,
+      "shap_feature0_classH": 0.0,
+      "delta_classH": 0.0
     },
     "away_promoted": {
-      "mean_abs_shap": 0.0002210760021382898,
+      "mean_abs_shap": 0.00046844066492420395,
       "rank": 17,
       "n_features_total": 29,
-      "shap_feature1_classH": -4.866683235850774e-05,
-      "shap_feature0_classH": 7.104162798840402e-05,
-      "delta_classH": -0.00011970846034691177
+      "shap_feature1_classH": -0.000340436678783041,
+      "shap_feature0_classH": 0.00011256467832714204,
+      "delta_classH": -0.0004530013571101831
     }
   }
 }

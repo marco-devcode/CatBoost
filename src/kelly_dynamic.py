@@ -119,3 +119,26 @@ def dynamic_kelly_breakdown(p: float, odds: float) -> dict:
 # il valore e' identico, cambia solo il nome.
 def kelly_fraction(p_model: float, odds: float) -> float:
     return calculate_dynamic_kelly_stake(p_model, odds)
+
+
+KELLY_MIN_EV = 0.005
+KELLY_MAX_ODDS = 4.50
+
+
+def select_value_bet_stake(
+    p_model: float,
+    p_bm: float,
+    odds: float,
+    min_ev: float = KELLY_MIN_EV,
+    max_odds: float = KELLY_MAX_ODDS,
+) -> float:
+    """Stake Kelly dinamico con filtro di qualita' (EV > min_ev e quota <= max_odds)."""
+    try:
+        pm = float(p_model)
+        pb = float(p_bm)
+        o = float(odds)
+    except (TypeError, ValueError):
+        return 0.0
+    if pm <= pb or o > max_odds or (pm * o - 1.0) <= min_ev:
+        return 0.0
+    return calculate_dynamic_kelly_stake(pm, o)

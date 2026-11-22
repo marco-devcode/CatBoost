@@ -46,6 +46,7 @@ from kelly_dynamic import (  # noqa: E402
     KELLY_DYNAMIC_CONFIG,
     calculate_dynamic_kelly_stake,
     dynamic_kelly_breakdown,
+    select_value_bet_stake,
 )
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -563,15 +564,14 @@ def main(league):
             m["bm"] = {"H": round(bm_odds[0], 2), "D": round(bm_odds[1], 2),
                        "A": round(bm_odds[2], 2)}
             m["bm_prob"] = {LABELS[i]: round(bm_prob[i] * 100, 1) for i in range(3)}
-            best_k = -1
+            best_k = 0.0
             for i, lab in enumerate(LABELS):
                 pk = m["prob"][lab] / 100.0
                 pb = bm_prob[i]
-                if pk > pb:
-                    kf = calculate_dynamic_kelly_stake(pk, bm_odds[i])
-                    if kf > 0 and kf > best_k:
-                        best_k = kf
-                        best_info = (lab, pk, bm_odds[i], kf)
+                kf = select_value_bet_stake(pk, pb, bm_odds[i])
+                if kf > 0.0 and kf > best_k:
+                    best_k = kf
+                    best_info = (lab, pk, bm_odds[i], kf)
             if best_info is not None:
                 lab, pk, odd, kf = best_info
                 m["kelly"] = {"pick": lab, "model_p": round(pk, 3),

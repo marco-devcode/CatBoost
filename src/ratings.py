@@ -124,66 +124,102 @@ def get_season_endpoints(df):
 
 
 def compute_pi_ratings(df: pd.DataFrame, cutoff: str = '2025-08-01'):
-    """Calcola i Pi-Rating con fit Dixon-Coles sul SOLO training (< cutoff) + DECAY TEMPORALE.
+    """Calcola i Pi-Rating Dixon-Coles senza data leakage.
 
-    Nessuna partita >= cutoff entra nella stima MLE (nessun data leakage dal
-    test set o dalla stagione corrente). I pesi temporali w = 0.5**(eta/half_life)
-    sono calcolati rispetto alla data piu' recente del solo training fit.
+    - Per tutte le partite pre-cutoff (< cutoff): fit MLE con decay temporale
+      ancorato al cutoff stesso.
+    - Per le partite >= cutoff: walk-forward mensile causale (ogni mese usa
+      solo partite strettamente precedenti all'inizio del mese, con warm-start).
     """
     df = df.copy().reset_index(drop=True)
     n = len(df)
 
     dates_all = pd.to_datetime(df['Date'])
-    df_fit = df[dates_all < pd.Timestamp(cutoff)].copy()
-    if len(df_fit) < 20:
-        df_fit = df.copy()
-        print(f"  [fallback fit] < 20 righe pre-{cutoff}: fit su {len(df_fit)} righe")
-
-    teams_fit = sorted(set(df_fit['HomeTeam'].unique()) | set(df_fit['AwayTeam'].unique()))
+    cutoff_ts = pd.Timestamp(cutoff)
+    pre_mask = (dates_all < cutoff_ts).values
+    df_pre = df.loc[pre_mask]
     teams_all = sorted(set(df['HomeTeam'].unique()) | set(df['AwayTeam'].unique()))
 
-    # Pesi di decay temporale (calcolati solo su df_fit -> nessun leakage dal futuro)
-    dates_fit = pd.to_datetime(df_fit['Date'])
-    age_days = (dates_fit.max() - dates_fit).dt.days.values.astype(float)
-    age_years = np.maximum(age_days / 365.25, 0.0)
-    weights = 0.5 ** (age_years / DECAY_HALF_LIFE_YEARS)
+    def _fit_slice(sub_df: pd.DataFrame, ref_date: pd.Timestamp, prev_ratings: dict | None = None):
+        teams_sub = sorted(set(sub_df['HomeTeam'].unique()) | set(sub_df['AwayTeam'].unique()))
+        dates_sub = pd.to_datetime(sub_df['Date'])
+        age_days = (ref_date - dates_sub).dt.days.values.astype(float)
+        age_years = np.maximum(age_days / 365.25, 0.0)
+        weights = 0.5 ** (age_years / DECAY_HALF_LIFE_YEARS)
 
-    print(f"  Fit Dixon-Coles su {len(df_fit)}/{n} partite (< {cutoff}), {len(teams_fit)} squadre "
-          f"(decay mezza vita {DECAY_HALF_LIFE_YEARS} anni)...")
-    ratings, home_adv, res_x = fit_dixon_coles(
-        df_fit['HomeTeam'].values, df_fit['AwayTeam'].values,
-        df_fit['FTHG'].values.astype(float), df_fit['FTAG'].values.astype(float),
-        teams_fit, None, weights,
-    )
-    rho = 0.20 * float(np.tanh(res_x[-1])) if len(res_x) else 0.0
-    print(f"  Fit completato. home_adv={home_adv:.3f}, rho={rho:+.4f}, "
-          f"peso recente={weights.max():.2f}, piu vecchia={weights.min():.3f}")
+        x0_sub = None
+        if prev_ratings is not None:
+            n_t = len(teams_sub)
+            x0_arr = np.zeros(2 * (n_t - 1) + 2)
+            for idx_t in range(n_t - 1):
+                t_name = teams_sub[idx_t]
+                if t_name in prev_ratings:
+                    x0_arr[idx_t] = prev_ratings[t_name]['attack']
+                    x0_arr[(n_t - 1) + idx_t] = prev_ratings[t_name]['defence']
+            x0_sub = x0_arr
 
-    attack = {t: ratings.get(t, {}).get('attack', 0.0) for t in teams_all}
-    defence = {t: ratings.get(t, {}).get('defence', 0.0) for t in teams_all}
+        r_dict, ha, res_x = fit_dixon_coles(
+            sub_df['HomeTeam'].values, sub_df['AwayTeam'].values,
+            sub_df['FTHG'].values.astype(float), sub_df['FTAG'].values.astype(float),
+            teams_sub, x0_sub, weights,
+        )
+        rho_val = 0.20 * float(np.tanh(res_x[-1])) if len(res_x) else 0.0
+        return r_dict, ha, rho_val, weights
 
     pi_cols = ('pi_home_H', 'pi_away_H', 'pi_home_A', 'pi_away_A')
     result = np.zeros((n, 4))
 
-    for i in range(n):
-        row = df.iloc[i]
-        home = row['HomeTeam']
-        away = row['AwayTeam']
-        result[i, 0] = attack[home] - defence[away] + home_adv   # pi_home_H
-        result[i, 1] = attack[away] - defence[home] - home_adv   # pi_away_H
-        result[i, 2] = defence[home]                               # pi_home_A
-        result[i, 3] = attack[away]                                # pi_away_A
+    def _fill_rows(indices, r_dict: dict, ha: float):
+        for idx in indices:
+            home = df.at[idx, 'HomeTeam']
+            away = df.at[idx, 'AwayTeam']
+            ah = r_dict.get(home, {}).get('attack', 0.0)
+            dh = r_dict.get(home, {}).get('defence', 0.0)
+            aa = r_dict.get(away, {}).get('attack', 0.0)
+            da = r_dict.get(away, {}).get('defence', 0.0)
+            result[idx, 0] = ah - da + ha
+            result[idx, 1] = aa - dh - ha
+            result[idx, 2] = dh
+            result[idx, 3] = aa
+
+    if len(df_pre) < 20:
+        print(f"  [fallback fit] < 20 righe pre-{cutoff}: fit su {n} righe")
+        last_ratings, last_ha, last_rho, weights = _fit_slice(df, dates_all.max())
+        _fill_rows(range(n), last_ratings, last_ha)
+    else:
+        print(f"  Fit Dixon-Coles iniziale su {len(df_pre)}/{n} partite (< {cutoff})...")
+        last_ratings, last_ha, last_rho, weights = _fit_slice(df_pre, cutoff_ts)
+        _fill_rows(np.where(pre_mask)[0], last_ratings, last_ha)
+
+        post_indices = np.where(~pre_mask)[0]
+        if len(post_indices):
+            post_ym = dates_all.iloc[post_indices].dt.to_period('M')
+            n_months = 0
+            for _, grp_idx in pd.Series(post_indices, index=post_indices).groupby(post_ym.values):
+                m_start = dates_all.iloc[grp_idx.values].min()
+                sub_fit = df.loc[dates_all < m_start]
+                if len(sub_fit) >= 20:
+                    last_ratings, last_ha, last_rho, weights = _fit_slice(
+                        sub_fit, m_start, prev_ratings=last_ratings
+                    )
+                _fill_rows(grp_idx.values, last_ratings, last_ha)
+                n_months += 1
+            print(f"  Walk-forward mensile post-cutoff completato ({n_months} refit). "
+                  f"Ultimo home_adv={last_ha:.3f}, rho={last_rho:+.4f}")
 
     for j, col in enumerate(pi_cols):
         df[col] = result[:, j]
 
     final_ratings = {
-        t: {"attack": round(attack[t], 4), "defence": round(defence[t], 4)}
+        t: {
+            "attack": round(last_ratings.get(t, {}).get('attack', 0.0), 4),
+            "defence": round(last_ratings.get(t, {}).get('defence', 0.0), 4),
+        }
         for t in teams_all
     }
     final_ratings["_global"] = {
-        "home_advantage": round(home_adv, 4),
-        "rho": round(rho, 4),
+        "home_advantage": round(last_ha, 4),
+        "rho": round(last_rho, 4),
         "cutoff": cutoff,
     }
 

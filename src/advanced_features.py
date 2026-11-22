@@ -190,13 +190,19 @@ def _run_elo_loop(df: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, float], dic
         home_expect[i] = exp_h
         away_expect[i] = exp_a
 
-        # Aggiornamento DOPO aver salvato le feature di questa riga.
+        # Aggiornamento DOPO aver salvato le feature di questa riga (pesato per scarto gol).
         ftr = str(getattr(row, "FTR", "") or "").strip().upper()
         if ftr in ("H", "D", "A"):
             score_h = 1.0 if ftr == "H" else (0.5 if ftr == "D" else 0.0)
             score_a = 1.0 - score_h
-            elo[h] = rh + ELO_K * (score_h - exp_h)
-            elo[a] = ra + ELO_K * (score_a - exp_a)
+            try:
+                gd = abs(float(row.FTHG) - float(row.FTAG))
+                mov = 1.0 + 0.25 * math.log1p(gd) if (math.isfinite(gd) and gd > 0) else 1.0
+            except (AttributeError, TypeError, ValueError):
+                mov = 1.0
+            k_eff = ELO_K * mov
+            elo[h] = rh + k_eff * (score_h - exp_h)
+            elo[a] = ra + k_eff * (score_a - exp_a)
         last_season[h] = season
         last_season[a] = season
 

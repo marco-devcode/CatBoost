@@ -26,6 +26,7 @@ from kelly_dynamic import (  # noqa: E402
     KELLY_DYNAMIC_CONFIG,
     calculate_dynamic_kelly_stake,
     dynamic_kelly_breakdown,
+    select_value_bet_stake,
 )
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -277,13 +278,10 @@ if b365_present and df_test_b365 is not None and len(bm_probs_list) > 0:
         best_k = 0.0
         best_pick = None
         for c in range(3):
-            if pm[c] > pb[c]:
-                # c_dynamic per scaglioni di quota + hard cap: la quota decide
-                # quanto Kelly pieno si prende, non una frazione unica.
-                k = calculate_dynamic_kelly_stake(pm[c], odds[c])
-                if k > 0.0 and k > best_k:
-                    best_k = k
-                    best_pick = c
+            k = select_value_bet_stake(pm[c], pb[c], odds[c])
+            if k > 0.0 and k > best_k:
+                best_k = k
+                best_pick = c
         if best_pick is not None:
             capped_flags.append(dynamic_kelly_breakdown(
                 pm[best_pick], odds[best_pick])["capped"])

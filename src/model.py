@@ -178,16 +178,42 @@ def compute_market_baseline(
     df_with_mkt: pd.DataFrame,
     pure_model=None,
     fund_cols=None,
+    use_sharp: bool = True,
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Estrae log(p_b365) come baseline continua (fallback al modello puro se mancano quote)."""
-    mkt_cols = ("mkt_b365_pH", "mkt_b365_pD", "mkt_b365_pA")
+    """Estrae log(p_prior) come baseline continua.
+
+    - Con use_sharp=False (usato nel fit sugli alberi): usa `mkt_b365_p*` in modo
+      che gli alberi apprendano i bias specifici rispetto alla linea Bet365.
+    - Con use_sharp=True (usato in valutazione/inferenza): usa il consenso sharp
+      0.65 * Pinnacle + 0.35 * Avg (con fallback a Pinnacle, media Avg+B365,
+      solo B365 o modello puro se mancano le quote).
+    """
     n = len(df_with_mkt)
-    if not all(c in df_with_mkt.columns for c in mkt_cols):
-        has_mkt = np.zeros(n, dtype=bool)
-        p_raw = np.full((n, 3), np.nan)
+
+    def _get_probs(cols):
+        if not all(c in df_with_mkt.columns for c in cols):
+            return np.full((n, 3), np.nan), np.zeros(n, dtype=bool)
+        arr = df_with_mkt[list(cols)].to_numpy(dtype=float)
+        valid = np.all(np.isfinite(arr) & (arr > 0.0), axis=1)
+        return arr, valid
+
+    p_b365, has_b365 = _get_probs(("mkt_b365_pH", "mkt_b365_pD", "mkt_b365_pA"))
+
+    if not use_sharp:
+        p_raw = p_b365
+        has_mkt = has_b365
     else:
-        p_raw = df_with_mkt[list(mkt_cols)].to_numpy(dtype=float)
-        has_mkt = np.all(np.isfinite(p_raw) & (p_raw > 0.0), axis=1)
+        p_pin, has_pin = _get_probs(("mkt_pinnacle_pH", "mkt_pinnacle_pD", "mkt_pinnacle_pA"))
+        p_avg, has_avg = _get_probs(("mkt_avg_pH", "mkt_avg_pD", "mkt_avg_pA"))
+        p_raw = np.where(has_b365[:, None], p_b365, 1.0 / 3.0)
+        for i in range(n):
+            if has_pin[i] and has_avg[i]:
+                p_raw[i] = 0.65 * p_pin[i] + 0.35 * p_avg[i]
+            elif has_pin[i]:
+                p_raw[i] = p_pin[i]
+            elif has_avg[i] and has_b365[i]:
+                p_raw[i] = 0.50 * p_avg[i] + 0.50 * p_b365[i]
+        has_mkt = has_b365 | has_pin | has_avg
 
     if pure_model is not None and fund_cols is not None and (~has_mkt).any():
         p_pure = pure_model.predict_proba(df_with_mkt[list(fund_cols)])
@@ -371,12 +397,13 @@ def main(league, fast: bool = False, tune: bool = False):
         pure_model.save_model(str(PURE_PATH))
         print(f"Modello puro di fallback salvato in {PURE_PATH}")
 
-        # 2. Prior continuo di mercato log(p_b365) per training/test residuale
+        # 2. Training degli alberi sul residuo rispetto a B365 (`use_sharp=False`);
+        #    in valutazione/inferenza si usa il prior sharp (`use_sharp=True`).
         base_train_all, has_mkt_train = compute_market_baseline(
-            X_train_full, pure_model=pure_model, fund_cols=keep
+            X_train_full, pure_model=pure_model, fund_cols=keep, use_sharp=False
         )
         base_test, _ = compute_market_baseline(
-            X_test_full, pure_model=pure_model, fund_cols=keep
+            X_test_full, pure_model=pure_model, fund_cols=keep, use_sharp=True
         )
 
         if has_mkt_train.sum() >= 20:

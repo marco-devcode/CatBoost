@@ -70,20 +70,34 @@ def _load_pure_model(league):
     return m
 
 
+def _extract_valid_triplet(feats: dict, prefix: str) -> list[float] | None:
+    vals = [feats.get(f"{prefix}pH"), feats.get(f"{prefix}pD"), feats.get(f"{prefix}pA")]
+    if all(v is not None and isinstance(v, (int, float)) and np.isfinite(float(v)) and float(v) > 0.0 for v in vals):
+        return [float(v) for v in vals]
+    return None
+
+
 def predict_proba_with_prior(model, X_row: pd.DataFrame, feats: dict, league=None) -> np.ndarray:
-    """Predice le probabilita' 1X2: usa log(p_b365) come baseline continua se
-    disponibile, altrimenti ripiega sul modello puro (solo 29 fondamentali)."""
+    """Predice le probabilita' 1X2 con prior continuo sharp (Pinnacle + Avg -> B365 -> puro)."""
     model_feats = list(model.feature_names_) if hasattr(model, "feature_names_") else list(X_row.columns)
     if any(c.startswith("mkt_") for c in model_feats):
         return model.predict_proba(X_row[model_feats])[0]
 
-    mkt_vals = [feats.get("mkt_b365_pH"), feats.get("mkt_b365_pD"), feats.get("mkt_b365_pA")]
-    mkt_valid = all(
-        v is not None and isinstance(v, (int, float)) and np.isfinite(float(v)) and float(v) > 0.0
-        for v in mkt_vals
-    )
-    if mkt_valid:
-        base = np.log(np.clip([[float(v) for v in mkt_vals]], 1e-6, 1.0))
+    p_pin = _extract_valid_triplet(feats, "mkt_pinnacle_")
+    p_avg = _extract_valid_triplet(feats, "mkt_avg_")
+    p_b365 = _extract_valid_triplet(feats, "mkt_b365_")
+
+    if p_pin is not None and p_avg is not None:
+        p_prior = [0.65 * p_pin[i] + 0.35 * p_avg[i] for i in range(3)]
+    elif p_pin is not None:
+        p_prior = p_pin
+    elif p_avg is not None and p_b365 is not None:
+        p_prior = [0.50 * p_avg[i] + 0.50 * p_b365[i] for i in range(3)]
+    else:
+        p_prior = p_b365
+
+    if p_prior is not None:
+        base = np.log(np.clip([p_prior], 1e-6, 1.0))
         return model.predict_proba(Pool(X_row[model_feats], baseline=base))[0]
 
     pure_model = _load_pure_model(league)
@@ -123,10 +137,17 @@ def _get_history_cache(df: pd.DataFrame) -> dict:
         for pos, r in enumerate(elo.itertuples(index=False))
     }
 
+    pi_arrays = {
+        c: df[c].to_numpy(dtype=float)
+        for c in ('pi_home_H', 'pi_away_H', 'pi_home_A', 'pi_away_A')
+        if c in df.columns
+    }
+
     cached = {
         "attack": attack,
         "defence": defence,
         "home_adv": home_adv,
+        "pi_arrays": pi_arrays,
         "perf": perf,
         "perf_idx": perf_idx,
         "elo": elo,
@@ -164,26 +185,15 @@ def _get_history_cache(df: pd.DataFrame) -> dict:
 # training e riapplicare la formula: l'inferenza riceve allora esattamente
 # la feature su cui il modello e' stato addestrato.
 def ratings_from_history(df):
-    """Estrae (attack, defence, home_adv) dal dataset con le colonne pi_*.
-
-    Il dataset contiene gia' i termini della formula, quindi si legge al
-    contrario senza dover rifare il fit MLE:
-      defence[t] = pi_home_A  su una riga dove t e' in casa
-      attack[t]  = pi_away_A  su una riga dove t e' e' in trasferta
-      home_adv   = pi_home_H - attack[home] + defence[away]
-    Verificato: ricostruisce il CSV con scarto max 1.2e-4 (arrotondamento
-    del JSON a 4 decimali, non errore di calcolo).
-    """
+    """Estrae gli ultimi (attack, defence, home_adv) aggiornati in ordine cronologico."""
     attack, defence, ha_rows = {}, {}, []
     for row in df.itertuples():
         h, a = row.HomeTeam, row.AwayTeam
-        if h not in defence:
-            defence[h] = float(row.pi_home_A)
-        if a not in attack:
-            attack[a] = float(row.pi_away_A)
+        defence[h] = float(row.pi_home_A)
+        attack[a] = float(row.pi_away_A)
         if h in attack and a in defence:
             ha_rows.append(float(row.pi_home_H) - attack[h] + defence[a])
-    home_adv = float(np.mean(ha_rows)) if ha_rows else 0.0
+    home_adv = float(np.mean(ha_rows[-50:])) if ha_rows else 0.0
     return attack, defence, home_adv
 
 
@@ -277,27 +287,39 @@ def compute_features_for_match(df, home, away, match_date, h2h_cache=None,
 
     feats = {}
     cache = _get_history_cache(df)
+    mkey = (match_ts, str(home), str(away)) if match_ts is not None else None
+    ppos = cache["perf_idx"].get(mkey) if mkey is not None else None
 
-    # Pi-Rating: STESSA formula del training (ratings.compute_pi_ratings).
-    feats.update(pi_features_from_ratings(
-        cache["attack"], cache["defence"], cache["home_adv"], home, away
-    ))
+    # Pi-Rating: se la partita e' gia' nello storico usa i valori walk-forward
+    # esatti di quella data; per le future usa i rating piu' recenti.
+    if ppos is not None and len(cache["pi_arrays"]) == 4:
+        for c, arr in cache["pi_arrays"].items():
+            feats[c] = float(arr[ppos])
+    else:
+        feats.update(pi_features_from_ratings(
+            cache["attack"], cache["defence"], cache["home_adv"], home, away
+        ))
 
-    # Forma recente (ultimi WINDOW match della squadra, casa o trasferta)
+    # Forma ibrida: 60% ruolo specifico (casa/trasferta) + 40% forma globale (casa + trasferta)
     def team_form(team, is_home):
         tcol, scol, acol = ('HomeTeam', 'FTHG', 'FTAG') if is_home else ('AwayTeam', 'FTAG', 'FTHG')
-        sub = past[past[tcol] == team].tail(WINDOW)
-        if len(sub) == 0:
-            # NaN, non un prior numerico: features.add_rolling_form usa
-            # shift(1).rolling(5, min_periods=1) sulle partite di CASA della
-            # squadra, quindi alla sua prima presenza in quel ruolo la
-            # feature manca. Qui l'inferenza restituiva 1.0, un valore che il
-            # modello non ha MAI visto in quella posizione: 14 righe su 600
-            # campionate differivano dal training (tutte debut di stagione).
+        sub_v = past[past[tcol] == team].tail(WINDOW)
+        if len(sub_v) == 0:
             return np.nan
-        pts = np.where(sub[scol].values > sub[acol].values, 3,
-                      np.where(sub[scol].values == sub[acol].values, 1, 0))
-        return float(np.mean(pts))
+        pts_v = np.where(sub_v[scol].values > sub_v[acol].values, 3.0,
+                         np.where(sub_v[scol].values == sub_v[acol].values, 1.0, 0.0))
+        venue_mean = float(np.mean(pts_v))
+
+        sub_all = past[(past['HomeTeam'] == team) | (past['AwayTeam'] == team)].tail(WINDOW)
+        pts_all = np.where(
+            sub_all['HomeTeam'].values == team,
+            np.where(sub_all['FTHG'].values > sub_all['FTAG'].values, 3.0,
+                     np.where(sub_all['FTHG'].values == sub_all['FTAG'].values, 1.0, 0.0)),
+            np.where(sub_all['FTAG'].values > sub_all['FTHG'].values, 3.0,
+                     np.where(sub_all['FTAG'].values == sub_all['FTHG'].values, 1.0, 0.0)),
+        )
+        all_mean = float(np.mean(pts_all))
+        return 0.60 * venue_mean + 0.40 * all_mean
 
     feats['home_form_5'] = team_form(home, True)
     feats['away_form_5'] = team_form(away, False)

@@ -1,29 +1,29 @@
 {
   "best_model": "v1_baseline",
   "best_model_desc": "Baseline (Pi-Rating + FE) — Eredivisie",
-  "accuracy": 0.5267,
-  "rps_model": 0.1308,
-  "f1_macro": 0.4022,
-  "f1_weighted": 0.4446,
+  "accuracy": 0.5226,
+  "rps_model": 0.1321,
+  "f1_macro": 0.3973,
+  "f1_weighted": 0.4424,
   "f1_per_class": {
-    "H": 0.6262,
+    "H": 0.6213,
     "D": 0.0,
-    "A": 0.5804
+    "A": 0.5704
   },
   "precision_per_class": {
-    "H": 0.5234,
+    "H": 0.5131,
     "D": 0.0,
-    "A": 0.5321
+    "A": 0.539
   },
-  "recall_home": 0.7791,
+  "recall_home": 0.7874,
   "recall_draw": 0.0,
-  "recall_away": 0.6385,
+  "recall_away": 0.6058,
   "recall_per_class": {
-    "H": 0.7791,
+    "H": 0.7874,
     "D": 0.0,
-    "A": 0.6385
+    "A": 0.6058
   },
-  "n_test": 412,
+  "n_test": 421,
   "n_features": 29,
   "features": [
     "pi_home_H",
@@ -56,16 +56,16 @@
     "elo_home_expect",
     "elo_away_expect"
   ],
-  "rps_bookmaker": 0.131,
-  "accuracy_bookmaker": 0.5243,
+  "rps_bookmaker": 0.1323,
+  "accuracy_bookmaker": 0.5226,
   "beats_bookmaker_rps": true,
   "kelly": {
     "bankroll_iniziale": 1000.0,
-    "bankroll_finale": 1042.78,
-    "profitto": 42.78,
-    "roi_pct": 4.28,
-    "scommesse": 121,
-    "stake_totale_pct": 63.4,
+    "bankroll_finale": 1068.62,
+    "profitto": 68.62,
+    "roi_pct": 6.86,
+    "scommesse": 125,
+    "stake_totale_pct": 68.9,
     "mode": "dinamico",
     "odds_thresholds": [
       1.8,
@@ -87,20 +87,20 @@
   },
   "shap_neopromossa": {
     "home_promoted": {
-      "mean_abs_shap": 0.0027547054309659032,
+      "mean_abs_shap": 0.002206405255151506,
       "rank": 16,
       "n_features_total": 29,
-      "shap_feature1_classH": 0.008455878086204504,
-      "shap_feature0_classH": -0.0011318662975916798,
-      "delta_classH": 0.009587744383796183
+      "shap_feature1_classH": 0.007302438497678782,
+      "shap_feature0_classH": -0.0009464811974960643,
+      "delta_classH": 0.008248919695174847
     },
     "away_promoted": {
-      "mean_abs_shap": 0.0022956272887513745,
+      "mean_abs_shap": 0.0021958012886825807,
       "rank": 17,
       "n_features_total": 29,
-      "shap_feature1_classH": 0.007502558260675081,
-      "shap_feature0_classH": -0.0008884997085574874,
-      "delta_classH": 0.008391057969232568
+      "shap_feature1_classH": 0.006140066938402892,
+      "shap_feature0_classH": -0.0009055699451246763,
+      "delta_classH": 0.007045636883527569
     }
   }
 }

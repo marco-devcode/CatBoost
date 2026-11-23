@@ -1,29 +1,29 @@
 {
   "best_model": "v1_baseline",
   "best_model_desc": "Baseline (Pi-Rating + FE) — Serie A",
-  "accuracy": 0.5635,
-  "rps_model": 0.1295,
-  "f1_macro": 0.4392,
-  "f1_weighted": 0.4951,
+  "accuracy": 0.5694,
+  "rps_model": 0.1284,
+  "f1_macro": 0.443,
+  "f1_weighted": 0.4998,
   "f1_per_class": {
-    "H": 0.6559,
-    "D": 0.0488,
-    "A": 0.6128
+    "H": 0.6614,
+    "D": 0.0484,
+    "A": 0.6192
   },
   "precision_per_class": {
-    "H": 0.5492,
-    "D": 0.5,
-    "A": 0.5882
+    "H": 0.5548,
+    "D": 0.6,
+    "A": 0.5916
   },
-  "recall_home": 0.8141,
-  "recall_draw": 0.0256,
-  "recall_away": 0.6395,
+  "recall_home": 0.8186,
+  "recall_draw": 0.0252,
+  "recall_away": 0.6494,
   "recall_per_class": {
-    "H": 0.8141,
-    "D": 0.0256,
-    "A": 0.6395
+    "H": 0.8186,
+    "D": 0.0252,
+    "A": 0.6494
   },
-  "n_test": 488,
+  "n_test": 497,
   "n_features": 29,
   "features": [
     "pi_home_H",
@@ -56,16 +56,16 @@
     "elo_home_expect",
     "elo_away_expect"
   ],
-  "rps_bookmaker": 0.1296,
-  "accuracy_bookmaker": 0.5594,
+  "rps_bookmaker": 0.1285,
+  "accuracy_bookmaker": 0.5634,
   "beats_bookmaker_rps": true,
   "kelly": {
     "bankroll_iniziale": 1000.0,
-    "bankroll_finale": 1031.53,
-    "profitto": 31.53,
-    "roi_pct": 3.15,
-    "scommesse": 72,
-    "stake_totale_pct": 30.8,
+    "bankroll_finale": 1021.56,
+    "profitto": 21.56,
+    "roi_pct": 2.16,
+    "scommesse": 68,
+    "stake_totale_pct": 29.4,
     "mode": "dinamico",
     "odds_thresholds": [
       1.8,
@@ -95,12 +95,12 @@
       "delta_classH": 0.0
     },
     "away_promoted": {
-      "mean_abs_shap": 0.00046844066492420395,
+      "mean_abs_shap": 0.0004651881464587111,
       "rank": 17,
       "n_features_total": 29,
-      "shap_feature1_classH": -0.000340436678783041,
-      "shap_feature0_classH": 0.00011256467832714204,
-      "delta_classH": -0.0004530013571101831
+      "shap_feature1_classH": -0.00037033738531136,
+      "shap_feature0_classH": 0.00011283508353572287,
+      "delta_classH": -0.0004831724688470829
     }
   }
 }

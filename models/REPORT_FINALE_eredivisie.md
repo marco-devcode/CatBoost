@@ -1,6 +1,6 @@
 # 🏆 Report Finale — CatBoost Eredivisie Match Prediction
 
-**Data**: 2026-11-23 17:20
+**Data**: 2026-11-26 16:26
 **Modello migliore**: Baseline (Pi-Rating + FE) — Eredivisie (`v1_baseline`)
 
 ---
@@ -45,12 +45,12 @@
 
 | Metrica | Valore |
 |---------|--------|
-| Scommesse piazzate | 125 |
+| Scommesse piazzate | 121 |
 | Bankroll iniziale | €1000 |
-| Bankroll finale | €1068.62 |
-| Profitto | €+68.62 |
-| ROI | +6.9% |
-| Stake totale | 68.9% del bankroll |
+| Bankroll finale | €1088.19 |
+| Profitto | €+88.19 |
+| ROI | +8.8% |
+| Stake totale | 62.9% del bankroll |
 
 ![Kelly Simulation](kelly_simulation.png)
 
@@ -64,8 +64,8 @@
 
 | Flag | mean |SHAP| | Rank su 29 feature |
 |------|-------------|------|
-| home_promoted | 0.002206 | 16/29 |
-| away_promoted | 0.002196 | 17/29 |
+| home_promoted | 0.002189 | 16/29 |
+| away_promoted | 0.002711 | 17/29 |
 
 ![SHAP Summary](shap_summary.png)
 
@@ -76,13 +76,13 @@
 ```
               precision    recall  f1-score   support
 
-           H     0.5131    0.7874    0.6213       174
+           H     0.5093    0.7874    0.6185       174
            D     0.0000    0.0000    0.0000       110
-           A     0.5390    0.6058    0.5704       137
+           A     0.5461    0.6058    0.5744       137
 
     accuracy                         0.5226       421
-   macro avg     0.3507    0.4644    0.3973       421
-weighted avg     0.3875    0.5226    0.4424       421
+   macro avg     0.3518    0.4644    0.3976       421
+weighted avg     0.3882    0.5226    0.4425       421
 
 ```
 

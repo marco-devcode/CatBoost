@@ -3,17 +3,17 @@
   "best_model_desc": "Baseline (Pi-Rating + FE) — Eredivisie",
   "accuracy": 0.5226,
   "rps_model": 0.1321,
-  "f1_macro": 0.3973,
-  "f1_weighted": 0.4424,
+  "f1_macro": 0.3976,
+  "f1_weighted": 0.4425,
   "f1_per_class": {
-    "H": 0.6213,
+    "H": 0.6185,
     "D": 0.0,
-    "A": 0.5704
+    "A": 0.5744
   },
   "precision_per_class": {
-    "H": 0.5131,
+    "H": 0.5093,
     "D": 0.0,
-    "A": 0.539
+    "A": 0.5461
   },
   "recall_home": 0.7874,
   "recall_draw": 0.0,
@@ -61,11 +61,11 @@
   "beats_bookmaker_rps": true,
   "kelly": {
     "bankroll_iniziale": 1000.0,
-    "bankroll_finale": 1068.62,
-    "profitto": 68.62,
-    "roi_pct": 6.86,
-    "scommesse": 125,
-    "stake_totale_pct": 68.9,
+    "bankroll_finale": 1088.19,
+    "profitto": 88.19,
+    "roi_pct": 8.82,
+    "scommesse": 121,
+    "stake_totale_pct": 62.9,
     "mode": "dinamico",
     "odds_thresholds": [
       1.8,
@@ -87,20 +87,20 @@
   },
   "shap_neopromossa": {
     "home_promoted": {
-      "mean_abs_shap": 0.002206405255151506,
+      "mean_abs_shap": 0.0021887779317242705,
       "rank": 16,
       "n_features_total": 29,
-      "shap_feature1_classH": 0.007302438497678782,
-      "shap_feature0_classH": -0.0009464811974960643,
-      "delta_classH": 0.008248919695174847
+      "shap_feature1_classH": 0.007292987880327062,
+      "shap_feature0_classH": -0.000906111735313669,
+      "delta_classH": 0.00819909961564073
     },
     "away_promoted": {
-      "mean_abs_shap": 0.0021958012886825807,
+      "mean_abs_shap": 0.0027107966658630315,
       "rank": 17,
       "n_features_total": 29,
-      "shap_feature1_classH": 0.006140066938402892,
-      "shap_feature0_classH": -0.0009055699451246763,
-      "delta_classH": 0.007045636883527569
+      "shap_feature1_classH": 0.00871526521929514,
+      "shap_feature0_classH": -0.001215869935109698,
+      "delta_classH": 0.009931135154404837
     }
   }
 }
